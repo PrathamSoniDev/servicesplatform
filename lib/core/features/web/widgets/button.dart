@@ -61,7 +61,7 @@ class _AppButtonState extends State<AppButton> {
 
     Widget buttonChild = _buildContent(context);
 
-    // 🌫️ Glass blur
+
     if (widget.type == AppButtonType.glass && widget.enableBlur) {
       buttonChild = ClipRRect(
         borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -94,7 +94,7 @@ class _AppButtonState extends State<AppButton> {
     );
   }
 
-  // ---------- CONTENT ----------
+
   Widget _buildContent(BuildContext context) {
     if (widget.isLoading) {
       return const SizedBox(
@@ -116,7 +116,7 @@ class _AppButtonState extends State<AppButton> {
     );
   }
 
-  // ---------- BACKGROUND ----------
+ 
   Color _backgroundColor(Color color) {
     switch (widget.type) {
       case AppButtonType.solid:
@@ -130,7 +130,7 @@ class _AppButtonState extends State<AppButton> {
     }
   }
 
-  // ---------- BORDER ----------
+
   Border? _border(Color color) {
     if (widget.type == AppButtonType.outline) {
       return Border.all(color: color, width: widget.borderWidth);
@@ -144,7 +144,7 @@ class _AppButtonState extends State<AppButton> {
     return null;
   }
 
-  // ---------- SHADOW / GLOW ----------
+
   List<BoxShadow>? _boxShadow(Color color) {
     if (!widget.enableGlow) return null;
 

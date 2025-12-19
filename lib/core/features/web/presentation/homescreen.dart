@@ -37,11 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 🔽 MAIN SCROLL CONTENT
+          
           SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 72), // ⬅️ space for navbar
+                const SizedBox(height: 72), // space for navbar
 
                 Container(
                   key: heroKey,
@@ -67,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // 🧊 GLASS NAVBAR (OVERLAY)
           TopNavBar(
             onHome: () => scrollTo(heroKey),
             onDesigns: () => scrollTo(designsKey),

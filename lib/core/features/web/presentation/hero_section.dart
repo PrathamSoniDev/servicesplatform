@@ -31,7 +31,7 @@ class HeroSection extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 🌌 Purple radial glow
+        
           Container(
             width: jellySize * 1.4,
             height: jellySize * 1.4,
@@ -46,7 +46,7 @@ class HeroSection extends StatelessWidget {
             ),
           ),
 
-          // 🫧 Jelly
+         
           Transform.translate(
             offset: const Offset(0, -30),
             child: SizedBox(
@@ -59,7 +59,7 @@ class HeroSection extends StatelessWidget {
             ),
           ),
 
-          // ✨ Text + CTA
+          
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -116,7 +116,7 @@ class HeroSection extends StatelessWidget {
 
               const SizedBox(height: 26),
 
-              // 🎯 CTA BUTTONS (USING AppButton)
+              //  BUTTONS 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

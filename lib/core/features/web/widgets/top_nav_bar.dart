@@ -41,7 +41,7 @@ class TopNavBar extends StatelessWidget {
       child: ClipRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: 22, // ⬅️ stronger blur
+            sigmaX: 22, // stronger blur
             sigmaY: 22,
           ),
           child: Container(
@@ -50,7 +50,7 @@ class TopNavBar extends StatelessWidget {
               horizontal: isMobile ? 16 : 32,
             ),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.25), // ⬅️ more transparent
+              color: Colors.black.withOpacity(0.25), //  more transparent
               border: Border(
                 bottom: BorderSide(
                   color: Colors.white.withOpacity(0.12),
@@ -59,7 +59,7 @@ class TopNavBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // 🟣 LOGO
+              
                 Text(
                   "PKPS-services",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -67,7 +67,7 @@ class TopNavBar extends StatelessWidget {
                       ),
                 ),
 
-                // 📱 MOBILE → Hamburger
+                
                 if (isMobile) ...[
                   const Spacer(),
                   IconButton(
@@ -76,7 +76,7 @@ class TopNavBar extends StatelessWidget {
                   ),
                 ]
 
-                // 🖥️ TABLET & DESKTOP → Center nav
+               
                 else ...[
                   Expanded(
                     child: Center(
@@ -94,7 +94,7 @@ class TopNavBar extends StatelessWidget {
                     ),
                   ),
 
-                  // Spacer keeps nav centered
+                
                   const SizedBox(width: 80),
                 ],
               ],
@@ -105,7 +105,7 @@ class TopNavBar extends StatelessWidget {
     );
   }
 
-  // 📱 Mobile menu
+ 
   void _openMobileMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
