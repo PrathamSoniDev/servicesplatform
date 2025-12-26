@@ -126,7 +126,7 @@ class _TestimonialSectionState extends State<TestimonialSection> {
                         (_, __) => const SizedBox(width: _cardSpacing),
                     itemBuilder: (_, index) {
                       return Container(
-                        width: _cardWidth,
+                        //width: _cardWidth,
                         padding: EdgeInsets.only(top: 30),
                         child: TestimonialCard(data: testimonials[index]),
                       );

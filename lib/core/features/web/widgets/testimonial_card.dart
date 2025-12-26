@@ -12,7 +12,7 @@ class TestimonialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 450,
+      width: MediaQuery.of(context).size.width / 3,
       height: 230, // 🔑 fixed height like reference
       child: Stack(
         clipBehavior: Clip.none,
