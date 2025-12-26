@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/features/web/utils/app_theme.dart';
 
@@ -11,99 +12,137 @@ class TestimonialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if the screen is small to adjust width logic if necessary
+    final double cardWidth = MediaQuery.of(context).size.width > 1024 
+        ? MediaQuery.of(context).size.width / 3.5 
+        : MediaQuery.of(context).size.width * 0.8;
+
     return SizedBox(
-      width: MediaQuery.of(context).size.width / 3,
-      height: 230, // 🔑 fixed height like reference
+      width: cardWidth,
+      height: 250, // Increased slightly to accommodate glass spacing
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Card body
-          Container(
-            padding: const EdgeInsets.fromLTRB(24, 36, 24, 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD9D9D9), // 🔑 reference gray
-              borderRadius: BorderRadius.circular(28), // 🔑 rounder corners
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
+          // ─── THE GLASS BODY ───
+          ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              // sigmaX and Y determine the "bluriness" of the glass
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
+                decoration: BoxDecoration(
+                  // Semi-transparent white background
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(28),
+                  // Border mimics light hitting the edge of glass
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.15),
+                      Colors.white.withOpacity(0.05),
+                    ],
+                  ),
+                ),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 56),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            data.role,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Rating
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    // --- Header (Name, Role, Rating) ---
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RatingStars(rating: data.rating),
-                        const SizedBox(height: 4),
-                        Text(
-                          "${data.rating.toStringAsFixed(1)}/5 ratings",
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black,
+                        const SizedBox(width: 56), // Placeholder for the avatar
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data.name,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                data.role,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        // Rating component
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            RatingStars(rating: data.rating),
+                            const SizedBox(height: 4),
+                            Text(
+                              "${data.rating.toStringAsFixed(1)}/5",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.5),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+
+                    const SizedBox(height: 18),
+
+                    // --- The Quote ---
+                    Expanded(
+                      child: Text(
+                        "“${data.message}”",
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.6,
+                          color: Colors.white.withOpacity(0.9),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-
-                const SizedBox(height: 18),
-
-                // Quote
-                Text(
-                  "“${data.message}”",
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
-          // 🔵 Avatar (reference style)
+          // ─── FLOATING AVATAR ───
           Positioned(
             top: -22,
             left: 24,
             child: Container(
-              width: 52,
-              height: 52,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.primary, // 🔑 purple
-                border: Border.all(color: Colors.white, width: 3),
+                // Soft glow shadow behind avatar
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+                border: Border.all(color: Colors.white.withOpacity(0.8), width: 2),
               ),
-              child: const Icon(Icons.person, color: Colors.white, size: 28),
+              child: CircleAvatar(
+                backgroundColor: AppTheme.primary,
+                child: const Icon(Icons.person, color: Colors.white, size: 28),
+              ),
             ),
           ),
         ],

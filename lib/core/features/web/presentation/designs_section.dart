@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/models/design_item_models.dart';
-import 'package:servicesplatform/core/features/web/utils/responsive.dart';
-import 'package:servicesplatform/core/features/web/widgets/animated_border.dart';
-import 'package:servicesplatform/core/features/web/widgets/card.dart';
+import 'package:servicesplatform/core/features/web/widgets/button.dart';
+// Ensure these paths match your actual project structure
+import 'package:servicesplatform/core/features/web/widgets/card.dart'; 
+// Assuming your AppButton is located here:
+// import 'package:servicesplatform/core/features/web/widgets/app_button.dart'; 
+import '../models/design_item_models.dart';
 
 class DesignsSection extends StatefulWidget {
   const DesignsSection({super.key});
@@ -12,179 +14,103 @@ class DesignsSection extends StatefulWidget {
 }
 
 class _DesignsSectionState extends State<DesignsSection> {
-  final ScrollController _scrollController = ScrollController();
-
-  void _scroll(double offset) {
-    _scrollController.animateTo(
-      _scrollController.offset + offset,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutQuart,
-    );
-  }
+  int? _hoveredIndex;
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = Responsive.isDesktop(context);
-    
-final double sidePadding = Responsive.isDesktop(context)
-    ? 96
-    : Responsive.isTablet(context)
-        ? 56
-        : 24;
-
-final double cardWidth = Responsive.isDesktop(context)
-    ? 320
-    : Responsive.isTablet(context)
-        ? 300
-        : 260;
-
-final double sectionHeight = Responsive.isDesktop(context)
-    ? 520
-    : Responsive.isTablet(context)
-        ? 480
-        : 440;
+    final bool isDesktop = MediaQuery.of(context).size.width > 1024;
+    final double sidePadding = isDesktop ? 88 : 24;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 96),
+      padding: const EdgeInsets.symmetric(vertical: 100),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.black,
-            Color(0xFF0A0A0A),
-          ],
+          colors: [Colors.black, Color(0xFF0A0A0A)],
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // Centers the header and the button at the bottom
+        crossAxisAlignment: CrossAxisAlignment.center, 
         children: [
-          // ───────────────── HEADER ─────────────────
+          // 1. CENTERED HEADER
+          _Header(),
+          
+          const SizedBox(height: 80),
+          
+          // 2. 3x3 GRID (Total 9 Items)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: sidePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "PORTFOLIO",
-                  style: TextStyle(
-                    color: Colors.white38,
-                    fontSize: 13,
-                    letterSpacing: 3,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "Selected Work",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 52,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "A carefully curated selection of interface designs,\ncrafted with precision, clarity, and refined motion.",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 17,
-                    height: 1.7,
-                  ),
-                ),
-              ],
-            ),
-          ),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: designsData.length, // Ensure your designsData list has 9 items
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isDesktop ? 3 : 1,
+                mainAxisSpacing: 40,
+                crossAxisSpacing: 40,
+                childAspectRatio: 1.45,
+              ),
+              itemBuilder: (context, index) {
+                final bool isHovered = _hoveredIndex == index;
 
-          const SizedBox(height: 64),
-
-          // ───────────────── CARD SHOWCASE ─────────────────
-          SizedBox(
-            height: sectionHeight,
-            child: Stack(
-              children: [
-                ListView.separated(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: sidePadding),
-                  itemCount: designs.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 48),
-                  itemBuilder: (context, index) {
-                    final item = designs[index];
-
-                    return SizedBox(
-                      width: cardWidth,
-                      child: AnimatedBorder(
-                        radius: 22,
-                        child: SimpleContentCard(
-                          imageUrl: item.image,
-                          title: item.title,
-                          description: item.description,
-                          likes: item.likes,
-                          views: item.views,
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (_) => setState(() => _hoveredIndex = index),
+                  onExit: (_) => setState(() => _hoveredIndex = null),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      // AMBIENT GLOW (Matches Button Color)
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 500),
+                        opacity: isHovered ? 0.4 : 0,
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF8E2DE2).withOpacity(0.3),
+                                blurRadius: 100,
+                                spreadRadius: 20,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
 
-                // Left Arrow
-                if (isDesktop)
-                  Positioned(
-                    left: 24,
-                    top: 0,
-                    bottom: 0,
-                    child: _LuxuryArrow(
-                      icon: Icons.arrow_back_ios_new,
-                      onTap: () => _scroll(-cardWidth * 1.3),
-                    ),
+                      // THE LUXURY CARD
+                      AnimatedScale(
+                        scale: isHovered ? 1.02 : 1.0,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOutCubic,
+                        child: LuxuryCard(
+                          item: designsData[index],
+                          hovered: isHovered,
+                        ),
+                      ),
+                    ],
                   ),
-
-                // Right Arrow
-                if (isDesktop)
-                  Positioned(
-                    right: 24,
-                    top: 0,
-                    bottom: 0,
-                    child: _LuxuryArrow(
-                      icon: Icons.arrow_forward_ios,
-                      onTap: () => _scroll(cardWidth * 1.3),
-                    ),
-                  ),
-              ],
+                );
+              },
             ),
           ),
 
-          const SizedBox(height: 48),
+          const SizedBox(height: 80),
 
-          // ───────────────── FOOTER CTA ─────────────────
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sidePadding),
-            child: Row(
-              children: const [
-                Text(
-                  "View complete case studies",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                Spacer(),
-                Text(
-                  "Drag or scroll horizontally",
-                  style: TextStyle(
-                    color: Colors.white38,
-                    fontSize: 14,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ],
-            ),
+          // 3. CENTERED REUSABLE BUTTON
+          AppButton(
+            text: "Explore more Designs",
+            enableGlow: true,
+            color: const Color(0xFF8E2DE2), // Purple theme from your image
+            onPressed: () {
+              // Action for button click
+            },
           ),
         ],
       ),
@@ -192,83 +118,35 @@ final double sectionHeight = Responsive.isDesktop(context)
   }
 }
 
-class _LuxuryArrow extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _LuxuryArrow({
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  State<_LuxuryArrow> createState() => _LuxuryArrowState();
-}
-
-class _LuxuryArrowState extends State<_LuxuryArrow> {
-  bool _pressed = false;
-
+class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.92 : 1.0,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: _pressed ? 0.9 : 1.0,
-          duration: const Duration(milliseconds: 140),
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.45),
-                border: Border.all(color: Colors.white24),
-                boxShadow: [
-                  // 🔹 INNER GLOW illusion (top)
-                  BoxShadow(
-                    color: Colors.white.withOpacity(_pressed ? 0.18 : 0.10),
-                    blurRadius: 6,
-                    spreadRadius: -2,
-                    offset: const Offset(0, -1),
-                  ),
-
-                  // 🔹 INNER GLOW illusion (bottom)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.6),
-                    blurRadius: 6,
-                    spreadRadius: -2,
-                    offset: const Offset(0, 2),
-                  ),
-
-                  // 🔹 SUBTLE OUTER LIFT (very light)
-                  if (_pressed)
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.08),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                    ),
-                ],
-              ),
-              child: Icon(
-                widget.icon,
-                color: Colors.white,
-                size: 20,
-              ),
+    return Column(
+      children: [
+        const Text(
+          "Featured Designs",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 48,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 16,
+              height: 1.5,
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
