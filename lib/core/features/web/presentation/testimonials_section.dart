@@ -42,6 +42,14 @@ class _TestimonialSectionState extends State<TestimonialSection> {
       imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
       rating: 4.5,
     ),
+    TestimonialModel(
+      name: "Sara Johnson",
+      role: "TechStart Inc",
+      message:
+          "Outstanding service from start to finish. Our new portfolio website has already generated multiple client leads.",
+      imageUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      rating: 4.5,
+    ),
   ];
 
   @override
@@ -102,23 +110,24 @@ class _TestimonialSectionState extends State<TestimonialSection> {
 
           /// ✅ SAFE STACK (arrows inside hit-test area)
           SizedBox(
-            height: 300,
+            height: 250,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 80),
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: ListView.separated(
                     controller: _scrollController,
-                    primary: false, // 🔑 WEB FIX
+                    primary: false,
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     itemCount: testimonials.length,
                     separatorBuilder:
                         (_, __) => const SizedBox(width: _cardSpacing),
                     itemBuilder: (_, index) {
-                      return SizedBox(
+                      return Container(
                         width: _cardWidth,
+                        padding: EdgeInsets.only(top: 30),
                         child: TestimonialCard(data: testimonials[index]),
                       );
                     },
@@ -165,7 +174,7 @@ class _ArrowButton extends StatelessWidget {
         height: 56,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: Colors.grey,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: .35),
@@ -174,7 +183,7 @@ class _ArrowButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: Colors.black, size: 32),
+        child: Icon(icon, color: Colors.white, size: 32),
       ),
     );
   }
