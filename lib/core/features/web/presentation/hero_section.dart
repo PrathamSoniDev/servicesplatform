@@ -12,67 +12,58 @@ class HeroSection extends StatelessWidget {
     final isTablet = Responsive.isTablet(context);
 
     final double heroHeight = isMobile ? 600 : 700;
-    final double jellySize = isMobile
-        ? 420
-        : isTablet
+    final double jellySize =
+        isMobile
+            ? 420
+            : isTablet
             ? 600
             : 780;
 
-    final double titleFontSize = isMobile
-        ? 36
-        : isTablet
+    final double titleFontSize =
+        isMobile
+            ? 36
+            : isTablet
             ? 46
             : 54;
 
     return Container(
       height: heroHeight,
       width: double.infinity,
-      color: Colors.black,
+      // color: Colors.black, // Removing explicit color to let background show or handle in Stack
       child: Stack(
         alignment: Alignment.center,
         children: [
-        
           Container(
             width: jellySize * 1.4,
             height: jellySize * 1.4,
             decoration: const BoxDecoration(
               gradient: RadialGradient(
-                colors: [
-                  Color(0x662E004F),
-                  Colors.transparent,
-                ],
+                colors: [Color(0x662E004F), Colors.transparent],
                 radius: 0.55,
               ),
             ),
           ),
 
-         
           Transform.translate(
             offset: const Offset(0, -30),
             child: SizedBox(
               width: jellySize,
               height: jellySize,
-              child: Image.asset(
-                'assets/gif/jelly.gif',
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset('assets/gif/jelly.gif', fit: BoxFit.contain),
             ),
           ),
 
-          
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: isMobile ? 20 : 35),
-
               // LINE 1
               Text(
                 "Your Digital Journey",
                 textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge
-                    ?.copyWith(fontSize: titleFontSize),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineLarge?.copyWith(fontSize: titleFontSize),
               ),
 
               const SizedBox(height: 4),
@@ -83,22 +74,16 @@ class HeroSection extends StatelessWidget {
                   return const LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFFE6D7FF),
-                      Color(0xFF8B5CF6),
-                    ],
+                    colors: [Color(0xFFE6D7FF), Color(0xFF8B5CF6)],
                   ).createShader(bounds);
                 },
                 child: Text(
                   "Starts Here",
                   textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineLarge
-                      ?.copyWith(
-                        fontSize: titleFontSize,
-                        color: Colors.white,
-                      ),
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontSize: titleFontSize,
+                    color: Colors.white,
+                  ),
                 ),
               ),
 
@@ -108,15 +93,14 @@ class HeroSection extends StatelessWidget {
               Text(
                 "Unlock bespoke web & app services at unbeatable prices",
                 textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Colors.white60),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white60),
               ),
 
               const SizedBox(height: 26),
 
-              //  BUTTONS 
+              //  BUTTONS
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

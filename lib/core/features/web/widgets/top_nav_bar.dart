@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/features/web/utils/responsive.dart';
+import 'package:servicesplatform/core/features/web/widgets/animated_border.dart';
 
 class TopNavBar extends StatelessWidget {
   final VoidCallback onHome;
@@ -21,16 +22,29 @@ class TopNavBar extends StatelessWidget {
     required this.onContact,
   });
 
-  Widget _navItem(BuildContext context, String title, VoidCallback onTap) {
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white70,
-        textStyle: Theme.of(context).textTheme.bodyMedium,
+ Widget _navItem(BuildContext context, String title, VoidCallback onTap) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8), // 👈 spacing here
+    child: AnimatedBorder(
+      radius: 16,
+      strokeWidth: 1.4,
+      child: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.white70,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
+          textStyle: Theme.of(context).textTheme.bodyMedium,
+        ),
+        child: Text(title),
       ),
-      child: Text(title),
-    );
-  }
+    ),
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
