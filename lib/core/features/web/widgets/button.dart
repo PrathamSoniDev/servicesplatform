@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 enum AppButtonType { solid, outline, glass }
@@ -6,14 +7,18 @@ enum AppButtonType { solid, outline, glass }
 class AppButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
+
   final AppButtonType type;
   final Color color;
   final Color textColor;
+
   final EdgeInsets padding;
   final double borderRadius;
   final double borderWidth;
+
   final bool isLoading;
   final bool isDisabled;
+
   final bool enableGlow;
   final bool enableBlur;
 
@@ -21,14 +26,18 @@ class AppButton extends StatefulWidget {
     super.key,
     required this.text,
     required this.onPressed,
+
     this.type = AppButtonType.solid,
     this.color = const Color(0xFF8E2DE2),
     this.textColor = Colors.white,
+
     this.padding = const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
     this.borderRadius = 30,
     this.borderWidth = 1.8,
+
     this.isLoading = false,
     this.isDisabled = false,
+
     this.enableGlow = false,
     this.enableBlur = false,
   });
@@ -47,12 +56,7 @@ class _AppButtonState extends State<AppButton> {
   Widget build(BuildContext context) {
     final Color effectiveColor = widget.isDisabled ? Colors.grey : widget.color;
 
-    // ─── WRAP CONTENT IN CENTER ───
-    // Wrapping the buildContent in a Center widget ensures that if the 
-    // parent (SizedBox) forces a specific width/height, the text stays centered.
-    Widget buttonChild = Center(
-      child: _buildContent(context),
-    );
+    Widget buttonChild = _buildContent(context);
 
     if (widget.type == AppButtonType.glass && widget.enableBlur) {
       buttonChild = ClipRRect(
@@ -72,9 +76,7 @@ class _AppButtonState extends State<AppButton> {
         onTap: _canPress ? widget.onPressed : null,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          // Note: If you want perfect centering in a fixed-size button, 
-          // you can keep padding or set it to zero if the parent defines size.
-          padding: widget.padding, 
+          padding: widget.padding,
           decoration: BoxDecoration(
             color: _backgroundColor(effectiveColor),
             borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -98,11 +100,10 @@ class _AppButtonState extends State<AppButton> {
 
     return Text(
       widget.text,
-      textAlign: TextAlign.center, // Added for multi-line text safety
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: widget.textColor,
-            fontWeight: FontWeight.w600,
-          ),
+        color: widget.textColor,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
@@ -110,8 +111,10 @@ class _AppButtonState extends State<AppButton> {
     switch (widget.type) {
       case AppButtonType.solid:
         return _isHovering ? color.withValues(alpha: .9) : color;
+
       case AppButtonType.outline:
         return Colors.transparent;
+
       case AppButtonType.glass:
         return Colors.black.withValues(alpha: .25);
     }
