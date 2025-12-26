@@ -4,6 +4,7 @@ import 'package:servicesplatform/core/features/web/presentation/blog_section.dar
 import 'package:servicesplatform/core/features/web/presentation/contact_section.dart';
 import 'package:servicesplatform/core/features/web/presentation/designs_section.dart';
 import 'package:servicesplatform/core/features/web/presentation/hero_section.dart';
+import 'package:servicesplatform/core/features/web/presentation/testimonials_section.dart';
 import 'package:servicesplatform/core/features/web/widgets/top_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final heroKey = GlobalKey();
   final designsKey = GlobalKey();
   final aboutKey = GlobalKey();
+  final testimonialsKey = GlobalKey();
   final blogKey = GlobalKey();
   final contactKey = GlobalKey();
 
@@ -37,32 +39,20 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          
           SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 72), // space for navbar
 
+                Container(key: heroKey, child: const HeroSection()),
+                Container(key: designsKey, child: const DesignsSection()),
+                Container(key: aboutKey, child: const AboutSection()),
                 Container(
-                  key: heroKey,
-                  child: const HeroSection(),
+                  key: testimonialsKey,
+                  child: const TestimonialSection(),
                 ),
-                Container(
-                  key: designsKey,
-                  child: const DesignsSection(),
-                ),
-                Container(
-                  key: aboutKey,
-                  child: const AboutSection(),
-                ),
-                Container(
-                  key: blogKey,
-                  child: const BlogSection(),
-                ),
-                Container(
-                  key: contactKey,
-                  child: const ContactSection(),
-                ),
+                Container(key: blogKey, child: const BlogSection()),
+                Container(key: contactKey, child: const ContactSection()),
               ],
             ),
           ),
@@ -71,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onHome: () => scrollTo(heroKey),
             onDesigns: () => scrollTo(designsKey),
             onAbout: () => scrollTo(aboutKey),
+            onTestimonials: () => scrollTo(testimonialsKey),
             onBlog: () => scrollTo(blogKey),
             onContact: () => scrollTo(contactKey),
           ),

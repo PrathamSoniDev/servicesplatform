@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/features/web/utils/responsive.dart';
 
@@ -6,6 +7,7 @@ class TopNavBar extends StatelessWidget {
   final VoidCallback onHome;
   final VoidCallback onDesigns;
   final VoidCallback onAbout;
+  final VoidCallback onTestimonials;
   final VoidCallback onBlog;
   final VoidCallback onContact;
 
@@ -14,6 +16,7 @@ class TopNavBar extends StatelessWidget {
     required this.onHome,
     required this.onDesigns,
     required this.onAbout,
+    required this.onTestimonials,
     required this.onBlog,
     required this.onContact,
   });
@@ -46,38 +49,29 @@ class TopNavBar extends StatelessWidget {
           ),
           child: Container(
             height: 72,
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 16 : 32,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.25), //  more transparent
+              color: Colors.black.withValues(alpha: .25), //  more transparent
               border: Border(
-                bottom: BorderSide(
-                  color: Colors.white.withOpacity(0.12),
-                ),
+                bottom: BorderSide(color: Colors.white.withValues(alpha: .12)),
               ),
             ),
             child: Row(
               children: [
-              
                 Text(
                   "PKPS-services",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
 
-                
                 if (isMobile) ...[
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.menu, color: Colors.white),
                     onPressed: () => _openMobileMenu(context),
                   ),
-                ]
-
-               
-                else ...[
+                ] else ...[
                   Expanded(
                     child: Center(
                       child: Row(
@@ -87,6 +81,7 @@ class TopNavBar extends StatelessWidget {
                           if (!isTablet)
                             _navItem(context, "Designs", onDesigns),
                           _navItem(context, "About Us", onAbout),
+                          _navItem(context, "Testimonials", onTestimonials),
                           _navItem(context, "Blog", onBlog),
                           _navItem(context, "Contact Us", onContact),
                         ],
@@ -94,7 +89,6 @@ class TopNavBar extends StatelessWidget {
                     ),
                   ),
 
-                
                   const SizedBox(width: 80),
                 ],
               ],
@@ -105,11 +99,10 @@ class TopNavBar extends StatelessWidget {
     );
   }
 
- 
   void _openMobileMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.black.withOpacity(0.92),
+      backgroundColor: Colors.black.withValues(alpha: .92),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -121,6 +114,7 @@ class TopNavBar extends StatelessWidget {
               _mobileItem(context, "Home", onHome),
               _mobileItem(context, "Designs", onDesigns),
               _mobileItem(context, "About Us", onAbout),
+              _mobileItem(context, "Testimonials", onTestimonials),
               _mobileItem(context, "Blog", onBlog),
               _mobileItem(context, "Contact Us", onContact),
             ],
@@ -130,19 +124,14 @@ class TopNavBar extends StatelessWidget {
     );
   }
 
-  Widget _mobileItem(
-    BuildContext context,
-    String title,
-    VoidCallback onTap,
-  ) {
+  Widget _mobileItem(BuildContext context, String title, VoidCallback onTap) {
     return ListTile(
       title: Text(
         title,
         textAlign: TextAlign.center,
-        style: Theme.of(context)
-            .textTheme
-            .headlineMedium
-            ?.copyWith(fontSize: 18),
+        style: Theme.of(
+          context,
+        ).textTheme.headlineMedium?.copyWith(fontSize: 18),
       ),
       onTap: () {
         Navigator.pop(context);

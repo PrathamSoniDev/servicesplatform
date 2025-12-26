@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 enum AppButtonType { solid, outline, glass }
@@ -30,8 +31,7 @@ class AppButton extends StatefulWidget {
     this.color = const Color(0xFF8E2DE2),
     this.textColor = Colors.white,
 
-    this.padding =
-        const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
+    this.padding = const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
     this.borderRadius = 30,
     this.borderWidth = 1.8,
 
@@ -50,17 +50,13 @@ class _AppButtonState extends State<AppButton> {
   bool _isHovering = false;
 
   bool get _canPress =>
-      widget.onPressed != null &&
-      !widget.isDisabled &&
-      !widget.isLoading;
+      widget.onPressed != null && !widget.isDisabled && !widget.isLoading;
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveColor =
-        widget.isDisabled ? Colors.grey : widget.color;
+    final Color effectiveColor = widget.isDisabled ? Colors.grey : widget.color;
 
     Widget buttonChild = _buildContent(context);
-
 
     if (widget.type == AppButtonType.glass && widget.enableBlur) {
       buttonChild = ClipRRect(
@@ -73,8 +69,7 @@ class _AppButtonState extends State<AppButton> {
     }
 
     return MouseRegion(
-      cursor:
-          _canPress ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: _canPress ? SystemMouseCursors.click : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
       child: GestureDetector(
@@ -94,63 +89,53 @@ class _AppButtonState extends State<AppButton> {
     );
   }
 
-
   Widget _buildContent(BuildContext context) {
     if (widget.isLoading) {
       return const SizedBox(
         width: 18,
         height: 18,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.white,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
 
     return Text(
       widget.text,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: widget.textColor,
-            fontWeight: FontWeight.w600,
-          ),
+        color: widget.textColor,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
- 
   Color _backgroundColor(Color color) {
     switch (widget.type) {
       case AppButtonType.solid:
-        return _isHovering ? color.withOpacity(0.9) : color;
+        return _isHovering ? color.withValues(alpha: .9) : color;
 
       case AppButtonType.outline:
         return Colors.transparent;
 
       case AppButtonType.glass:
-        return Colors.black.withOpacity(0.25);
+        return Colors.black.withValues(alpha: .25);
     }
   }
-
 
   Border? _border(Color color) {
     if (widget.type == AppButtonType.outline) {
       return Border.all(color: color, width: widget.borderWidth);
     }
     if (widget.type == AppButtonType.glass) {
-      return Border.all(
-        color: Colors.white.withOpacity(0.25),
-        width: 1,
-      );
+      return Border.all(color: Colors.white.withValues(alpha: .25), width: 1);
     }
     return null;
   }
-
 
   List<BoxShadow>? _boxShadow(Color color) {
     if (!widget.enableGlow) return null;
 
     return [
       BoxShadow(
-        color: color.withOpacity(0.45),
+        color: color.withValues(alpha: .45),
         blurRadius: _isHovering ? 24 : 16,
         spreadRadius: 1,
       ),
