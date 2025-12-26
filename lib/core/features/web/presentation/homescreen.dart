@@ -37,32 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          
           SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 72), // space for navbar
 
-                Container(
-                  key: heroKey,
-                  child: const HeroSection(),
-                ),
-                Container(
-                  key: designsKey,
-                  child: const DesignsSection(),
-                ),
-                Container(
-                  key: aboutKey,
-                  child: const AboutSection(),
-                ),
-                Container(
-                  key: blogKey,
-                  child: const BlogSection(),
-                ),
-                Container(
-                  key: contactKey,
-                  child: const ContactSection(),
-                ),
+                Container(key: heroKey, child: const HeroSection()),
+                Container(key: designsKey, child: const DesignsSection()),
+                Container(key: aboutKey, child: const AboutSection()),
+                Container(key: blogKey, child: const BlogSection()),
+                Container(key: contactKey, child: const ContactSection()),
               ],
             ),
           ),
