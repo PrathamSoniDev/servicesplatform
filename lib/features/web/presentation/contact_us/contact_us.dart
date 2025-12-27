@@ -56,7 +56,7 @@ class _ContactUsState extends State<ContactUs> {
                   subtitle:
                       "Ready to bring your digital vision to life? Contact us today and let's start\n building something amazing together.",
                 ),
-                // _buildHeroAndFormSection(context),
+                _buildHeroAndFormSection(context),
                 _buildContactInfoSection(context),
                 const FooterSection(),
               ],
@@ -84,24 +84,10 @@ class _ContactUsState extends State<ContactUs> {
 
     return Stack(
       children: [
-        // Background Image
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SizedBox(
-            height: isMobile ? 300 : 500, // Reduced height for image
-            child: Image.asset(
-              'assets/images/image 18.png',
-              fit: BoxFit.contain,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-        ),
         // Content
         Container(
           padding: EdgeInsets.only(
-            top: 120, // Navbar space
+            top: 20, // Navbar space
             left: isMobile ? 20 : 100,
             right: isMobile ? 20 : 100,
             bottom: 80,
@@ -109,39 +95,6 @@ class _ContactUsState extends State<ContactUs> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ─── Header ───
-              Text(
-                "Love to hear from you",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: isMobile ? 32 : 56,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                "Get in touch",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: isMobile ? 32 : 56,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFFFFFFF), // Can add gradient if needed
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Ready to bring your digital vision to life? Contact us today and let's start\nbuilding something amazing together.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: isMobile ? 14 : 18,
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 60),
-
               // ─── Form ───
               Container(
                 constraints: const BoxConstraints(maxWidth: 800),
