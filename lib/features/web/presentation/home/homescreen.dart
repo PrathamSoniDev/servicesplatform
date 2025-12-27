@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/testimonials_section.dart';
 
 import '../../widgets/top_nav_bar.dart';
@@ -122,9 +123,17 @@ class _HomeScreenState extends State<HomeScreen> {
           // ───────── NAVBAR ─────────
           TopNavBar(
             activeIndex: currentSectionIndex,
-            onHome: () => scrollToSection(0),
+            onHome:
+                () =>
+                    currentRoute == AppRouter.home
+                        ? scrollToSection(0)
+                        : context.go(AppRouter.home),
             onDesigns: () => scrollToSection(1),
-            onAbout: () => scrollToSection(2),
+            onAbout:
+                () =>
+                    currentRoute == AppRouter.home
+                        ? scrollToSection(2)
+                        : context.push(AppRouter.aboutUs),
             onTestimonials: () => scrollToSection(3),
             onBlog: () => scrollToSection(4),
             onContact: () => scrollToSection(5),
