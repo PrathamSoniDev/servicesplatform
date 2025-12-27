@@ -1,7 +1,9 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/utils/responsive.dart';
-import 'package:servicesplatform/core/features/web/widgets/animated_border.dart';
+
+import '../utils/responsive.dart';
+import 'animated_border.dart';
 
 class TopNavBar extends StatefulWidget {
   final int activeIndex;
@@ -30,7 +32,6 @@ class TopNavBar extends StatefulWidget {
 
 class _TopNavBarState extends State<TopNavBar> {
   int? _hoveredIndex;
-
   Widget _navItem({
     required BuildContext context,
     required String title,
@@ -45,9 +46,10 @@ class _TopNavBarState extends State<TopNavBar> {
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: isHovered && !isActive
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.transparent,
+        color:
+            isHovered && !isActive
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
       ),
       child: AnimatedScale(
@@ -57,24 +59,21 @@ class _TopNavBarState extends State<TopNavBar> {
         child: Text(
           title,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isActive
+            color:
+                isActive
                     ? Colors.white
                     : isHovered
-                        ? Colors.white
-                        : Colors.white70,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              ),
+                    ? Colors.white
+                    : Colors.white70,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+          ),
         ),
       ),
     );
 
     // 🔥 Only ACTIVE item gets AnimatedBorder
     if (isActive) {
-      content = AnimatedBorder(
-        radius: 16,
-        strokeWidth: 1.4,
-        child: content,
-      );
+      content = AnimatedBorder(radius: 16, strokeWidth: 1.4, child: content);
     }
 
     return MouseRegion(
@@ -109,9 +108,7 @@ class _TopNavBarState extends State<TopNavBar> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: .25),
               border: Border(
-                bottom: BorderSide(
-                  color: Colors.white.withValues(alpha: .12),
-                ),
+                bottom: BorderSide(color: Colors.white.withValues(alpha: .12)),
               ),
             ),
             child: Row(
@@ -119,8 +116,8 @@ class _TopNavBarState extends State<TopNavBar> {
                 Text(
                   "PKPS-services",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
 
                 if (isMobile) ...[
@@ -216,8 +213,9 @@ class _TopNavBarState extends State<TopNavBar> {
       title: Text(
         title,
         textAlign: TextAlign.center,
-        style:
-            Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 18),
+        style: Theme.of(
+          context,
+        ).textTheme.headlineMedium?.copyWith(fontSize: 18),
       ),
       onTap: () {
         Navigator.pop(context);

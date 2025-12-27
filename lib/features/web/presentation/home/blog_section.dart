@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/widgets/custom_text.dart';
 
-import '../models/blog_model.dart';
-import '../widgets/blog_card.dart';
+import '../../models/blog_model.dart';
+import '../../widgets/blog_card.dart';
+import '../../widgets/custom_text.dart';
 
 class BlogSection extends StatelessWidget {
   const BlogSection({super.key});

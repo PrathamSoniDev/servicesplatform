@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/utils/app_theme.dart';
 
 import '../models/testimonial_model.dart';
+import '../utils/app_theme.dart';
 import 'rating_stars.dart';
 
 class TestimonialCard extends StatelessWidget {

@@ -1,8 +1,10 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
+import '../../utils/responsive.dart';
+import '../../widgets/button.dart';
 // Ensure this path matches where your responsive.dart file is located
-import 'package:servicesplatform/core/features/web/utils/responsive.dart';
-import 'package:servicesplatform/core/features/web/widgets/button.dart'; 
 // import 'package:servicesplatform/core/features/web/widgets/app_button.dart';
 
 class ContactSection extends StatefulWidget {
@@ -17,7 +19,7 @@ class _ContactSectionState extends State<ContactSection> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _messageController = TextEditingController();
-  
+
   // ─── STATE ───
   String _selectedOption = "Do you have your own design?";
   String _selectedRole = "Select your role";
@@ -38,7 +40,10 @@ class _ContactSectionState extends State<ContactSection> {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 100, horizontal: horizontalPadding),
+      padding: EdgeInsets.symmetric(
+        vertical: 100,
+        horizontal: horizontalPadding,
+      ),
       color: Colors.black,
       child: Column(
         children: [
@@ -76,15 +81,35 @@ class _ContactSectionState extends State<ContactSection> {
                 if (isDesktop)
                   Row(
                     children: [
-                      Expanded(child: _buildGlassField("Your name", "Enter your name", _nameController)),
+                      Expanded(
+                        child: _buildGlassField(
+                          "Your name",
+                          "Enter your name",
+                          _nameController,
+                        ),
+                      ),
                       const SizedBox(width: 32),
-                      Expanded(child: _buildGlassField("Your e-mail", "Enter your mail", _emailController)),
+                      Expanded(
+                        child: _buildGlassField(
+                          "Your e-mail",
+                          "Enter your mail",
+                          _emailController,
+                        ),
+                      ),
                     ],
                   )
                 else ...[
-                  _buildGlassField("Your name", "Enter your name", _nameController),
+                  _buildGlassField(
+                    "Your name",
+                    "Enter your name",
+                    _nameController,
+                  ),
                   const SizedBox(height: 24),
-                  _buildGlassField("Your e-mail", "Enter your mail", _emailController),
+                  _buildGlassField(
+                    "Your e-mail",
+                    "Enter your mail",
+                    _emailController,
+                  ),
                 ],
 
                 const SizedBox(height: 32),
@@ -107,14 +132,24 @@ class _ContactSectionState extends State<ContactSection> {
                       ),
                       const SizedBox(width: 32),
                       Expanded(
-                        child: _buildGlassField("Message *", "Tell us about your project", _messageController, maxLines: 9),
+                        child: _buildGlassField(
+                          "Message *",
+                          "Tell us about your project",
+                          _messageController,
+                          maxLines: 9,
+                        ),
                       ),
                     ],
                   )
                 else ...[
                   _buildGlassDropdown("Your role"),
                   const SizedBox(height: 32),
-                  _buildGlassField("Message *", "Tell us about your project", _messageController, maxLines: 6),
+                  _buildGlassField(
+                    "Message *",
+                    "Tell us about your project",
+                    _messageController,
+                    maxLines: 6,
+                  ),
                   const SizedBox(height: 32),
                   _buildRadioOption("Do you have any liked design?"),
                   _buildRadioOption("Do you have your own design?"),
@@ -130,7 +165,9 @@ class _ContactSectionState extends State<ContactSection> {
                     child: AppButton(
                       text: "Submit",
                       enableGlow: true,
-                      color: const Color(0xFF8E2DE2), // Matches the Purple design
+                      color: const Color(
+                        0xFF8E2DE2,
+                      ), // Matches the Purple design
                       onPressed: () {
                         // Access your data here:
                         // print(_nameController.text);
@@ -149,11 +186,19 @@ class _ContactSectionState extends State<ContactSection> {
 
   // ─── COMPONENT BUILDERS ───
 
-  Widget _buildGlassField(String label, String hint, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildGlassField(
+    String label,
+    String hint,
+    TextEditingController controller, {
+    int maxLines = 1,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
         const SizedBox(height: 10),
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -187,7 +232,10 @@ class _ContactSectionState extends State<ContactSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -202,12 +250,18 @@ class _ContactSectionState extends State<ContactSection> {
               dropdownColor: const Color(0xFF1A1A1A),
               value: _selectedRole,
               icon: const Icon(Icons.expand_more, color: Colors.white54),
-              items: ["Select your role", "Designer", "Developer", "Client"]
-                  .map((val) => DropdownMenuItem(
-                        value: val,
-                        child: Text(val, style: const TextStyle(color: Colors.white)),
-                      ))
-                  .toList(),
+              items:
+                  ["Select your role", "Designer", "Developer", "Client"]
+                      .map(
+                        (val) => DropdownMenuItem(
+                          value: val,
+                          child: Text(
+                            val,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      )
+                      .toList(),
               onChanged: (v) => setState(() => _selectedRole = v!),
             ),
           ),
@@ -235,13 +289,27 @@ class _ContactSectionState extends State<ContactSection> {
                 ),
               ),
               child: Center(
-                child: isSelected 
-                  ? Container(width: 10, height: 10, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8E2DE2)))
-                  : null,
+                child:
+                    isSelected
+                        ? Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF8E2DE2),
+                          ),
+                        )
+                        : null,
               ),
             ),
             const SizedBox(width: 12),
-            Text(title, style: TextStyle(color: isSelected ? Colors.white : Colors.white60, fontSize: 15)),
+            Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.white60,
+                fontSize: 15,
+              ),
+            ),
           ],
         ),
       ),

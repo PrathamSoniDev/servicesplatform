@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/presentation/about_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/blog_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/contact_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/designs_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/hero_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/testimonials_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/footer_section.dart';
-import 'package:servicesplatform/core/features/web/widgets/top_nav_bar.dart';
+import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/home/testimonials_section.dart';
+
+import '../../widgets/top_nav_bar.dart';
+import '../common/footer_section.dart';
+import 'about_section.dart';
+import 'blog_section.dart';
+import 'contact_section.dart';
+import 'designs_section.dart';
+import 'hero_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-
+  late String currentRoute;
   // Section keys
   final heroKey = GlobalKey();
   final designsKey = GlobalKey();
@@ -50,6 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    currentRoute = GoRouterState.of(context).uri.toString();
+    super.didChangeDependencies();
   }
 
   // ───────────────── SCROLL SPY ─────────────────

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/widgets/button.dart';
-// Ensure these paths match your actual project structure
-import 'package:servicesplatform/core/features/web/widgets/card.dart'; 
-// Assuming your AppButton is located here:
-// import 'package:servicesplatform/core/features/web/widgets/app_button.dart'; 
-import '../models/design_item_models.dart';
+
+import '../../models/design_item_models.dart';
+import '../../widgets/button.dart';
+import '../../widgets/card.dart';
 
 class DesignsSection extends StatefulWidget {
   const DesignsSection({super.key});
@@ -33,20 +31,22 @@ class _DesignsSectionState extends State<DesignsSection> {
       ),
       child: Column(
         // Centers the header and the button at the bottom
-        crossAxisAlignment: CrossAxisAlignment.center, 
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // 1. CENTERED HEADER
           _Header(),
-          
+
           const SizedBox(height: 80),
-          
+
           // 2. 3x3 GRID (Total 9 Items)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: sidePadding),
             child: GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: designsData.length, // Ensure your designsData list has 9 items
+              itemCount:
+                  designsData
+                      .length, // Ensure your designsData list has 9 items
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: isDesktop ? 3 : 1,
                 mainAxisSpacing: 40,
@@ -75,7 +75,9 @@ class _DesignsSectionState extends State<DesignsSection> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF8E2DE2).withOpacity(0.3),
+                                color: const Color(
+                                  0xFF8E2DE2,
+                                ).withValues(alpha: .3),
                                 blurRadius: 100,
                                 spreadRadius: 20,
                               ),
@@ -89,9 +91,11 @@ class _DesignsSectionState extends State<DesignsSection> {
                         scale: isHovered ? 1.02 : 1.0,
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeOutCubic,
-                        child: LuxuryCard(
-                          item: designsData[index],
-                          hovered: isHovered,
+                        child: RepaintBoundary(
+                          child: LuxuryCard(
+                            item: designsData[index],
+                            hovered: isHovered,
+                          ),
                         ),
                       ),
                     ],
@@ -140,7 +144,7 @@ class _Header extends StatelessWidget {
             "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: .6),
               fontSize: 16,
               height: 1.5,
             ),

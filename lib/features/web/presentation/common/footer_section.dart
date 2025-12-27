@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:servicesplatform/core/features/web/utils/responsive.dart';
+
+import '../../utils/responsive.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});

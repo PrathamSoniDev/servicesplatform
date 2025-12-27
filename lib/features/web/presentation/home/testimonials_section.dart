@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../models/testimonial_model.dart';
-import '../utils/responsive.dart';
-import '../widgets/testimonial_card.dart';
+import '../../models/testimonial_model.dart';
+import '../../utils/responsive.dart';
+import '../../widgets/testimonial_card.dart';
 
 class TestimonialSection extends StatefulWidget {
   const TestimonialSection({super.key});

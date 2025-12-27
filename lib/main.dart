@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/presentation/homescreen.dart';
+import 'package:servicesplatform/core/app_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Dec End',
       theme: ThemeData(
@@ -23,12 +23,10 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
-          bodyLarge: TextStyle(
-            color: Colors.white70,
-          ),
+          bodyLarge: TextStyle(color: Colors.white70),
         ),
       ),
-      home: const HomeScreen(),
+      routerConfig: AppRouter().router,
     );
   }
 }

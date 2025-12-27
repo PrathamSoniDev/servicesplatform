@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/widgets/animated_border.dart';
+
 import '../models/design_item_models.dart';
+import 'animated_border.dart';
 
 class LuxuryCard extends StatelessWidget {
   final DesignItem item;
   final bool hovered;
 
-  const LuxuryCard({
-    super.key,
-    required this.item,
-    required this.hovered,
-  });
+  const LuxuryCard({super.key, required this.item, required this.hovered});
 
   @override
   Widget build(BuildContext context) {
@@ -98,14 +95,21 @@ class _CardContent extends StatelessWidget {
         children: [
           Text(
             item.title,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             item.description,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -116,8 +120,15 @@ class _CardContent extends StatelessWidget {
               const Spacer(),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white10, shape: BoxShape.circle),
-                child: const Icon(Icons.share_outlined, color: Colors.white, size: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.share_outlined,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             ],
           ),

@@ -1,7 +1,6 @@
-/*import 'package:flutter/material.dart';
-import 'package:servicesplatform/core/features/web/presentation/about_section.dart';
-import 'package:servicesplatform/core/features/web/presentation/homescreen.dart';
-import 'package:servicesplatform/core/features/web/widgets/top_nav_bar.dart';
+import 'package:flutter/material.dart';
+
+import '../home/about_section.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -78,34 +77,33 @@ class AboutScreen extends StatelessWidget {
           ),
 
           // Navbar
-          TopNavBar(
-            onHome:
-                () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  (route) => false,
-                ),
-            onDesigns:
-                () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const HomeScreen(),
-                  ), // Ideally modify HomeScreen to scroll to Designs
-                  (route) => false,
-                ),
-            onAbout: () {}, // Already here
-            onBlog:
-                () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  (route) => false,
-                ),
-            onContact:
-                () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  (route) => false,
-                ),
-          ),
+          // TopNavBar(
+          //   onHome:
+          //       () => Navigator.of(context).pushAndRemoveUntil(
+          //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+          //         (route) => false,
+          //       ),
+          //   onDesigns:
+          //       () => Navigator.of(context).pushAndRemoveUntil(
+          //         MaterialPageRoute(
+          //           builder: (context) => const HomeScreen(),
+          //         ), // Ideally modify HomeScreen to scroll to Designs
+          //         (route) => false,
+          //       ),
+          //   onAbout: () {}, // Already here
+          //   onBlog:
+          //       () => Navigator.of(context).pushAndRemoveUntil(
+          //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+          //         (route) => false,
+          //       ),
+          //   onContact:
+          //       () => Navigator.of(context).pushAndRemoveUntil(
+          //         MaterialPageRoute(builder: (context) => const HomeScreen()),
+          //         (route) => false,
+          //       ),
+          // ),
         ],
       ),
     );
   }
 }
-*/
