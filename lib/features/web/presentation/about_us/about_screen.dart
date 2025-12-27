@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/about_us/about_values_section.dart';
 
+import '../../../../core/app_router.dart';
+import '../../widgets/top_nav_bar.dart';
 import '../home/about_section.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -69,13 +73,22 @@ class AboutScreen extends StatelessWidget {
                 ),
 
                 // Content
+                const AboutValuesSection(),
                 const AboutSection(),
 
                 const SizedBox(height: 100),
               ],
             ),
           ),
-
+          TopNavBar(
+            activeIndex: 2,
+            onHome: () => context.go(AppRouter.home),
+            onDesigns: () {},
+            onAbout: () {},
+            onTestimonials: () {},
+            onBlog: () {},
+            onContact: () {},
+          ),
           // Navbar
           // TopNavBar(
           //   onHome:

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:servicesplatform/core/app_router.dart';
 
 import '../../utils/responsive.dart';
 
@@ -78,7 +80,9 @@ class AboutSection extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  context.push(AppRouter.aboutUs);
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: Colors.white,
@@ -120,7 +124,9 @@ class AboutSection extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  context.push(AppRouter.aboutUs);
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: Colors.white,
@@ -177,10 +183,12 @@ class _DesktopLayout extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/images/about_us.png',
-                  height: 300,
-                  fit: BoxFit.cover,
+                child: RepaintBoundary(
+                  child: Image.asset(
+                    'assets/images/about_us.png',
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -196,10 +204,12 @@ class _DesktopLayout extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/images/why_choose_us.png',
-                  height: 300,
-                  fit: BoxFit.cover,
+                child: RepaintBoundary(
+                  child: Image.asset(
+                    'assets/images/why_choose_us.png',
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -233,10 +243,12 @@ class _DesktopLayout extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/images/how_we_work.png',
-                  height: 300,
-                  fit: BoxFit.cover,
+                child: RepaintBoundary(
+                  child: Image.asset(
+                    'assets/images/how_we_work.png',
+                    height: 300,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -264,7 +276,9 @@ class _MobileLayout extends StatelessWidget {
         const SizedBox(height: 20),
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.asset('assets/images/about_us.png', fit: BoxFit.cover),
+          child: RepaintBoundary(
+            child: Image.asset('assets/images/about_us.png', fit: BoxFit.cover),
+          ),
         ),
         const SizedBox(height: 80),
 
@@ -278,9 +292,11 @@ class _MobileLayout extends StatelessWidget {
         const SizedBox(height: 20),
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            'assets/images/why_choose_us.png',
-            fit: BoxFit.cover,
+          child: RepaintBoundary(
+            child: Image.asset(
+              'assets/images/why_choose_us.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(height: 80),
@@ -295,9 +311,11 @@ class _MobileLayout extends StatelessWidget {
         const SizedBox(height: 20),
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            'assets/images/how_we_work.png',
-            fit: BoxFit.cover,
+          child: RepaintBoundary(
+            child: Image.asset(
+              'assets/images/how_we_work.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ],
