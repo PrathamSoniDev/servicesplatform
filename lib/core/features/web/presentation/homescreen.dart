@@ -5,6 +5,7 @@ import 'package:servicesplatform/core/features/web/presentation/contact_section.
 import 'package:servicesplatform/core/features/web/presentation/designs_section.dart';
 import 'package:servicesplatform/core/features/web/presentation/hero_section.dart';
 import 'package:servicesplatform/core/features/web/presentation/testimonials_section.dart';
+import 'package:servicesplatform/core/features/web/presentation/footer_section.dart';
 import 'package:servicesplatform/core/features/web/widgets/top_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -105,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Container(key: blogKey, child: const BlogSection()),
                 Container(key: contactKey, child: const ContactSection()),
+                const FooterSection(),
               ],
             ),
           ),

@@ -26,7 +26,7 @@ class HeroSection extends StatelessWidget {
             ? 46
             : 54;
 
-    return Container(
+    return SizedBox(
       height: heroHeight,
       width: double.infinity,
       // color: Colors.black, // Removing explicit color to let background show or handle in Stack
