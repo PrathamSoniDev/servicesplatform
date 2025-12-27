@@ -1,8 +1,9 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/features/web/utils/app_theme.dart';
 
-import '../model/testimonial_model.dart';
+import '../models/testimonial_model.dart';
 import 'rating_stars.dart';
 
 class TestimonialCard extends StatelessWidget {
@@ -13,9 +14,10 @@ class TestimonialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine if the screen is small to adjust width logic if necessary
-    final double cardWidth = MediaQuery.of(context).size.width > 1024 
-        ? MediaQuery.of(context).size.width / 3.5 
-        : MediaQuery.of(context).size.width * 0.8;
+    final double cardWidth =
+        MediaQuery.of(context).size.width > 1024
+            ? MediaQuery.of(context).size.width / 3.5
+            : MediaQuery.of(context).size.width * 0.8;
 
     return SizedBox(
       width: cardWidth,
@@ -137,7 +139,10 @@ class TestimonialCard extends StatelessWidget {
                     offset: const Offset(0, 5),
                   ),
                 ],
-                border: Border.all(color: Colors.white.withOpacity(0.8), width: 2),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.8),
+                  width: 2,
+                ),
               ),
               child: CircleAvatar(
                 backgroundColor: AppTheme.primary,
