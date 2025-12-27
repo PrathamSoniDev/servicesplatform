@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/testimonials_section.dart';
+import 'package:servicesplatform/features/web/widgets/button.dart';
 
 import '../../widgets/top_nav_bar.dart';
 import '../common/footer_section.dart';
@@ -105,7 +107,20 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const SizedBox(height: 72), // space for navbar
 
-                Container(key: heroKey, child: const HeroSection()),
+                Container(key: heroKey, child: const HeroSection(
+  title: "Your Digital Journey",      // Main text
+  gradientText: "Starts Here",        // Text that will have the gradient
+  showGradient: true,                 // Turn on gradient for Home
+  subtitle: "Unlock bespoke web & app services.",
+  imagePath: "assets/gif/jelly.gif",
+  isOverlayMode: true,
+  contentAlignment: HeroContentAlignment.center,
+  customButtons: [
+    AppButton(text: "View Designs", onPressed: null),
+    AppButton(text: "Book Us", type: AppButtonType.outline, onPressed: null),
+  ],
+)
+),
                 Container(key: designsKey, child: const DesignsSection()),
                 Container(key: aboutKey, child: const AboutSection()),
                 Container(
@@ -122,9 +137,17 @@ class _HomeScreenState extends State<HomeScreen> {
           // ───────── NAVBAR ─────────
           TopNavBar(
             activeIndex: currentSectionIndex,
-            onHome: () => scrollToSection(0),
+            onHome:
+                () =>
+                    currentRoute == AppRouter.home
+                        ? scrollToSection(0)
+                        : context.go(AppRouter.home),
             onDesigns: () => scrollToSection(1),
-            onAbout: () => scrollToSection(2),
+            onAbout:
+                () =>
+                    currentRoute == AppRouter.home
+                        ? scrollToSection(2)
+                        : context.push(AppRouter.aboutUs),
             onTestimonials: () => scrollToSection(3),
             onBlog: () => scrollToSection(4),
             onContact: () => scrollToSection(5),
