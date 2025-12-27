@@ -100,6 +100,7 @@ class _AppButtonState extends State<AppButton> {
 
     return Text(
       widget.text,
+      textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: widget.textColor,
         fontWeight: FontWeight.w600,
