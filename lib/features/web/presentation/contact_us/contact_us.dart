@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
-import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
+import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -47,7 +48,15 @@ class _ContactUsState extends State<ContactUs> {
           SingleChildScrollView(
             child: Column(
               children: [
-                _buildHeroAndFormSection(context),
+                const HeroSection(
+                  title: "Love to hear from you \n Get in touch",
+                  imagePath: "assets/images/image 18.png",
+                  isOverlayMode: true,
+                  contentAlignment: HeroContentAlignment.center,
+                  subtitle:
+                      "Ready to bring your digital vision to life? Contact us today and let's start\n building something amazing together.",
+                ),
+                // _buildHeroAndFormSection(context),
                 _buildContactInfoSection(context),
                 const FooterSection(),
               ],
@@ -60,9 +69,9 @@ class _ContactUsState extends State<ContactUs> {
                 () => context.go(
                   AppRouter.home,
                 ), // Scroll handling could be improved if needed
-            onAbout: () => context.go(AppRouter.aboutUs),
+            onAbout: () => context.push(AppRouter.aboutUs),
             onTestimonials: () => context.go(AppRouter.home),
-            onBlog: () => context.go(AppRouter.blog),
+            onBlog: () => context.push(AppRouter.blog),
             onContact: () {}, // Already here
           ),
         ],

@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Container(
                   key: heroKey,
-                  child: const HeroSection(
+                  child: HeroSection(
                     title: "Your Digital Journey", // Main text
                     gradientText:
                         "Starts Here", // Text that will have the gradient
@@ -119,11 +119,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     isOverlayMode: true,
                     contentAlignment: HeroContentAlignment.center,
                     customButtons: [
-                      AppButton(text: "View Designs", onPressed: null),
+                      const AppButton(text: "View Designs", onPressed: null),
                       AppButton(
                         text: "Book Us",
                         type: AppButtonType.outline,
-                        onPressed: null,
+                        onPressed: () {
+                          context.push(AppRouter.contact);
+                        },
                       ),
                     ],
                   ),
@@ -157,7 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         : context.push(AppRouter.aboutUs),
             onTestimonials: () => scrollToSection(3),
             onBlog: () => scrollToSection(4),
-            onContact: () => context.go(AppRouter.contact),
+            onContact:
+                () =>
+                    currentRoute == AppRouter.home
+                        ? scrollToSection(5)
+                        : context.push(AppRouter.contact),
           ),
         ],
       ),
