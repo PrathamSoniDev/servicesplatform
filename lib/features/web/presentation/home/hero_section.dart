@@ -182,7 +182,7 @@ class HeroSection extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: imagePath!.startsWith('http')
           ? Image.network(imagePath!, fit: BoxFit.cover)
-          : Image.asset(imagePath!, fit: BoxFit.cover),
+          : Image.asset(imagePath!, fit: BoxFit.contain),
     );
   }
 
