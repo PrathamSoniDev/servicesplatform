@@ -107,20 +107,27 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const SizedBox(height: 72), // space for navbar
 
-                Container(key: heroKey, child: const HeroSection(
-  title: "Your Digital Journey",      // Main text
-  gradientText: "Starts Here",        // Text that will have the gradient
-  showGradient: true,                 // Turn on gradient for Home
-  subtitle: "Unlock bespoke web & app services.",
-  imagePath: "assets/gif/jelly.gif",
-  isOverlayMode: true,
-  contentAlignment: HeroContentAlignment.center,
-  customButtons: [
-    AppButton(text: "View Designs", onPressed: null),
-    AppButton(text: "Book Us", type: AppButtonType.outline, onPressed: null),
-  ],
-)
-),
+                Container(
+                  key: heroKey,
+                  child: const HeroSection(
+                    title: "Your Digital Journey", // Main text
+                    gradientText:
+                        "Starts Here", // Text that will have the gradient
+                    showGradient: true, // Turn on gradient for Home
+                    subtitle: "Unlock bespoke web & app services.",
+                    imagePath: "assets/gif/jelly.gif",
+                    isOverlayMode: true,
+                    contentAlignment: HeroContentAlignment.center,
+                    customButtons: [
+                      AppButton(text: "View Designs", onPressed: null),
+                      AppButton(
+                        text: "Book Us",
+                        type: AppButtonType.outline,
+                        onPressed: null,
+                      ),
+                    ],
+                  ),
+                ),
                 Container(key: designsKey, child: const DesignsSection()),
                 Container(key: aboutKey, child: const AboutSection()),
                 Container(
@@ -150,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         : context.push(AppRouter.aboutUs),
             onTestimonials: () => scrollToSection(3),
             onBlog: () => scrollToSection(4),
-            onContact: () => scrollToSection(5),
+            onContact: () => context.go(AppRouter.contact),
           ),
         ],
       ),
