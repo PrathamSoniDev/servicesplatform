@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/blog_model.dart';
+import 'package:servicesplatform/features/web/models/blog_model.dart';
 
 class BlogCard extends StatefulWidget {
   final BlogModel blog;
@@ -18,6 +18,7 @@ class _BlogCardState extends State<BlogCard> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: AnimatedContainer(
@@ -27,7 +28,7 @@ class _BlogCardState extends State<BlogCard> {
             ? (Matrix4.identity()..translate(0, -8, 0)) 
             : Matrix4.identity(),
         decoration: BoxDecoration(
-          color: const Color(0xFF121212), // Deep obsidian
+          color: const Color(0xFF121212), // Premium Obsidian
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isHovered ? Colors.white.withOpacity(0.2) : Colors.white.withOpacity(0.08),
@@ -69,19 +70,28 @@ class _ImageSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        AnimatedScale(
-          scale: isHovered ? 1.05 : 1.0,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeOutQuart,
-          child: AspectRatio(
-            aspectRatio: 16 / 10,
-            child: Image.network(
-              blog.imageUrl,
-              fit: BoxFit.cover,
+        // Hero tag matches the detail screen for a seamless transition
+        Hero(
+          tag: 'blog_image_${blog.id}', 
+          child: AnimatedScale(
+            scale: isHovered ? 1.05 : 1.0,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutQuart,
+            child: AspectRatio(
+              aspectRatio: 16 / 10,
+              child: Image.network(
+                blog.imageUrl,
+                fit: BoxFit.cover,
+                // Error handling for network images
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white24),
+                ),
+              ),
             ),
           ),
         ),
-        // Premium Gradient Overlay
+        // Gradient overlay for better text readability and depth
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -92,7 +102,7 @@ class _ImageSection extends StatelessWidget {
                 colors: [
                   Colors.black.withOpacity(0.4),
                   Colors.transparent,
-                  Colors.black.withOpacity(0.1),
+                  Colors.black.withOpacity(0.2),
                 ],
               ),
             ),
@@ -121,23 +131,18 @@ class _ContentSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  blog.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    height: 1.2,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            blog.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+              height: 1.2,
+              color: Colors.white,
+              fontFamily: 'Outfit', // Using the font from your Hero Section
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -151,17 +156,17 @@ class _ContentSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          // Footer Info
+          // Footer: Author and Read Time
           Row(
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(color: Colors.white12),
                   image: const DecorationImage(
-                    image: NetworkImage("https://ui-avatars.com/api/?name=Author&background=random"),
+                    image: NetworkImage("https://ui-avatars.com/api/?background=random&color=fff"),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -175,7 +180,7 @@ class _ContentSection extends StatelessWidget {
                       blog.authorName,
                       style: const TextStyle(
                         fontSize: 13, 
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
@@ -211,9 +216,10 @@ class _CategoryChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
+        color: Colors.black.withOpacity(0.7),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withOpacity(0.1)),
+        // backdropFilter: const ColorFilter.mode(Colors.black12, BlendMode.blur),
       ),
       child: Text(
         text.toUpperCase(),

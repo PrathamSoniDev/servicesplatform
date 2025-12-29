@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // Ensure go_router is imported
+import 'package:go_router/go_router.dart';
 import '../../models/blog_model.dart';
 import '../../widgets/blog_card.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/button.dart'; // Import your AppButton
+import '../../widgets/button.dart'; 
 
 class BlogSection extends StatelessWidget {
   const BlogSection({super.key});
@@ -23,8 +23,7 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "1",
         title: "Blog post title",
-        description:
-            "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "ED-Tech",
         authorName: "Name",
@@ -34,8 +33,7 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "2",
         title: "Blog post title",
-        description:
-            "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "ED-Tech",
         authorName: "Name",
@@ -45,8 +43,7 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "3",
         title: "Blog post title",
-        description:
-            "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "ED-Tech",
         authorName: "Name",
@@ -63,7 +60,7 @@ class BlogSection extends StatelessWidget {
         vertical: 90,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Ensures children stay centered
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CustomText(
             text: "Our Blogs",
@@ -93,25 +90,27 @@ class BlogSection extends StatelessWidget {
               childAspectRatio: 0.78,
             ),
             itemBuilder: (_, index) {
+              final currentBlog = blogs[index]; // Reference the specific blog
               return RepaintBoundary(
                 child: BlogCard(
-                  blog: blogs[index],
+                  blog: currentBlog,
                   onTap: () {
-                    // Navigate to blog details
+                    // IMPLEMENTED: Navigate to detail screen using the blog ID
+                    // and pass the blog object so the detail screen has the data immediately
+                    context.go('/blog/${currentBlog.id}', extra: currentBlog);
                   },
                 ),
               );
             },
           ),
 
-          // --- EXPLORE MORE BUTTON ---
           const SizedBox(height: 60),
           AppButton(
             text: "Explore More",
             onPressed: () {
-              context.push('/blog'); // Navigates to the blog screen
+              context.push('/blog'); 
             },
-            type: AppButtonType.outline, // Optional: Use outline to match style
+            type: AppButtonType.outline,
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
           ),
         ],
