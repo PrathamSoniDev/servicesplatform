@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
+import 'package:servicesplatform/features/web/presentation/home/contact_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+
 import '../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
@@ -76,6 +79,10 @@ class _BlogScreenState extends State<BlogScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // --- FEATURED HERO ---
+                        _buildHeaderLabel("FEATURED INSIGHTS"),
+                        const SizedBox(height: 20),
+                        
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: [
@@ -138,16 +145,10 @@ class _BlogScreenState extends State<BlogScreen> {
                           itemCount: itemsPerPage,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: _getCrossAxisCount(width),
-                            crossAxisSpacing: 35,
+                            crossAxisSpacing: 35, 
                             mainAxisSpacing: 35,
-                            // --- DYNAMIC RATIO FIX ---
-                            // On Mobile (1 column): We need a taller ratio (lower number)
-                            // On Desktop (3 columns): We need a wider ratio (higher number)
-                            childAspectRatio: isMobile 
-        ? (width / 620) // Changed from 580 to 620 to add more height
-        : (isTablet ? 0.72 : 0.80), // Lowered values to prevent pixel overflow
-  ),
-
+                            childAspectRatio: isMobile ? 0.9 : (isTablet ? 0.85 : 0.82),
+                          ),
                           itemBuilder: (_, index) {
                             int blogId =
                                 ((currentPage - 1) * itemsPerPage) + index + 1;
@@ -199,11 +200,10 @@ class _BlogScreenState extends State<BlogScreen> {
                         const SizedBox(height: 50),
                         _buildTrendingSection(width, isMobile),
                         const SizedBox(height: 60),
-                        Divider(
-                          color: Colors.white.withOpacity(0.08),
-                          thickness: 1,
-                        ),
+                        Divider(color: Colors.white.withOpacity(0.08), thickness: 1),
                         const SizedBox(height: 40),
+                        ContactSection(),
+                        FooterSection(),
                       ],
                     ),
                   ),
