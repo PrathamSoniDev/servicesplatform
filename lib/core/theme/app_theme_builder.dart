@@ -11,33 +11,6 @@ class AppThemeBuilder {
 
     Color c(String key) => ThemeParser.parseColorToken(colors[key]);
 
-    TextStyle font(
-      String? name, {
-      Color? color,
-      double? size,
-      FontWeight? weight,
-    }) {
-      if (name == null || name.isEmpty) {
-        return TextStyle(color: color, fontSize: size, fontWeight: weight);
-      }
-
-      try {
-        return GoogleFonts.getFont(
-          name,
-          color: color,
-          fontSize: size,
-          fontWeight: weight,
-        );
-      } catch (_) {
-        return TextStyle(
-          fontFamily: name,
-          color: color,
-          fontSize: size,
-          fontWeight: weight,
-        );
-      }
-    }
-
     final brightness =
         theme.mode == 'dark' ? Brightness.dark : Brightness.light;
 
@@ -49,30 +22,21 @@ class AppThemeBuilder {
       primaryColor: c('primary'),
       dividerColor: c('border'),
 
-      appBarTheme: AppBarTheme(
-        backgroundColor: c('surface'),
-        foregroundColor: c('textPrimary'),
-        titleTextStyle: font(
-          fonts['primaryFont'],
-          color: c('textPrimary'),
-          size: 20,
-          weight: FontWeight.w600,
-        ),
-      ),
-
       textTheme: TextTheme(
-        headlineLarge: font(
+        headlineLarge: GoogleFonts.getFont(
           fonts['primaryFont'],
           color: c('textPrimary'),
-          size: 48,
-          weight: FontWeight.bold,
+          fontSize: 48,
+          fontWeight: FontWeight.bold,
         ),
-        bodyLarge: font(fonts['secondaryFont'], color: c('textPrimary')),
-        bodyMedium: font(fonts['secondaryFont'], color: c('textSecondary')),
-        labelLarge: font(
+        bodyMedium: GoogleFonts.getFont(
+          fonts['secondaryFont'],
+          color: c('textSecondary'),
+        ),
+        labelLarge: GoogleFonts.getFont(
           fonts['buttonFont'] ?? fonts['primaryFont'],
           color: c('white'),
-          weight: FontWeight.w600,
+          fontWeight: FontWeight.w600,
         ),
       ),
 
@@ -80,10 +44,6 @@ class AppThemeBuilder {
         style: ElevatedButton.styleFrom(
           backgroundColor: c('primary'),
           foregroundColor: c('white'),
-          textStyle: font(
-            fonts['buttonFont'] ?? fonts['primaryFont'],
-            weight: FontWeight.w600,
-          ),
         ),
       ),
 

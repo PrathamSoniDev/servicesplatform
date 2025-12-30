@@ -111,7 +111,7 @@ class _DesignsSectionState extends State<DesignsSection> {
           AppButton(
             text: "Explore more Designs",
             enableGlow: true,
-            color: const Color(0xFF8E2DE2), // Purple theme from your image
+            // color: const Color(0xFF8E2DE2), // Purple theme from your image
             onPressed: () {
               // Action for button click
             },

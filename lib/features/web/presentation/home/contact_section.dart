@@ -165,9 +165,9 @@ class _ContactSectionState extends State<ContactSection> {
                     child: AppButton(
                       text: "Submit",
                       enableGlow: true,
-                      color: const Color(
-                        0xFF8E2DE2,
-                      ), // Matches the Purple design
+                      // color: const Color(
+                      //   0xFF8E2DE2,
+                      // ), // Matches the Purple design
                       onPressed: () {
                         // Access your data here:
                         // print(_nameController.text);

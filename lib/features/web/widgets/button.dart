@@ -2,6 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme_provider.dart';
+import '../../../core/theme/theme_parser.dart';
+
 enum AppButtonType { solid, outline, glass }
 
 class AppButton extends StatefulWidget {
@@ -9,7 +12,10 @@ class AppButton extends StatefulWidget {
   final VoidCallback? onPressed;
 
   final AppButtonType type;
+
+  /// ✅ Existing solid color (fallback)
   final Color color;
+
   final Color textColor;
 
   final EdgeInsets padding;
@@ -54,7 +60,18 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveColor = widget.isDisabled ? Colors.grey : widget.color;
+    final tokens = AppThemeProvider.of(context);
+    final buttonToken = tokens.colors['buttonPrimary'];
+    // 🔑 Theme-driven values
+    final Gradient? themeGradient = ThemeParser.parseGradientToken(buttonToken);
+    final Color themeColor = ThemeParser.parseColorToken(buttonToken);
+
+    final Color effectiveColor =
+        widget.isDisabled
+            ? Colors.grey
+            : themeGradient == null
+            ? themeColor
+            : Colors.white; // fallback for glow/border
 
     Widget buttonChild = _buildContent(context);
 
@@ -78,7 +95,13 @@ class _AppButtonState extends State<AppButton> {
           duration: const Duration(milliseconds: 200),
           padding: widget.padding,
           decoration: BoxDecoration(
-            color: _backgroundColor(effectiveColor),
+            // ✅ GRADIENT AUTO-INTEGRATION
+            gradient: widget.type == AppButtonType.solid ? themeGradient : null,
+
+            // ✅ SOLID FALLBACK (UNCHANGED BEHAVIOR)
+            color:
+                themeGradient == null ? _backgroundColor(effectiveColor) : null,
+
             borderRadius: BorderRadius.circular(widget.borderRadius),
             border: _border(effectiveColor),
             boxShadow: _boxShadow(effectiveColor),
