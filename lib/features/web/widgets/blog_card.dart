@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:servicesplatform/features/web/models/blog_model.dart';
 
 class BlogCard extends StatefulWidget {
-  final BlogModel blog;
+  final dynamic blog; 
   final VoidCallback? onTap;
 
   const BlogCard({super.key, required this.blog, this.onTap});
@@ -17,6 +16,17 @@ class _BlogCardState extends State<BlogCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.blog == null) {
+      return const SizedBox.shrink(); 
+    }
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 600;
+    
+    final dateStr = DateFormat("dd MMM, yyyy")
+        .format(widget.blog.publishedAt)
+        .toLowerCase();
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => isHovered = true),
@@ -25,183 +35,160 @@ class _BlogCardState extends State<BlogCard> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
         transform: isHovered 
-            ? (Matrix4.identity()..translate(0, -8, 0)) 
+            ? (Matrix4.identity()..translate(0, -10, 0)) 
             : Matrix4.identity(),
         decoration: BoxDecoration(
-          color: const Color(0xFF121212), // Premium Obsidian
-          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xFF0D0D0D),
+          borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: isHovered ? Colors.white.withOpacity(0.2) : Colors.white.withOpacity(0.08),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 20,
+              color: Colors.black.withOpacity(isHovered ? 0.5 : 0.2),
+              blurRadius: 25,
               offset: const Offset(0, 10),
             ),
           ],
         ),
-        child: InkWell(
-          onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: InkWell(
+            onTap: widget.onTap,
             child: Column(
+              mainAxisSize: MainAxisSize.min, // KEY: Card wraps its content
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _ImageSection(blog: widget.blog, isHovered: isHovered),
-                _ContentSection(blog: widget.blog),
+                // --- IMAGE SECTION ---
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Hero(
+                    tag: 'blog_image_${widget.blog.id}',
+                    child: Image.network(
+                      widget.blog.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.white10,
+                        child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // --- CONTENT SECTION ---
+                // We use Flexible to ensure this section can shrink if the grid height is restricted
+                Flexible(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 24,
+                      vertical: 20,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min, // KEY: Button stays inside
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Category & Time
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _CategoryChip(text: widget.blog.category),
+                            Text(
+                              "${widget.blog.readMinutes} min read",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.4),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Title
+                        Text(
+                          widget.blog.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: isMobile ? 18 : 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Description
+                        Text(
+                          widget.blog.description,
+                          maxLines: isMobile ? 2 : 3, // Constrain lines to prevent overflow
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            height: 1.5,
+                            color: Colors.white.withOpacity(0.4),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 24),
+
+                        // Author Footer
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 15,
+                              backgroundColor: Colors.white12,
+                              child: Icon(Icons.person, size: 18, color: Colors.white.withOpacity(0.5)),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                widget.blog.authorName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: Colors.white, fontSize: 14),
+                              ),
+                            ),
+                            Text(
+                              dateStr,
+                              style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 20),
+
+                        // --- READ MORE BUTTON (Inside Card) ---
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: isHovered ? Colors.white : Colors.transparent,
+                            border: Border.all(
+                              color: isHovered ? Colors.white : Colors.white.withOpacity(0.15),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Read More",
+                              style: TextStyle(
+                                color: isHovered ? Colors.black : Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ImageSection extends StatelessWidget {
-  final BlogModel blog;
-  final bool isHovered;
-  const _ImageSection({required this.blog, required this.isHovered});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Hero tag matches the detail screen for a seamless transition
-        Hero(
-          tag: 'blog_image_${blog.id}', 
-          child: AnimatedScale(
-            scale: isHovered ? 1.05 : 1.0,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutQuart,
-            child: AspectRatio(
-              aspectRatio: 16 / 10,
-              child: Image.network(
-                blog.imageUrl,
-                fit: BoxFit.cover,
-                // Error handling for network images
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[900],
-                  child: const Icon(Icons.broken_image, color: Colors.white24),
-                ),
-              ),
-            ),
-          ),
-        ),
-        // Gradient overlay for better text readability and depth
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.6, 1.0],
-                colors: [
-                  Colors.black.withOpacity(0.4),
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.2),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 16,
-          top: 16,
-          child: _CategoryChip(text: blog.category),
-        ),
-      ],
-    );
-  }
-}
-
-class _ContentSection extends StatelessWidget {
-  final BlogModel blog;
-  const _ContentSection({required this.blog});
-
-  @override
-  Widget build(BuildContext context) {
-    final date = DateFormat("MMM dd, yyyy").format(blog.publishedAt);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            blog.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-              height: 1.2,
-              color: Colors.white,
-              fontFamily: 'Outfit', // Using the font from your Hero Section
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            blog.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Colors.white.withOpacity(0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Footer: Author and Read Time
-          Row(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white12),
-                  image: const DecorationImage(
-                    image: NetworkImage("https://ui-avatars.com/api/?background=random&color=fff"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      blog.authorName,
-                      style: const TextStyle(
-                        fontSize: 13, 
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      "$date • ${blog.readMinutes} min read",
-                      style: TextStyle(
-                        fontSize: 11, 
-                        color: Colors.white.withOpacity(0.4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 18,
-                color: Colors.white.withOpacity(0.3),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -214,20 +201,18 @@ class _CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        // backdropFilter: const ColorFilter.mode(Colors.black12, BlendMode.blur),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text.toUpperCase(),
         style: const TextStyle(
           fontSize: 10,
-          letterSpacing: 1.2,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          color: Colors.black,
+          letterSpacing: 0.5,
         ),
       ),
     );

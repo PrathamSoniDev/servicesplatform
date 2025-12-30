@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
@@ -77,24 +76,25 @@ class _BlogScreenState extends State<BlogScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- FEATURED HERO ---
-                        _buildHeaderLabel("FEATURED INSIGHTS"),
-                        const SizedBox(height: 20),
-                        
                         Container(
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF8B5CF6).withOpacity(0.05),
+                                color: const Color(
+                                  0xFF8B5CF6,
+                                ).withOpacity(0.05),
                                 blurRadius: 100,
                                 spreadRadius: 10,
-                              )
+                              ),
                             ],
                           ),
                           child: HeroSection(
-                            title: "The Ultimate Guide to Digital Marketing Strategy",
-                            subtitle: "Digital Marketing Strategist helping businesses grow through data-driven marketing campaigns.",
-                            imagePath: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070',
+                            title:
+                                "The Ultimate Guide to Digital Marketing Strategy",
+                            subtitle:
+                                "Digital Marketing Strategist helping businesses grow through data-driven marketing campaigns.",
+                            imagePath:
+                                'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070',
                             featuredText: "FEATURED",
                             featuredColor: Colors.redAccent,
                             showNavigationArrows: false,
@@ -105,7 +105,7 @@ class _BlogScreenState extends State<BlogScreen> {
                         ),
 
                         const SizedBox(height: 100),
-                        
+
                         // --- CATEGORY FILTERS ---
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,24 +131,34 @@ class _BlogScreenState extends State<BlogScreen> {
                         const SizedBox(height: 60),
 
                         // --- BLOG GRID ---
+                        // --- BLOG GRID UPDATED ---
                         GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: itemsPerPage,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: _getCrossAxisCount(width),
-                            crossAxisSpacing: 35, 
+                            crossAxisSpacing: 35,
                             mainAxisSpacing: 35,
-                            childAspectRatio: isMobile ? 0.9 : (isTablet ? 0.85 : 0.82),
-                          ),
+                            // --- DYNAMIC RATIO FIX ---
+                            // On Mobile (1 column): We need a taller ratio (lower number)
+                            // On Desktop (3 columns): We need a wider ratio (higher number)
+                            childAspectRatio: isMobile 
+        ? (width / 620) // Changed from 580 to 620 to add more height
+        : (isTablet ? 0.72 : 0.80), // Lowered values to prevent pixel overflow
+  ),
+
                           itemBuilder: (_, index) {
-                            int blogId = ((currentPage - 1) * itemsPerPage) + index + 1;
-                            
+                            int blogId =
+                                ((currentPage - 1) * itemsPerPage) + index + 1;
+
                             final currentBlog = BlogModel(
                               id: "$blogId",
                               title: "How to Scale your Business $blogId",
-                              description: "Explore our most popular designs crafted with precision and creativity.",
-                              imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+                              description:
+                                  "Explore our most popular designs crafted with precision and creativity.",
+                              imageUrl:
+                                  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
                               category: "Marketing",
                               authorName: "John Doe",
                               publishedAt: DateTime(2025, 12, 24),
@@ -157,15 +167,21 @@ class _BlogScreenState extends State<BlogScreen> {
 
                             return BlogCard(
                               blog: currentBlog,
-                              onTap: () => context.go('/blog/$blogId', extra: currentBlog),
+                              onTap:
+                                  () => context.go(
+                                    '/blog/$blogId',
+                                    extra: currentBlog,
+                                  ),
                             );
                           },
                         ),
-
                         const SizedBox(height: 80),
                         _buildPaginationControls(),
                         const SizedBox(height: 60),
-                        Divider(color: Colors.white.withOpacity(0.08), thickness: 1),
+                        Divider(
+                          color: Colors.white.withOpacity(0.08),
+                          thickness: 1,
+                        ),
                         const SizedBox(height: 80),
 
                         // --- TRENDING SECTION ---
@@ -183,7 +199,10 @@ class _BlogScreenState extends State<BlogScreen> {
                         const SizedBox(height: 50),
                         _buildTrendingSection(width, isMobile),
                         const SizedBox(height: 60),
-                        Divider(color: Colors.white.withOpacity(0.08), thickness: 1),
+                        Divider(
+                          color: Colors.white.withOpacity(0.08),
+                          thickness: 1,
+                        ),
                         const SizedBox(height: 40),
                       ],
                     ),
@@ -193,18 +212,6 @@ class _BlogScreenState extends State<BlogScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: Colors.white.withOpacity(0.5),
-        fontSize: 12,
-        fontWeight: FontWeight.w900,
-        letterSpacing: 2.0,
       ),
     );
   }
@@ -227,8 +234,10 @@ class _BlogScreenState extends State<BlogScreen> {
             final trendingBlog = BlogModel(
               id: trendingId,
               title: "Trending Article Title ${index + 1}",
-              description: "Explore our most popular designs crafted with precision.",
-              imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
+              description:
+                  "Explore our most popular designs crafted with precision.",
+              imageUrl:
+                  "https://images.unsplash.com/photo-1552664730-d307ca884978",
               category: "ED-Tech",
               authorName: "Name",
               publishedAt: DateTime(2025, 12, 24),
@@ -271,7 +280,10 @@ class _BlogScreenState extends State<BlogScreen> {
           if (totalPages > 2) _pageNumber(3),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Text("...", style: TextStyle(color: Colors.white24, fontSize: 18)),
+            child: Text(
+              "...",
+              style: TextStyle(color: Colors.white24, fontSize: 18),
+            ),
           ),
           _pageNumber(totalPages),
           const SizedBox(width: 25),
@@ -294,18 +306,22 @@ class _BlogScreenState extends State<BlogScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 6),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.03),
+          color:
+              active ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.03),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: active ? Colors.white24 : Colors.transparent,
           ),
-          boxShadow: active ? [
-            BoxShadow(
-              color: const Color(0xFF8B5CF6).withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            )
-          ] : [],
+          boxShadow:
+              active
+                  ? [
+                    BoxShadow(
+                      color: const Color(0xFF8B5CF6).withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ]
+                  : [],
         ),
         child: Text(
           "$num",
@@ -327,10 +343,16 @@ class _BlogScreenState extends State<BlogScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: enabled ? Colors.white10 : Colors.transparent),
+          border: Border.all(
+            color: enabled ? Colors.white10 : Colors.transparent,
+          ),
           color: enabled ? Colors.white.withOpacity(0.02) : Colors.transparent,
         ),
-        child: Icon(icon, color: enabled ? Colors.white : Colors.white12, size: 18),
+        child: Icon(
+          icon,
+          color: enabled ? Colors.white : Colors.white12,
+          size: 18,
+        ),
       ),
     );
   }
@@ -340,38 +362,49 @@ class _BlogScreenState extends State<BlogScreen> {
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        children: categories.map((cat) {
-          bool isSelected = selectedCategory == cat;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategory = cat;
-                currentPage = 1;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.08) : Colors.transparent,
-                borderRadius: BorderRadius.circular(30), 
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF8B5CF6).withOpacity(0.5) : Colors.white10,
+        children:
+            categories.map((cat) {
+              bool isSelected = selectedCategory == cat;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategory = cat;
+                    currentPage = 1;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? Colors.white.withOpacity(0.08)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color:
+                          isSelected
+                              ? const Color(0xFF8B5CF6).withOpacity(0.5)
+                              : Colors.white10,
+                    ),
+                  ),
+                  child: Text(
+                    cat,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white38,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                cat,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white38,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 13,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
