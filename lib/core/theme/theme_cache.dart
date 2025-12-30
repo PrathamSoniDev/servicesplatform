@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeCache {
@@ -11,6 +12,7 @@ class ThemeCache {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyData, jsonEncode(json));
     await prefs.setInt(_keyTime, DateTime.now().millisecondsSinceEpoch);
+    debugPrint("Theme Cache Successfully");
   }
 
   static Future<Map<String, dynamic>?> get() async {
