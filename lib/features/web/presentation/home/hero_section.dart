@@ -243,7 +243,7 @@ import 'package:flutter/material.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/hero_shimmer.dart';
 
-enum HeroContentAlignment { left, center, right }
+enum HeroContentAlignment { left, center, right, start }
 
 class HeroSection extends StatelessWidget {
   const HeroSection({

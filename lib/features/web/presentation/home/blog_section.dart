@@ -105,14 +105,26 @@ class BlogSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 60),
-          AppButton(
-            text: "Explore More",
-            onPressed: () {
-              context.push('/blog'); 
-            },
-            type: AppButtonType.outline,
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-          ),
+     AppButton(
+  text: "Explore More",
+  onPressed: () {
+    context.push('/blog'); 
+  },
+  // Use 'solid' to get the background fill color
+  type: AppButtonType.solid, 
+  
+  // Dynamically pulls 0xFF8E2DE2 from your AppTheme
+  color: Theme.of(context).colorScheme.primary, 
+  
+  // Set text to white for high contrast
+  textColor: Colors.white,
+  
+  // Match the padding from your design
+  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+  
+  // Optional: adds the glow effect seen in your earlier theme logic
+  enableGlow: true, 
+),
         ],
       ),
     );

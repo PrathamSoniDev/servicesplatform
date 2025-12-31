@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:servicesplatform/features/web/utils/responsive.dart';
 
 class BlogCard extends StatefulWidget {
   final dynamic blog;
@@ -18,7 +19,10 @@ class _BlogCardState extends State<BlogCard> {
   Widget build(BuildContext context) {
     if (widget.blog == null) return const SizedBox.shrink();
 
-    final bool isMobile = MediaQuery.of(context).size.width < 600;
+    // 📱 Responsive checks using your utility
+    final bool isMobile = Responsive.isMobile(context);
+    // final bool isTablet = Responsive.isTablet(context);
+
     final dateStr = DateFormat("dd MMM, yyyy").format(widget.blog.publishedAt).toLowerCase();
 
     return MouseRegion(
@@ -31,7 +35,7 @@ class _BlogCardState extends State<BlogCard> {
         transform: isHovered ? (Matrix4.identity()..translate(0, -10, 0)) : Matrix4.identity(),
         decoration: BoxDecoration(
           color: const Color(0xFF0D0D0D),
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(isMobile ? 20 : 28),
           border: Border.all(
             color: isHovered ? Colors.white.withOpacity(0.2) : Colors.white.withOpacity(0.08),
           ),
@@ -44,124 +48,135 @@ class _BlogCardState extends State<BlogCard> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(isMobile ? 20 : 28),
           child: InkWell(
             onTap: widget.onTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // --- IMAGE ---
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Hero(
-                    tag: 'blog_image_${widget.blog.id}',
-                    child: Image.network(
-                      widget.blog.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.white10,
-                        child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
+            child: LayoutBuilder( // 🛠️ LayoutBuilder prevents overflow by knowing constraints
+              builder: (context, constraints) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- IMAGE SECTION ---
+                    AspectRatio(
+                      aspectRatio: isMobile ? 16 / 10 : 16 / 9,
+                      child: Hero(
+                        tag: 'blog_image_${widget.blog.id}',
+                        child: Image.network(
+                          widget.blog.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: Colors.white10,
+                            child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
-                // --- CONTENT ---
-                Expanded( // KEY: Ensures content fits the GridView cell
-                  child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 16 : 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // --- CONTENT SECTION ---
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(isMobile ? 16 : 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _CategoryChip(text: widget.blog.category),
+                            // Category & Read Time
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _CategoryChip(text: widget.blog.category),
+                                Text(
+                                  "${widget.blog.readMinutes} min read",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.4), 
+                                    fontSize: isMobile ? 10 : 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            
+                            // Title
                             Text(
-                              "${widget.blog.readMinutes} min read",
-                              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          widget.blog.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: isMobile ? 17 : 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            height: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        
-                        // DESCRIPTION: Wrapped in Expanded to prevent overflow
-                        Expanded(
-                          child: Text(
-                            widget.blog.description,
-                            maxLines: isMobile ? 2 : 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              height: 1.5,
-                              color: Colors.white.withOpacity(0.4),
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // FOOTER
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.white12,
-                              child: Icon(Icons.person, size: 14, color: Colors.white54),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                widget.blog.authorName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
-                              ),
-                            ),
-                            Text(dateStr, style: TextStyle(color: Colors.white24, fontSize: 11)),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 16),
-
-                        // BUTTON
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: isHovered ? Colors.white : Colors.transparent,
-                            border: Border.all(color: isHovered ? Colors.white : Colors.white12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "Read More",
+                              widget.blog.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: isHovered ? Colors.black : Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: isMobile ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1.2,
                               ),
                             ),
-                          ),
+                            const SizedBox(height: 8),
+
+                            // Description - Uses flexible to avoid overflow
+                            Flexible(
+                              child: Text(
+                                widget.blog.description,
+                                maxLines: isMobile ? 2 : 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: isMobile ? 12 : 13,
+                                  height: 1.4,
+                                  color: Colors.white.withOpacity(0.4),
+                                ),
+                              ),
+                            ),
+                            
+                            // Spacer pushes footer to bottom
+                            const Spacer(),
+
+                            // Footer (Author & Date)
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: isMobile ? 10 : 12,
+                                  backgroundColor: const Color(0xFF8B5CF6).withOpacity(0.2),
+                                  child: Icon(Icons.person, size: isMobile ? 12 : 14, color: const Color(0xFF8B5CF6)),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    widget.blog.authorName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: Colors.white70, fontSize: isMobile ? 11 : 12),
+                                  ),
+                                ),
+                                Text(dateStr, style: TextStyle(color: Colors.white24, fontSize: isMobile ? 10 : 11)),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 12),
+
+                            // Read More Button
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(vertical: isMobile ? 8 : 12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: isHovered ? Colors.white : Colors.white.withOpacity(0.05),
+                                border: Border.all(color: isHovered ? Colors.white : Colors.white12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "Read More",
+                                  style: TextStyle(
+                                    color: isHovered ? Colors.black : Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: isMobile ? 12 : 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -176,11 +191,14 @@ class _CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFF8B5CF6), // Primary Brand Color
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.black),
+        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
       ),
     );
   }

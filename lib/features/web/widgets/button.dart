@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme_provider.dart';
@@ -10,21 +9,16 @@ enum AppButtonType { solid, outline, glass }
 class AppButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
-
   final AppButtonType type;
 
-  /// ✅ Existing solid color (fallback)
+  /// ✅ Main color (will pull from Theme if not provided)
   final Color color;
-
   final Color textColor;
-
   final EdgeInsets padding;
   final double borderRadius;
   final double borderWidth;
-
   final bool isLoading;
   final bool isDisabled;
-
   final bool enableGlow;
   final bool enableBlur;
 
@@ -32,18 +26,14 @@ class AppButton extends StatefulWidget {
     super.key,
     required this.text,
     required this.onPressed,
-
     this.type = AppButtonType.solid,
-    this.color = const Color(0xFF8E2DE2),
+    this.color = const Color(0xFF8E2DE2), // Fallback to Primary Purple
     this.textColor = Colors.white,
-
     this.padding = const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
     this.borderRadius = 30,
     this.borderWidth = 1.8,
-
     this.isLoading = false,
     this.isDisabled = false,
-
     this.enableGlow = false,
     this.enableBlur = false,
   });
@@ -60,18 +50,19 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
+    // 🔑 Theme Integration
     final tokens = AppThemeProvider.of(context);
     final buttonToken = tokens.colors['buttonPrimary'];
-    // 🔑 Theme-driven values
+    
     final Gradient? themeGradient = ThemeParser.parseGradientToken(buttonToken);
     final Color themeColor = ThemeParser.parseColorToken(buttonToken);
 
-    final Color effectiveColor =
-        widget.isDisabled
-            ? Colors.grey
-            : themeGradient == null
-            ? themeColor
-            : Colors.white; // fallback for glow/border
+    // ✅ LOGIC UPDATE: Use passed color if themeColor is transparent/null
+    final Color effectiveColor = widget.isDisabled
+        ? Colors.grey
+        : (themeColor == Colors.transparent || themeColor == const Color(0x00000000))
+            ? widget.color
+            : themeColor;
 
     Widget buttonChild = _buildContent(context);
 
@@ -95,12 +86,11 @@ class _AppButtonState extends State<AppButton> {
           duration: const Duration(milliseconds: 200),
           padding: widget.padding,
           decoration: BoxDecoration(
-            // ✅ GRADIENT AUTO-INTEGRATION
+            // ✅ Gradient handles Theme automatically
             gradient: widget.type == AppButtonType.solid ? themeGradient : null,
 
-            // ✅ SOLID FALLBACK (UNCHANGED BEHAVIOR)
-            color:
-                themeGradient == null ? _backgroundColor(effectiveColor) : null,
+            // ✅ Color uses our new effectiveColor logic
+            color: themeGradient == null ? _backgroundColor(effectiveColor) : null,
 
             borderRadius: BorderRadius.circular(widget.borderRadius),
             border: _border(effectiveColor),
@@ -125,22 +115,21 @@ class _AppButtonState extends State<AppButton> {
       widget.text,
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: widget.textColor,
-        fontWeight: FontWeight.w600,
-      ),
+            color: widget.textColor,
+            fontWeight: FontWeight.bold, // Made bolder for better visibility
+          ),
     );
   }
 
   Color _backgroundColor(Color color) {
     switch (widget.type) {
       case AppButtonType.solid:
-        return _isHovering ? color.withValues(alpha: .9) : color;
-
+        // Using withOpacity for backward compatibility if withValues isn't available
+        return _isHovering ? color.withOpacity(0.85) : color;
       case AppButtonType.outline:
         return Colors.transparent;
-
       case AppButtonType.glass:
-        return Colors.black.withValues(alpha: .25);
+        return Colors.black.withOpacity(0.25);
     }
   }
 
@@ -149,18 +138,18 @@ class _AppButtonState extends State<AppButton> {
       return Border.all(color: color, width: widget.borderWidth);
     }
     if (widget.type == AppButtonType.glass) {
-      return Border.all(color: Colors.white.withValues(alpha: .25), width: 1);
+      return Border.all(color: Colors.white.withOpacity(0.25), width: 1);
     }
     return null;
   }
 
   List<BoxShadow>? _boxShadow(Color color) {
-    if (!widget.enableGlow) return null;
+    if (!widget.enableGlow || widget.type == AppButtonType.outline) return null;
 
     return [
       BoxShadow(
-        color: color.withValues(alpha: .45),
-        blurRadius: _isHovering ? 24 : 16,
+        color: color.withOpacity(0.3),
+        blurRadius: _isHovering ? 20 : 12,
         spreadRadius: 1,
       ),
     ];
