@@ -1,8 +1,9 @@
 // import 'package:flutter/material.dart';
 //
 // import '../../utils/responsive.dart';
+// import '../../widgets/hero_shimmer.dart';
 //
-// enum HeroContentAlignment { left, center, right }
+// enum HeroContentAlignment { left, center, right, start }
 //
 // class HeroSection extends StatelessWidget {
 //   const HeroSection({
@@ -19,9 +20,13 @@
 //     this.imageFlex = 5,
 //     this.contentFlex = 5,
 //     this.gap = 40,
-//     // --- Gradient Configuration ---
+//
+//     // Gradient
 //     this.gradientText,
 //     this.showGradient = false,
+//
+//     // Loading
+//     this.isLoading = false,
 //   });
 //
 //   final String title;
@@ -37,15 +42,20 @@
 //   final int contentFlex;
 //   final double gap;
 //
-//   final String? gradientText; // Text to apply gradient to
-//   final bool showGradient; // Toggle gradient on/off
+//   final String? gradientText;
+//   final bool showGradient;
+//
+//   final bool isLoading;
 //
 //   @override
 //   Widget build(BuildContext context) {
+//     if (isLoading) {
+//       return HeroShimmer();
+//     }
+//
 //     final isMobile = Responsive.isMobile(context);
 //     final isTablet = Responsive.isTablet(context);
 //
-//     // 🔹 Responsive Sizing
 //     final double titleFontSize =
 //         isMobile
 //             ? 36
@@ -58,7 +68,7 @@
 //         contentAlignment == HeroContentAlignment.left
 //             ? CrossAxisAlignment.start
 //             : contentAlignment == HeroContentAlignment.right
-//             ? CrossAxisAlignment.end
+//             ? CrossAxisAlignment.start
 //             : CrossAxisAlignment.center;
 //
 //     final TextAlign textAlign =
@@ -68,34 +78,31 @@
 //             ? TextAlign.right
 //             : TextAlign.center;
 //
-//     // --- Helper: Title with Optional Gradient Line ---
 //     Widget buildTitle() {
 //       final baseStyle = TextStyle(
 //         fontSize: titleFontSize,
 //         height: 1.1,
 //         fontWeight: FontWeight.w900,
 //         color: Colors.white,
-//         fontFamily: 'Outfit',
 //       );
 //
 //       if (!showGradient || gradientText == null) {
-//         return Text(title, textAlign: textAlign, style: baseStyle);
+//         return Text(title, style: baseStyle);
 //       }
 //
 //       return Column(
-//         mainAxisSize: MainAxisSize.min,
 //         crossAxisAlignment: crossAxisAlignment,
 //         children: [
-//           Text(title, textAlign: textAlign, style: baseStyle),
-//           const SizedBox(height: 8), // Small gap between title parts
+//           Text(title, style: baseStyle),
+//           const SizedBox(height: 8),
 //           ShaderMask(
-//             shaderCallback:
-//                 (bounds) => const LinearGradient(
-//                   colors: [Color(0xFFE6D7FF), Color(0xFF8B5CF6)],
-//                 ).createShader(bounds),
+//             shaderCallback: (bounds) {
+//               return const LinearGradient(
+//                 colors: [Color(0xFFE6D7FF), Color(0xFF8B5CF6)],
+//               ).createShader(bounds);
+//             },
 //             child: Text(
 //               gradientText!,
-//               textAlign: textAlign,
 //               style: baseStyle.copyWith(color: Colors.white),
 //             ),
 //           ),
@@ -103,18 +110,17 @@
 //       );
 //     }
 //
-//     // --- Helper: Content Column ---
 //     Widget buildContent() {
 //       return Column(
-//         mainAxisSize: MainAxisSize.min,
 //         crossAxisAlignment: crossAxisAlignment,
 //         children: [
 //           if (showNavigationArrows) _buildNavigation(),
 //           if (featuredText != null) ...[
 //             Text(
 //               featuredText!.toUpperCase(),
+//               textAlign: TextAlign.left,
 //               style: TextStyle(
-//                 letterSpacing: 2.0,
+//                 letterSpacing: 2,
 //                 color: featuredColor,
 //                 fontWeight: FontWeight.bold,
 //                 fontSize: 14,
@@ -124,20 +130,18 @@
 //           ],
 //           buildTitle(),
 //           if (subtitle != null) ...[
-//             const SizedBox(height: 32), // 🔹 Space between title and subtitle
+//             const SizedBox(height: 32),
 //             Text(
 //               subtitle!,
-//               textAlign: textAlign,
 //               style: TextStyle(
 //                 color: Colors.white.withValues(alpha: .7),
 //                 fontSize: isMobile ? 16 : 20,
 //                 height: 1.6,
-//                 fontWeight: FontWeight.w400,
 //               ),
 //             ),
 //           ],
 //           if (customButtons != null && customButtons!.isNotEmpty) ...[
-//             const SizedBox(height: 48), // 🔹 Space between subtitle and buttons
+//             const SizedBox(height: 48),
 //             Wrap(
 //               spacing: 20,
 //               runSpacing: 20,
@@ -156,66 +160,49 @@
 //       ),
 //       child:
 //           isOverlayMode
-//               ? Stack(
-//                 alignment: Alignment.center,
-//                 children: [
-//                   if (imagePath != null)
-//                     Opacity(
-//                       opacity: 0.4,
-//                       child: _buildHeroImage(imageHeight, isMobile, true),
-//                     ),
-//                   // Constrain content width for better readability in overlay mode
-//                   SizedBox(
-//                     width: isMobile ? double.infinity : 800,
-//                     child: buildContent(),
-//                   ),
-//                 ],
-//               )
-//               : _buildStandardLayout(isMobile, buildContent(), imageHeight),
+//               ? _buildOverlayLayout(isMobile, imageHeight, buildContent())
+//               : _buildStandardLayout(isMobile, imageHeight, buildContent()),
 //     );
 //   }
 //
-//   // Helper for Image
-//   Widget _buildHeroImage(double height, bool isMobile, bool isOverlay) {
-//     return Container(
-//       height: height,
-//       width: isMobile ? double.infinity : (isOverlay ? double.infinity : null),
-//       decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
-//       clipBehavior: Clip.antiAlias,
-//       child:
-//           imagePath!.startsWith('http')
-//               ? Image.network(imagePath!, fit: BoxFit.cover)
-//               : Image.asset(imagePath!, fit: BoxFit.contain),
+//   /// 🔥 Overlay layout (RESTORED)
+//   Widget _buildOverlayLayout(
+//     bool isMobile,
+//     double imageHeight,
+//     Widget content,
+//   ) {
+//     return Stack(
+//       alignment: Alignment.center,
+//       children: [
+//         if (imagePath != null)
+//           Opacity(opacity: 0.4, child: _secureImage(imageHeight, cover: true)),
+//         SizedBox(width: isMobile ? double.infinity : 800, child: content),
+//       ],
 //     );
 //   }
 //
-//   // Helper for Row/Column Layout
+//   /// Standard layout
 //   Widget _buildStandardLayout(
 //     bool isMobile,
-//     Widget content,
 //     double imageHeight,
+//     Widget content,
 //   ) {
 //     if (isMobile) {
 //       return Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
 //         children: [
-//           if (imagePath != null) ...[
-//             _buildHeroImage(imageHeight, true, false),
-//             const SizedBox(height: 48),
-//           ],
+//           if (imagePath != null) _secureImage(imageHeight),
+//           const SizedBox(height: 48),
 //           content,
 //         ],
 //       );
 //     }
+//
 //     return Row(
 //       children: [
 //         Expanded(flex: contentFlex, child: content),
 //         SizedBox(width: gap),
 //         if (imagePath != null)
-//           Expanded(
-//             flex: imageFlex,
-//             child: _buildHeroImage(imageHeight, false, false),
-//           ),
+//           Expanded(flex: imageFlex, child: _secureImage(imageHeight)),
 //       ],
 //     );
 //   }
@@ -237,11 +224,38 @@
 //       ),
 //     );
 //   }
+//
+//   /// 🔐 Secure image loader
+//   Widget _secureImage(double height, {bool cover = false}) {
+//     final url =
+//         imagePath?.startsWith('http') == true ? imagePath! : imagePath ?? '';
+//
+//     return Container(
+//       height: height,
+//       decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
+//       clipBehavior: Clip.antiAlias,
+//       child: Image.network(
+//         url,
+//         fit: cover ? BoxFit.cover : BoxFit.contain,
+//         loadingBuilder: (context, child, progress) {
+//           if (progress == null) return child;
+//           return const Center(child: CircularProgressIndicator());
+//         },
+//         errorBuilder:
+//             (_, __, ___) => const Center(
+//               child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
+//             ),
+//       ),
+//     );
+//   }
 // }
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/widgets/hero_shimmer.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../utils/responsive.dart';
-import '../../widgets/hero_shimmer.dart';
 
 enum HeroContentAlignment { left, center, right, start }
 
@@ -260,12 +274,8 @@ class HeroSection extends StatelessWidget {
     this.imageFlex = 5,
     this.contentFlex = 5,
     this.gap = 40,
-
-    // Gradient
     this.gradientText,
     this.showGradient = false,
-
-    // Loading
     this.isLoading = false,
   });
 
@@ -281,28 +291,22 @@ class HeroSection extends StatelessWidget {
   final int imageFlex;
   final int contentFlex;
   final double gap;
-
   final String? gradientText;
   final bool showGradient;
-
   final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return HeroShimmer();
-    }
-
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
 
-    final double titleFontSize =
+    final titleFontSize =
         isMobile
-            ? 36
+            ? 36.0
             : isTablet
-            ? 48
-            : 64;
-    final double imageHeight = isMobile ? 320 : 500;
+            ? 48.0
+            : 64.0;
+    final imageHeight = isMobile ? 320.0 : 500.0;
 
     final CrossAxisAlignment crossAxisAlignment =
         contentAlignment == HeroContentAlignment.left
@@ -318,132 +322,141 @@ class HeroSection extends StatelessWidget {
     //         ? TextAlign.right
     //         : TextAlign.center;
 
-    Widget buildTitle() {
-      final baseStyle = TextStyle(
-        fontSize: titleFontSize,
-        height: 1.1,
-        fontWeight: FontWeight.w900,
-        color: Colors.white,
-        fontFamily: 'Outfit',
-      );
-
-      if (!showGradient || gradientText == null) {
-        return Text(title, style: baseStyle);
-      }
-
-      return Column(
-        crossAxisAlignment: crossAxisAlignment,
-        children: [
-          Text(title, style: baseStyle),
-          const SizedBox(height: 8),
-          ShaderMask(
-            shaderCallback: (bounds) {
-              return const LinearGradient(
-                colors: [Color(0xFFE6D7FF), Color(0xFF8B5CF6)],
-              ).createShader(bounds);
-            },
-            child: Text(
-              gradientText!,
-              style: baseStyle.copyWith(color: Colors.white),
-            ),
-          ),
-        ],
-      );
-    }
-
-    Widget buildContent() {
-      return Column(
-        crossAxisAlignment: crossAxisAlignment,
-        children: [
-          if (showNavigationArrows) _buildNavigation(),
-          if (featuredText != null) ...[
-            Text(
-              featuredText!.toUpperCase(),
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                letterSpacing: 2,
-                color: featuredColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          buildTitle(),
-          if (subtitle != null) ...[
-            const SizedBox(height: 32),
-            Text(
-              subtitle!,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: .7),
-                fontSize: isMobile ? 16 : 20,
-                height: 1.6,
-              ),
-            ),
-          ],
-          if (customButtons != null && customButtons!.isNotEmpty) ...[
-            const SizedBox(height: 48),
-            Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              alignment: WrapAlignment.center,
-              children: customButtons!,
-            ),
-          ],
-        ],
-      );
-    }
-
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 24 : 60,
         vertical: 60,
       ),
-      child:
-          isOverlayMode
-              ? _buildOverlayLayout(isMobile, imageHeight, buildContent())
-              : _buildStandardLayout(isMobile, imageHeight, buildContent()),
+      child: RepaintBoundary(
+        child:
+            isOverlayMode
+                ? _OverlayLayout(
+                  imagePath: imagePath,
+                  imageHeight: imageHeight,
+                  content: _HeroContent(
+                    title: title,
+                    subtitle: subtitle,
+                    titleFontSize: titleFontSize,
+                    featuredText: featuredText,
+                    featuredColor: featuredColor,
+                    customButtons: customButtons,
+                    showNavigationArrows: showNavigationArrows,
+                    crossAxisAlignment: crossAxisAlignment,
+                    showGradient: showGradient,
+                    gradientText: gradientText,
+                    isLoading: isLoading,
+                  ),
+                )
+                : _StandardLayout(
+                  imagePath: imagePath,
+                  imageHeight: imageHeight,
+                  contentFlex: contentFlex,
+                  imageFlex: imageFlex,
+                  gap: gap,
+                  isMobile: isMobile,
+                  content: _HeroContent(
+                    title: title,
+                    subtitle: subtitle,
+                    titleFontSize: titleFontSize,
+                    featuredText: featuredText,
+                    featuredColor: featuredColor,
+                    customButtons: customButtons,
+                    showNavigationArrows: showNavigationArrows,
+                    crossAxisAlignment: crossAxisAlignment,
+                    showGradient: showGradient,
+                    gradientText: gradientText,
+                    isLoading: isLoading,
+                  ),
+                ),
+      ),
     );
   }
+}
 
-  /// 🔥 Overlay layout (RESTORED)
-  Widget _buildOverlayLayout(
-    bool isMobile,
-    double imageHeight,
-    Widget content,
-  ) {
-    return Stack(
-      alignment: Alignment.center,
+class _HeroContent extends StatelessWidget {
+  const _HeroContent({
+    required this.title,
+    required this.titleFontSize,
+    required this.crossAxisAlignment,
+    required this.isLoading,
+    this.subtitle,
+    this.featuredText,
+    this.featuredColor,
+    this.customButtons,
+    this.showNavigationArrows = false,
+    this.showGradient = false,
+    this.gradientText,
+  });
+
+  final String title;
+  final double titleFontSize;
+  final CrossAxisAlignment crossAxisAlignment;
+  final bool isLoading;
+
+  final String? subtitle;
+  final String? featuredText;
+  final Color? featuredColor;
+  final List<Widget>? customButtons;
+  final bool showNavigationArrows;
+  final bool showGradient;
+  final String? gradientText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: crossAxisAlignment,
       children: [
-        if (imagePath != null)
-          Opacity(opacity: 0.4, child: _secureImage(imageHeight, cover: true)),
-        SizedBox(width: isMobile ? double.infinity : 800, child: content),
-      ],
-    );
-  }
+        if (showNavigationArrows) _buildNavigation(),
 
-  /// Standard layout
-  Widget _buildStandardLayout(
-    bool isMobile,
-    double imageHeight,
-    Widget content,
-  ) {
-    if (isMobile) {
-      return Column(
-        children: [
-          if (imagePath != null) _secureImage(imageHeight),
-          const SizedBox(height: 48),
-          content,
+        if (featuredText != null)
+          _ShimmerText(
+            isLoading: isLoading,
+            child: Text(
+              featuredText!.toUpperCase(),
+              style: TextStyle(
+                letterSpacing: 2,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: featuredColor,
+              ),
+            ),
+          ),
+
+        const SizedBox(height: 16),
+
+        _ShimmerText(
+          isLoading: isLoading,
+          child:
+              isLoading
+                  ? HeroShimmer()
+                  : _HeroTitle(
+                    title: title,
+                    fontSize: titleFontSize,
+                    alignment: crossAxisAlignment,
+                    showGradient: showGradient,
+                    gradientText: gradientText,
+                  ),
+        ),
+
+        if (subtitle != null) ...[
+          const SizedBox(height: 24),
+          _ShimmerText(
+            isLoading: isLoading,
+            child: Text(
+              subtitle!,
+              style: TextStyle(
+                fontSize: 18,
+                height: 1.6,
+                color: Colors.white.withValues(alpha: .7),
+              ),
+            ),
+          ),
         ],
-      );
-    }
 
-    return Row(
-      children: [
-        Expanded(flex: contentFlex, child: content),
-        SizedBox(width: gap),
-        if (imagePath != null)
-          Expanded(flex: imageFlex, child: _secureImage(imageHeight)),
+        if (customButtons != null) ...[
+          const SizedBox(height: 40),
+          Wrap(spacing: 20, runSpacing: 20, children: customButtons!),
+        ],
       ],
     );
   }
@@ -465,27 +478,229 @@ class HeroSection extends StatelessWidget {
       ),
     );
   }
+}
 
-  /// 🔐 Secure image loader
-  Widget _secureImage(double height, {bool cover = false}) {
-    final url =
-        imagePath?.startsWith('http') == true ? imagePath! : imagePath ?? '';
+class _HeroImage extends StatelessWidget {
+  const _HeroImage({
+    required this.imagePath,
+    required this.height,
+    this.cover = false,
+  });
 
-    return Container(
-      height: height,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        url,
-        fit: cover ? BoxFit.cover : BoxFit.contain,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return const Center(child: CircularProgressIndicator());
-        },
-        errorBuilder:
-            (_, __, ___) => const Center(
-              child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
+  final String imagePath;
+  final double height;
+  final bool cover;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: CachedNetworkImage(
+          imageUrl: imagePath,
+          height: height,
+          fit: cover ? BoxFit.cover : BoxFit.contain,
+          placeholder:
+              (_, __) => const Center(child: CircularProgressIndicator()),
+          errorWidget:
+              (_, __, ___) => const Icon(
+                Icons.broken_image,
+                color: Colors.white54,
+                size: 48,
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerText extends StatelessWidget {
+  final Widget child;
+  final bool isLoading;
+
+  const _ShimmerText({required this.child, required this.isLoading});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoading) return child;
+
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade800,
+      highlightColor: Colors.grey.shade600,
+      child: Container(color: Colors.white, child: child),
+    );
+  }
+}
+
+class _StandardLayout extends StatelessWidget {
+  const _StandardLayout({
+    required this.content,
+    required this.imagePath,
+    required this.imageHeight,
+    required this.isMobile,
+    required this.contentFlex,
+    required this.imageFlex,
+    required this.gap,
+  });
+
+  final Widget content;
+  final String? imagePath;
+  final double imageHeight;
+  final bool isMobile;
+  final int contentFlex;
+  final int imageFlex;
+  final double gap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isMobile) {
+      return Column(
+        children: [
+          if (imagePath != null)
+            _HeroImage(imagePath: imagePath!, height: imageHeight),
+          const SizedBox(height: 48),
+          content,
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(flex: contentFlex, child: content),
+        SizedBox(width: gap),
+        if (imagePath != null)
+          Expanded(
+            flex: imageFlex,
+            child: _HeroImage(imagePath: imagePath!, height: imageHeight),
+          ),
+      ],
+    );
+  }
+}
+
+class _OverlayLayout extends StatelessWidget {
+  const _OverlayLayout({
+    required this.imagePath,
+    required this.imageHeight,
+    required this.content,
+  });
+
+  final String? imagePath;
+  final double imageHeight;
+  final Widget content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (imagePath != null)
+          Opacity(
+            opacity: .4,
+            child: _HeroImage(
+              imagePath: imagePath!,
+              height: imageHeight,
+              cover: true,
             ),
+          ),
+        SizedBox(width: 800, child: content),
+      ],
+    );
+  }
+}
+
+class _HeroTitle extends StatelessWidget {
+  const _HeroTitle({
+    required this.title,
+    required this.fontSize,
+    required this.alignment,
+    this.showGradient = false,
+    this.gradientText,
+  });
+
+  final String title;
+  final double fontSize;
+  final CrossAxisAlignment alignment;
+  final bool showGradient;
+  final String? gradientText;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseStyle = TextStyle(
+      fontSize: fontSize,
+      height: 1.1,
+      fontWeight: FontWeight.w900,
+      color: Colors.white,
+    );
+
+    final textAlign =
+        alignment == CrossAxisAlignment.start
+            ? TextAlign.left
+            : TextAlign.center;
+
+    // 🔹 Simple title (no gradient)
+    if (!showGradient || gradientText == null) {
+      return Text(title, textAlign: textAlign, style: baseStyle);
+    }
+
+    // 🔹 Title + Gradient subtitle
+    return Column(
+      crossAxisAlignment: alignment,
+      children: [
+        Text(title, textAlign: textAlign, style: baseStyle),
+        const SizedBox(height: 8),
+        ShaderMask(
+          shaderCallback:
+              (bounds) => const LinearGradient(
+                colors: [Color(0xFFE6D7FF), Color(0xFF8B5CF6)],
+              ).createShader(bounds),
+          child: Text(
+            gradientText!,
+            textAlign: textAlign,
+            style: baseStyle.copyWith(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroSkeleton extends StatelessWidget {
+  const _HeroSkeleton({required this.titleFontSize});
+
+  final double titleFontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade800,
+      highlightColor: Colors.grey.shade600,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Featured line
+          Container(width: 140, height: 14, color: Colors.white),
+          const SizedBox(height: 16),
+
+          // Title line 1
+          Container(
+            width: 280,
+            height: titleFontSize * 0.7,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 12),
+
+          // Title line 2
+          Container(
+            width: 220,
+            height: titleFontSize * 0.6,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 24),
+
+          // Subtitle
+          Container(width: 360, height: 18, color: Colors.white),
+        ],
       ),
     );
   }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+
 import '../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
@@ -11,11 +12,7 @@ class BlogDetailScreen extends StatefulWidget {
   final BlogModel? blog;
   final String? id; // ADDED: ID parameter to handle web refreshes
 
-  const BlogDetailScreen({
-    super.key, 
-    this.blog, 
-    this.id,
-  });
+  const BlogDetailScreen({super.key, this.blog, this.id});
 
   @override
   State<BlogDetailScreen> createState() => _BlogDetailScreenState();
@@ -46,10 +43,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
   Future<void> _fetchBlogById() async {
     setState(() => _isLoading = true);
-    
+
     // Simulate API/Repository call
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     // REPLACE THIS: Call your actual repository here
     // Example: _currentBlog = await blogRepository.getById(widget.id);
     _currentBlog = BlogModel(
@@ -68,7 +65,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
   void _updateScrollProgress() {
     if (_scrollController.hasClients) {
-      double progress = (_scrollController.offset / _scrollController.position.maxScrollExtent).clamp(0.0, 1.0);
+      double progress = (_scrollController.offset /
+              _scrollController.position.maxScrollExtent)
+          .clamp(0.0, 1.0);
       if (progress != _scrollProgress) {
         setState(() => _scrollProgress = progress);
       }
@@ -87,7 +86,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF080808),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF8B5CF6))),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF8B5CF6)),
+        ),
       );
     }
 
@@ -98,8 +99,14 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Blog not found", style: TextStyle(color: Colors.white)),
-              TextButton(onPressed: () => context.go('/blog'), child: const Text("Go Back")),
+              const Text(
+                "Blog not found",
+                style: TextStyle(color: Colors.white),
+              ),
+              TextButton(
+                onPressed: () => context.go('/blog'),
+                child: const Text("Go Back"),
+              ),
             ],
           ),
         ),
@@ -109,8 +116,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     final bool isMobile = Responsive.isMobile(context);
     final bool isTablet = Responsive.isTablet(context);
     final double width = MediaQuery.of(context).size.width;
-    final double horizontalPadding = isMobile ? 20 : (isTablet ? 60 : width * 0.15);
-    final String date = DateFormat("MMMM dd, yyyy").format(_currentBlog!.publishedAt);
+    final double horizontalPadding = isMobile ? 20 : (isTablet ? 60 : 40);
+    final String date = DateFormat(
+      "MMMM dd, yyyy",
+    ).format(_currentBlog!.publishedAt);
 
     return Scaffold(
       backgroundColor: const Color(0xFF080808),
@@ -136,7 +145,13 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildPremiumTopBar(context, _currentBlog!, date, isMobile, isTablet),
+                      _buildPremiumTopBar(
+                        context,
+                        _currentBlog!,
+                        date,
+                        isMobile,
+                        isTablet,
+                      ),
                       SizedBox(height: isMobile ? 30 : 60),
                       _buildMainImage(_currentBlog!, isMobile),
                       SizedBox(height: isMobile ? 40 : 100),
@@ -156,7 +171,12 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                         ),
                       ),
                       SizedBox(height: isMobile ? 80 : 140),
-                      _buildSectionHeader(context, "READ MORE", "Trending for you", isMobile),
+                      _buildSectionHeader(
+                        context,
+                        "READ MORE",
+                        "Trending for you",
+                        isMobile,
+                      ),
                       const SizedBox(height: 50),
                       _buildFeaturedGrid(context, width, isMobile, isTablet),
                       SizedBox(height: isMobile ? 60 : 120),
@@ -182,7 +202,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
             color: const Color(0xFF8B5CF6).withOpacity(0.08),
             blurRadius: 100,
             spreadRadius: 20,
-          )
+          ),
         ],
       ),
       child: ClipRRect(
@@ -197,7 +217,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
             featuredColor: const Color(0xFF8B5CF6),
             showNavigationArrows: false,
             isOverlayMode: false,
-            contentAlignment: isMobile ? HeroContentAlignment.center : HeroContentAlignment.start,
+            contentAlignment:
+                isMobile
+                    ? HeroContentAlignment.center
+                    : HeroContentAlignment.start,
             customButtons: const [],
           ),
         ),
@@ -207,7 +230,9 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
   Widget _buildReadingProgressBar() {
     return Positioned(
-      top: 0, left: 0, right: 0,
+      top: 0,
+      left: 0,
+      right: 0,
       child: Container(
         height: 3,
         alignment: Alignment.centerLeft,
@@ -228,21 +253,44 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   // ... (Keep your _buildPremiumTopBar, _metaChip, _metaText, _premiumIconButton, etc. from your original code)
   // Just ensure they use 'blog' or '_currentBlog' correctly.
 
-  Widget _buildPremiumTopBar(BuildContext context, BlogModel blog, String date, bool isMobile, bool isTablet) {
+  Widget _buildPremiumTopBar(
+    BuildContext context,
+    BlogModel blog,
+    String date,
+    bool isMobile,
+    bool isTablet,
+  ) {
     return Column(
-      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: isMobile ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
+          mainAxisAlignment:
+              isMobile
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.spaceBetween,
           children: [
             InkWell(
-              onTap: () => context.canPop() ? context.pop() : context.go('/blog'),
+              onTap:
+                  () => context.canPop() ? context.pop() : context.go('/blog'),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 12),
+                  const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white70,
+                    size: 12,
+                  ),
                   const SizedBox(width: 8),
-                  Text("BACK TO BLOG", style: TextStyle(color: Colors.white.withOpacity(0.7), letterSpacing: 2, fontSize: 10, fontWeight: FontWeight.w900)),
+                  Text(
+                    "BACK TO BLOG",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      letterSpacing: 2,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -255,7 +303,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         Wrap(
           alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 15, runSpacing: 10,
+          spacing: 15,
+          runSpacing: 10,
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -263,10 +312,19 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 CircleAvatar(
                   radius: 14,
                   backgroundColor: const Color(0xFF8B5CF6),
-                  backgroundImage: NetworkImage("https://ui-avatars.com/api/?name=${blog.authorName}&background=8B5CF6&color=fff"),
+                  backgroundImage: NetworkImage(
+                    "https://ui-avatars.com/api/?name=${blog.authorName}&background=8B5CF6&color=fff",
+                  ),
                 ),
                 const SizedBox(width: 10),
-                Text(blog.authorName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                Text(
+                  blog.authorName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ),
             _verticalDivider(),
@@ -279,7 +337,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     );
   }
 
-  Widget _verticalDivider() => Container(height: 12, width: 1, color: Colors.white24);
+  Widget _verticalDivider() =>
+      Container(height: 12, width: 1, color: Colors.white24);
 
   Widget _metaChip(String text) {
     return Container(
@@ -289,36 +348,91 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         borderRadius: BorderRadius.circular(100),
         border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.3)),
       ),
-      child: Text(text, style: const TextStyle(color: Color(0xFFC4B5FD), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFFC4B5FD),
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.5,
+        ),
+      ),
     );
   }
 
-  Widget _metaText(String text) => Text(text, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5));
+  Widget _metaText(String text) => Text(
+    text,
+    style: TextStyle(
+      color: Colors.white.withOpacity(0.4),
+      fontSize: 11,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.5,
+    ),
+  );
 
   Widget _buildPremiumBlogContent(BlogModel blog, bool isMobile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(blog.description, style: TextStyle(color: Colors.white, fontSize: isMobile ? 20 : 26, height: 1.5, fontWeight: FontWeight.w400)),
+        Text(
+          blog.description,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: isMobile ? 20 : 26,
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
         const SizedBox(height: 40),
-        _paragraphText("In today's fast-paced digital landscape, staying ahead requires vision. Great design is not just what it looks like, it is how it works."),
+        _paragraphText(
+          "In today's fast-paced digital landscape, staying ahead requires vision. Great design is not just what it looks like, it is how it works.",
+        ),
         const SizedBox(height: 30),
-        _paragraphText("By implementing scalable architectures, we empower creators to build faster and more consistently than ever before."),
+        _paragraphText(
+          "By implementing scalable architectures, we empower creators to build faster and more consistently than ever before.",
+        ),
       ],
     );
   }
 
-  Widget _paragraphText(String text) => Text(text, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 18, height: 1.8));
+  Widget _paragraphText(String text) => Text(
+    text,
+    style: TextStyle(
+      color: Colors.white.withOpacity(0.6),
+      fontSize: 18,
+      height: 1.8,
+    ),
+  );
 
-  Widget _buildSectionHeader(BuildContext context, String tag, String title, bool isMobile) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String tag,
+    String title,
+    bool isMobile,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(tag, style: const TextStyle(color: Color(0xFF8B5CF6), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 3)),
-            Text(title, style: TextStyle(color: Colors.white, fontSize: isMobile ? 28 : 42, fontWeight: FontWeight.bold)),
+            Text(
+              tag,
+              style: const TextStyle(
+                color: Color(0xFF8B5CF6),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3,
+              ),
+            ),
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isMobile ? 28 : 42,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ],
@@ -343,15 +457,33 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 9)),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.3),
+                fontSize: 9,
+              ),
+            ),
           ],
-        )
+        ),
       ],
     );
   }
 
-  Widget _buildFeaturedGrid(BuildContext context, double width, bool isMobile, bool isTablet) {
+  Widget _buildFeaturedGrid(
+    BuildContext context,
+    double width,
+    bool isMobile,
+    bool isTablet,
+  ) {
     int count = width >= 1100 ? 3 : (width >= 750 ? 2 : 1);
     return GridView.builder(
       shrinkWrap: true,
@@ -374,7 +506,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           publishedAt: DateTime.now(),
           readMinutes: 5,
         );
-        return BlogCard(blog: blog, onTap: () => context.push('/blog/${blog.id}', extra: blog));
+        return BlogCard(
+          blog: blog,
+          onTap: () => context.push('/blog/${blog.id}', extra: blog),
+        );
       },
     );
   }

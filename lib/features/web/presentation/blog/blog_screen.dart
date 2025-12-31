@@ -4,7 +4,10 @@ import 'package:servicesplatform/features/web/presentation/common/footer_section
 import 'package:servicesplatform/features/web/presentation/home/contact_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+import 'package:servicesplatform/services/hero_repository.dart';
 
+import '../../../../core/hero/hero_mapper.dart';
+import '../../../../core/hero/hero_model.dart';
 import '../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
@@ -21,7 +24,7 @@ class _BlogScreenState extends State<BlogScreen> {
   int currentPage = 1;
   final int itemsPerPage = 9;
   final int totalPages = 10;
-
+  late HeroRepository _heroRepository;
   final List<String> categories = [
     "All",
     "Marketing",
@@ -46,7 +49,7 @@ class _BlogScreenState extends State<BlogScreen> {
 
   // RESOLUTION: Dynamic Aspect Ratio to prevent card overflows
   double _getResponsiveAspectRatio(double width, bool isMobile, bool isTablet) {
-    if (isMobile) return (width / 680); 
+    if (isMobile) return (width / 680);
     if (isTablet) return 0.75;
     return 0.85;
   }
@@ -59,22 +62,29 @@ class _BlogScreenState extends State<BlogScreen> {
     } else {
       // Always show first page
       pages.add(1);
-      
+
       int start = (currentPage - 1).clamp(2, totalPages - 2);
       int end = (currentPage + 1).clamp(3, totalPages - 1);
 
       if (start > 2) pages.add(-1); // -1 is the "..." ellipsis
-      
+
       for (int i = start; i <= end; i++) {
         if (!pages.contains(i)) pages.add(i);
       }
 
       if (end < totalPages - 1) pages.add(-2); // Second ellipsis
-      
+
       // Always show last page
       if (!pages.contains(totalPages)) pages.add(totalPages);
     }
     return pages;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _heroRepository = HeroRepository();
   }
 
   @override
@@ -114,25 +124,64 @@ class _BlogScreenState extends State<BlogScreen> {
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF8B5CF6).withOpacity(0.05),
+                                color: const Color(
+                                  0xFF8B5CF6,
+                                ).withValues(alpha: .05),
                                 blurRadius: 100,
                                 spreadRadius: 10,
                               ),
                             ],
                           ),
-                          child: HeroSection(
-                            title: "The Ultimate Guide to Digital Marketing Strategy",
-                            subtitle: "Digital Marketing Strategist helping businesses grow through data-driven marketing campaigns.",
-                            imagePath: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070',
-                            featuredText: "FEATURED",
-                            featuredColor: Colors.redAccent,
-                            showNavigationArrows: false,
-                            isOverlayMode: false,
-                            contentAlignment: HeroContentAlignment.left,
-                            customButtons: const [],
+                          child: SizedBox(
+                            child: FutureBuilder<List<HeroModel>>(
+                              future: _heroRepository.getHeroes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const SizedBox(
+                                    height: 600,
+                                    child: Center(
+                                      child: HeroSection(
+                                        title: "",
+                                        isLoading: true,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                // ❌ Error or empty
+                                if (snapshot.hasError ||
+                                    !snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                // ✅ Pick HOME hero
+                                final hero = snapshot.data!.firstWhere(
+                                  (h) => h.key == 'blog' && h.isActive,
+                                  orElse: () => snapshot.data!.first,
+                                );
+                                debugPrint(
+                                  "Debugging Asset Url : ${hero.assetUrl}",
+                                );
+                                return HeroSection(
+                                  title: hero.headingText,
+                                  subtitle: hero.subHeadingText,
+                                  imagePath: resolveAssetUrl(hero.assetUrl),
+                                  featuredText: hero.gradientText,
+                                  showGradient: false,
+                                  isOverlayMode: false,
+                                  contentAlignment:
+                                      hero.isContentLeft
+                                          ? HeroContentAlignment.left
+                                          : hero.isContentRight
+                                          ? HeroContentAlignment.right
+                                          : HeroContentAlignment.center,
+                                );
+                              },
+                            ),
                           ),
                         ),
-
                         const SizedBox(height: 100),
 
                         Row(
@@ -150,6 +199,7 @@ class _BlogScreenState extends State<BlogScreen> {
                             if (!isMobile) _buildCategoryFilters(),
                           ],
                         ),
+
                         if (isMobile) ...[
                           const SizedBox(height: 20),
                           _buildCategoryFilters(),
@@ -163,19 +213,27 @@ class _BlogScreenState extends State<BlogScreen> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: itemsPerPage,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: _getCrossAxisCount(width),
-                            crossAxisSpacing: 35, 
-                            mainAxisSpacing: 50,
-                            childAspectRatio: _getResponsiveAspectRatio(width, isMobile, isTablet),
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: _getCrossAxisCount(width),
+                                crossAxisSpacing: 35,
+                                mainAxisSpacing: 50,
+                                childAspectRatio: _getResponsiveAspectRatio(
+                                  width,
+                                  isMobile,
+                                  isTablet,
+                                ),
+                              ),
                           itemBuilder: (_, index) {
-                            int blogId = ((currentPage - 1) * itemsPerPage) + index + 1;
+                            int blogId =
+                                ((currentPage - 1) * itemsPerPage) + index + 1;
                             final currentBlog = BlogModel(
                               id: "$blogId",
                               title: "How to Scale your Business $blogId",
-                              description: "Explore our most popular designs crafted with precision and creativity.",
-                              imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+                              description:
+                                  "Explore our most popular designs crafted with precision and creativity.",
+                              imageUrl:
+                                  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
                               category: "Marketing",
                               authorName: "John Doe",
                               publishedAt: DateTime(2025, 12, 24),
@@ -184,15 +242,22 @@ class _BlogScreenState extends State<BlogScreen> {
 
                             return BlogCard(
                               blog: currentBlog,
-                              onTap: () => context.go('/blog/$blogId', extra: currentBlog),
+                              onTap:
+                                  () => context.go(
+                                    '/blog/$blogId',
+                                    extra: currentBlog,
+                                  ),
                             );
                           },
                         ),
-                        
+
                         const SizedBox(height: 80),
                         _buildPaginationControls(), // Updated functional widget
                         const SizedBox(height: 60),
-                        Divider(color: Colors.white.withOpacity(0.08), thickness: 1),
+                        Divider(
+                          color: Colors.white.withOpacity(0.08),
+                          thickness: 1,
+                        ),
                         const SizedBox(height: 80),
 
                         HeroSection(
@@ -209,7 +274,10 @@ class _BlogScreenState extends State<BlogScreen> {
                         const SizedBox(height: 50),
                         _buildTrendingSection(width, isMobile, isTablet),
                         const SizedBox(height: 60),
-                        Divider(color: Colors.white.withOpacity(0.08), thickness: 1),
+                        Divider(
+                          color: Colors.white.withOpacity(0.08),
+                          thickness: 1,
+                        ),
                         const SizedBox(height: 40),
                         const ContactSection(),
                         const FooterSection(),
@@ -236,7 +304,11 @@ class _BlogScreenState extends State<BlogScreen> {
             crossAxisCount: _getCrossAxisCount(width),
             crossAxisSpacing: 35,
             mainAxisSpacing: 50,
-            childAspectRatio: _getResponsiveAspectRatio(width, isMobile, isTablet),
+            childAspectRatio: _getResponsiveAspectRatio(
+              width,
+              isMobile,
+              isTablet,
+            ),
           ),
           itemBuilder: (_, index) {
             final trendingId = "trending_$index";
@@ -244,7 +316,8 @@ class _BlogScreenState extends State<BlogScreen> {
               id: trendingId,
               title: "Trending Article Title ${index + 1}",
               description: "Explore our most popular designs.",
-              imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
+              imageUrl:
+                  "https://images.unsplash.com/photo-1552664730-d307ca884978",
               category: "ED-Tech",
               authorName: "Name",
               publishedAt: DateTime(2025, 12, 24),
@@ -276,7 +349,8 @@ class _BlogScreenState extends State<BlogScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Wrap( // Wrap prevents the Right Overflow error
+      child: Wrap(
+        // Wrap prevents the Right Overflow error
         alignment: WrapAlignment.center,
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 10, // Horizontal space between numbers
@@ -287,10 +361,13 @@ class _BlogScreenState extends State<BlogScreen> {
             currentPage > 1,
             () => _changePage(currentPage - 1),
           ),
-          
+
           ...visiblePages.map((num) {
             if (num < 0) {
-              return const Text("...", style: TextStyle(color: Colors.white24, fontSize: 18));
+              return const Text(
+                "...",
+                style: TextStyle(color: Colors.white24, fontSize: 18),
+              );
             }
             return _pageNumber(num);
           }),
@@ -313,9 +390,12 @@ class _BlogScreenState extends State<BlogScreen> {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.03),
+          color:
+              active ? const Color(0xFF8B5CF6) : Colors.white.withOpacity(0.03),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: active ? Colors.white24 : Colors.transparent),
+          border: Border.all(
+            color: active ? Colors.white24 : Colors.transparent,
+          ),
         ),
         child: Text(
           "$num",
@@ -352,36 +432,47 @@ class _BlogScreenState extends State<BlogScreen> {
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        children: categories.map((cat) {
-          bool isSelected = selectedCategory == cat;
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategory = cat;
-                currentPage = 1;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.08) : Colors.transparent,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF8B5CF6).withOpacity(0.5) : Colors.white10,
+        children:
+            categories.map((cat) {
+              bool isSelected = selectedCategory == cat;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategory = cat;
+                    currentPage = 1;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? Colors.white.withOpacity(0.08)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color:
+                          isSelected
+                              ? const Color(0xFF8B5CF6).withOpacity(0.5)
+                              : Colors.white10,
+                    ),
+                  ),
+                  child: Text(
+                    cat,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white38,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                cat,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white38,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
