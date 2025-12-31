@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
-import 'animated_border.dart';
+import 'animated_border.dart'; // Ensure your AnimatedBorder file is in the same directory
 
 class TopNavBar extends StatefulWidget {
   final int activeIndex;
@@ -30,238 +30,221 @@ class TopNavBar extends StatefulWidget {
 class _TopNavBarState extends State<TopNavBar> {
   int? _hoveredIndex;
   bool _isMenuOpen = false;
+  OverlayEntry? _overlayEntry;
 
-  Widget _navItem({
-    required BuildContext context,
-    required String title,
-    required VoidCallback onTap,
-    required int index,
-  }) {
-    final bool isActive = widget.activeIndex == index;
-    final bool isHovered = _hoveredIndex == index;
+  List<Map<String, dynamic>> get navLinks => [
+        {'title': "Home", 'index': 0, 'onTap': widget.onHome},
+        {'title': "Designs", 'index': 1, 'onTap': widget.onDesigns},
+        {'title': "About", 'index': 2, 'onTap': widget.onAbout},
+        {'title': "Reviews", 'index': 3, 'onTap': widget.onTestimonials},
+        {'title': "Blog", 'index': 4, 'onTap': widget.onBlog},
+        {'title': "Contact", 'index': 5, 'onTap': widget.onContact},
+      ];
 
-    Widget content = AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive 
-            ? Colors.white.withValues(alpha: 0.08)
-            : (isHovered ? Colors.white.withValues(alpha: 0.12) : Colors.transparent),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isActive || isHovered ? Colors.white : Colors.white70,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              letterSpacing: 0.3,
-            ),
-      ),
-    );
-
-    if (isActive) {
-      content = AnimatedBorder(radius: 12, strokeWidth: 1.2, child: content);
+  void _toggleMenu() {
+    if (_isMenuOpen) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    } else {
+      _overlayEntry = _createOverlayEntry();
+      Overlay.of(context).insert(_overlayEntry!);
     }
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+    });
+  }
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hoveredIndex = index),
-      onExit: (_) => setState(() => _hoveredIndex = null),
-      child: GestureDetector(
-        onTap: () {
-          onTap();
-          if (_isMenuOpen) setState(() => _isMenuOpen = false);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: content,
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _overlayEntry?.remove();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isMobile = Responsive.isMobile(context);
-    final bool isTablet = Responsive.isTablet(context);
+    final bool isSmallScreen = Responsive.isMobile(context) || Responsive.isTablet(context);
     final theme = Theme.of(context);
 
-    return Stack(
-      children: [
-        // --- Main Top Bar ---
-        Positioned(
-          top: 0, left: 0, right: 0,
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                height: 72,
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 40),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.4),
-                  border: Border(
-                    bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-                  ),
-                ),
-                child: Row(
-                  // Center the logo on mobile/tablet, space-between on desktop
-                  mainAxisAlignment: isMobile || isTablet 
-                      ? MainAxisAlignment.center 
-                      : MainAxisAlignment.spaceBetween,
-                  children: [
-                    // --- Gradient Text Logo Pulling from AppTheme ---
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                          theme.colorScheme.tertiary,
-                        ],
-                      ).createShader(bounds),
-                      child: Text(
-                        "Devnex Services",
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                          color: Colors.white, // Mask base
-                        ),
-                      ),
-                    ),
-
-                    if (!isMobile && !isTablet) _buildDesktopMenu(context),
-                  ],
-                ),
-              ),
-            ),
+    return ClipRect(
+      child: BackdropFilter(
+        // Optimized blur for performance
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          height: 80,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.4),
+            border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
           ),
-        ),
-
-        // --- Futuristic Menu Toggle (Positioned Right) ---
-        if (isMobile || isTablet)
-          Positioned(
-            top: 14,
-            right: 20,
-            child: _buildFuturisticToggle(theme),
-          ),
-
-        // --- Mobile Glass Menu ---
-        if (_isMenuOpen) _buildPremiumMobileMenu(context),
-      ],
-    );
-  }
-
-  Widget _buildFuturisticToggle(ThemeData theme) {
-    return GestureDetector(
-      onTap: () => setState(() => _isMenuOpen = !_isMenuOpen),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Outer Halo Ring
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: 44,
-              width: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _isMenuOpen 
-                    ? theme.colorScheme.primary.withValues(alpha: 0.1) 
-                    : Colors.transparent,
-                border: Border.all(
-                  color: _isMenuOpen 
-                      ? theme.colorScheme.primary 
-                      : Colors.white.withValues(alpha: 0.2),
-                  width: 1.2,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: isSmallScreen ? Alignment.center : Alignment.centerLeft,
+                child: _buildLogo(theme),
+              ),
+              if (!isSmallScreen)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: navLinks.map((link) => _buildNavItem(context, link, false)).toList(),
                 ),
-                boxShadow: _isMenuOpen ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                  )
-                ] : [],
-              ),
-            ),
-            // Tech-style Icon (Widgets to Cross)
-            AnimatedRotation(
-              duration: const Duration(milliseconds: 500),
-              turns: _isMenuOpen ? 0.25 : 0,
-              curve: Curves.elasticOut,
-              child: Icon(
-                _isMenuOpen ? Icons.add_rounded : Icons.widgets_outlined,
-                color: _isMenuOpen ? theme.colorScheme.primary : Colors.white,
-                size: 24,
-              ),
-            ),
-          ],
+              if (isSmallScreen)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _buildAdaptiveToggle(theme),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDesktopMenu(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _navItem(context: context, title: "Home", index: 0, onTap: widget.onHome),
-        _navItem(context: context, title: "Designs", index: 1, onTap: widget.onDesigns),
-        _navItem(context: context, title: "About Us", index: 2, onTap: widget.onAbout),
-        _navItem(context: context, title: "Testimonials", index: 3, onTap: widget.onTestimonials),
-        _navItem(context: context, title: "Blog", index: 4, onTap: widget.onBlog),
-        _navItem(context: context, title: "Contact Us", index: 5, onTap: widget.onContact),
-      ],
-    );
-  }
-
-  Widget _buildPremiumMobileMenu(BuildContext context) {
-    return Positioned(
-      bottom: 24,
-      left: 15,
-      right: 15,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.elasticOut,
-        builder: (context, value, child) {
-          return Transform.translate(
-            offset: Offset(0, 40 * (1 - value)),
-            child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
-          );
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: Container(
-              height: 60,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  width: 1,
-                ),
-              ),
-              child: Center(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _navItem(context: context, title: "Home", index: 0, onTap: widget.onHome),
-                      _navItem(context: context, title: "Designs", index: 1, onTap: widget.onDesigns),
-                      _navItem(context: context, title: "About", index: 2, onTap: widget.onAbout),
-                      _navItem(context: context, title: "Reviews", index: 3, onTap: widget.onTestimonials),
-                      _navItem(context: context, title: "Blog", index: 4, onTap: widget.onBlog),
-                      _navItem(context: context, title: "Contact", index: 5, onTap: widget.onContact),
+  OverlayEntry _createOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 40,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) => Transform.scale(
+              scale: 0.95 + (0.05 * value),
+              child: Opacity(opacity: value, child: child),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                // Lower sigma for mobile overlay to prevent lag
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  height: 75,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      )
                     ],
+                  ),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: navLinks.map((link) => _buildNavItem(context, link, true)).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogo(ThemeData theme) {
+    return ShaderMask(
+      shaderCallback: (bounds) => LinearGradient(
+        colors: [theme.colorScheme.primary, theme.colorScheme.secondary, theme.colorScheme.tertiary],
+      ).createShader(bounds),
+      child: Text(
+        "Devnex Services",
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.5,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, Map<String, dynamic> item, bool isMobile) {
+    final int index = item['index'];
+    final bool isActive = widget.activeIndex == index;
+    final bool isHovered = _hoveredIndex == index;
+
+    // The base UI of the button
+    Widget navContent = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 18 : 22, 
+        vertical: isMobile ? 12 : 10
+      ),
+      decoration: BoxDecoration(
+        color: isActive 
+            ? Colors.white.withOpacity(0.05) 
+            : (isHovered ? Colors.white.withOpacity(0.1) : Colors.transparent),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        item['title'],
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: isActive || isHovered ? Colors.white : Colors.white70,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+              fontSize: isMobile ? 14 : 15,
+            ),
+      ),
+    );
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredIndex = index),
+      onExit: (_) => setState(() => _hoveredIndex = null),
+      child: GestureDetector(
+        onTap: () {
+          item['onTap']();
+          if (_isMenuOpen) _toggleMenu();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          // ISOLATION: RepaintBoundary prevents the animation from lagging the whole screen
+          child: isActive 
+              ? RepaintBoundary(
+                  child: AnimatedBorder(
+                    radius: 12,
+                    strokeWidth: 2.0, // Thinner for Navbar
+                    child: navContent,
+                  ),
+                )
+              : navContent,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdaptiveToggle(ThemeData theme) {
+    return GestureDetector(
+      onTap: _toggleMenu,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: _isMenuOpen ? theme.colorScheme.primary.withOpacity(0.1) : Colors.white.withOpacity(0.05),
+          border: Border.all(color: _isMenuOpen ? theme.colorScheme.primary : Colors.white.withOpacity(0.1)),
+        ),
+        child: AnimatedRotation(
+          duration: const Duration(milliseconds: 400),
+          turns: _isMenuOpen ? 0.25 : 0,
+          curve: Curves.easeOutBack,
+          child: Icon(
+            _isMenuOpen ? Icons.add_rounded : Icons.widgets_outlined,
+            color: _isMenuOpen ? theme.colorScheme.primary : Colors.white,
+            size: 24,
           ),
         ),
       ),

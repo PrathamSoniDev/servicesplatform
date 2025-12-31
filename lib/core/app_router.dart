@@ -1,3 +1,4 @@
+
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/models/blog_model.dart';
 import 'package:servicesplatform/features/web/presentation/about_us/about_screen.dart';
@@ -15,23 +16,28 @@ class AppRouter {
 
   final GoRouter router = GoRouter(
     initialLocation: root,
-
+    debugLogDiagnostics: true, // Helps you see routing errors in the console
     routes: [
       GoRoute(path: root, redirect: (_, __) => home),
-
       GoRoute(path: home, builder: (context, state) => const HomeScreen()),
-
       GoRoute(path: aboutUs, builder: (context, state) => const AboutScreen()),
-
+      
+      // BLOG PARENT ROUTE
       GoRoute(
         path: blog,
         builder: (context, state) => const BlogScreen(),
         routes: [
+          // BLOG DETAIL CHILD ROUTE
           GoRoute(
-            path: ':id',
+            path: ':id', // This results in /blog/123
             builder: (context, state) {
-              final blog = state.extra as BlogModel?;
-              return BlogDetailScreen(blog: blog);
+              final id = state.pathParameters['id'];
+              final blogModel = state.extra as BlogModel?;
+              
+              return BlogDetailScreen(
+                id: id, 
+                blog: blogModel,
+              );
             },
           ),
         ],

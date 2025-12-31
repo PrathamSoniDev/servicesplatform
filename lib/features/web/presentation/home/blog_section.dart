@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/blog_model.dart';
 import '../../widgets/blog_card.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/button.dart'; 
+import '../../widgets/button.dart';
 
 class BlogSection extends StatelessWidget {
   const BlogSection({super.key});
@@ -22,31 +22,31 @@ class BlogSection extends StatelessWidget {
     final blogs = [
       BlogModel(
         id: "1",
-        title: "Blog post title",
-        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        title: "The Future of AI",
+        description: "Explore our most popular designs crafted with precision and creativity.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "ED-Tech",
-        authorName: "Name",
+        authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
         readMinutes: 3,
       ),
       BlogModel(
         id: "2",
-        title: "Blog post title",
-        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        title: "UI/UX Trends",
+        description: "Explore our most popular designs crafted with precision and creativity.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
-        category: "ED-Tech",
-        authorName: "Name",
+        category: "Design",
+        authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
         readMinutes: 3,
       ),
       BlogModel(
         id: "3",
-        title: "Blog post title",
-        description: "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
+        title: "Flutter Mastery",
+        description: "Explore our most popular designs crafted with precision and creativity.",
         imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
-        category: "ED-Tech",
-        authorName: "Name",
+        category: "Development",
+        authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
         readMinutes: 3,
       ),
@@ -73,12 +73,13 @@ class BlogSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           CustomText(
-            text: "Stay updated with the latest trends and insights in the digital world.",
+            text: "Stay updated with the latest trends and insights.",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: Colors.grey.shade400),
           ),
           const SizedBox(height: 60),
 
+          // Using GridView.builder with shrinkWrap
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -89,42 +90,34 @@ class BlogSection extends StatelessWidget {
               mainAxisSpacing: 28,
               childAspectRatio: 0.78,
             ),
-            itemBuilder: (_, index) {
-              final currentBlog = blogs[index]; // Reference the specific blog
-              return RepaintBoundary(
-                child: BlogCard(
-                  blog: currentBlog,
-                  onTap: () {
-                    // IMPLEMENTED: Navigate to detail screen using the blog ID
-                    // and pass the blog object so the detail screen has the data immediately
-                    context.go('/blog/${currentBlog.id}', extra: currentBlog);
-                  },
-                ),
+            itemBuilder: (context, index) {
+              final currentBlog = blogs[index];
+              return BlogCard(
+                blog: currentBlog,
+                onTap: () => context.go('/blog/${currentBlog.id}', extra: currentBlog),
               );
             },
           ),
 
           const SizedBox(height: 60),
-     AppButton(
-  text: "Explore More",
-  onPressed: () {
-    context.push('/blog'); 
-  },
-  // Use 'solid' to get the background fill color
-  type: AppButtonType.solid, 
-  
-  // Dynamically pulls 0xFF8E2DE2 from your AppTheme
-  color: Theme.of(context).colorScheme.primary, 
-  
-  // Set text to white for high contrast
-  textColor: Colors.white,
-  
-  // Match the padding from your design
-  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-  
-  // Optional: adds the glow effect seen in your earlier theme logic
-  enableGlow: true, 
-),
+
+          // --- THE BUTTON ---
+          AppButton(
+            text: "Explore More",
+            onPressed: () {
+              // DEBUG: Check your console. If this doesn't print, 
+              // the button is being covered by another widget.
+              debugPrint("Explore More clicked!"); 
+              
+              // Try using .go instead of .push if /blog is a top-level route
+              context.go('/blog'); 
+            },
+            type: AppButtonType.solid,
+            color: Theme.of(context).colorScheme.primary,
+            textColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+            enableGlow: true,
+          ),
         ],
       ),
     );
