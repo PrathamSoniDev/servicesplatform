@@ -252,7 +252,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/features/web/widgets/hero_shimmer.dart';
+import 'package:servicesplatform/features/web/presentation/home/custom_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../utils/responsive.dart';
@@ -428,7 +428,10 @@ class _HeroContent extends StatelessWidget {
           isLoading: isLoading,
           child:
               isLoading
-                  ? HeroShimmer()
+                  ? AdaptiveShimmer(
+                    layout: ShimmerLayout.hero,
+                    showAvatar: true,
+                  )
                   : _HeroTitle(
                     title: title,
                     fontSize: titleFontSize,
@@ -661,47 +664,6 @@ class _HeroTitle extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HeroSkeleton extends StatelessWidget {
-  const _HeroSkeleton({required this.titleFontSize});
-
-  final double titleFontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade800,
-      highlightColor: Colors.grey.shade600,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Featured line
-          Container(width: 140, height: 14, color: Colors.white),
-          const SizedBox(height: 16),
-
-          // Title line 1
-          Container(
-            width: 280,
-            height: titleFontSize * 0.7,
-            color: Colors.white,
-          ),
-          const SizedBox(height: 12),
-
-          // Title line 2
-          Container(
-            width: 220,
-            height: titleFontSize * 0.6,
-            color: Colors.white,
-          ),
-          const SizedBox(height: 24),
-
-          // Subtitle
-          Container(width: 360, height: 18, color: Colors.white),
-        ],
-      ),
     );
   }
 }
