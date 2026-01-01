@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/core/app_router.dart';
 
 import '../../models/design_item_models.dart';
 import '../../widgets/button.dart';
@@ -111,9 +113,9 @@ class _DesignsSectionState extends State<DesignsSection> {
           AppButton(
             text: "Explore more Designs",
             enableGlow: true,
-            // color: const Color(0xFF8E2DE2), // Purple theme from your image
             onPressed: () {
-              // Action for button click
+              // Navigate to the design screen
+              context.go(AppRouter.designs);
             },
           ),
         ],
