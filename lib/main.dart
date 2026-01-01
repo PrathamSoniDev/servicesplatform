@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/core/theme/app_theme_builder.dart';
 import 'package:servicesplatform/core/theme/app_theme_provider.dart';
-import 'package:servicesplatform/features/web/widgets/hero_shimmer.dart';
 import 'package:servicesplatform/services/theme_repository.dart';
 
 void main() {
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               home: Scaffold(
                 backgroundColor: Colors.black,
-                body: Center(child: HeroShimmer()),
+                body: Center(child: CircularProgressIndicator()),
               ),
             ),
           );
