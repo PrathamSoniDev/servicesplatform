@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/design_card.dart';
-
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+
+import '../../../../core/app_router.dart';
 
 class DesignScreen extends StatelessWidget {
   const DesignScreen({super.key});
@@ -21,7 +22,7 @@ class DesignScreen extends StatelessWidget {
         preferredSize: Size(double.infinity, isMobile ? 60 : 80),
         child: TopNavBar(
           activeIndex: 1, // Set to match Designs position
-          onHome: () => context.go('/home'),
+          onHome: () => context.go(AppRouter.home),
           onDesigns: () => context.go('/designs'),
           onAbout: () => context.go('/about'),
           onTestimonials: () {},
@@ -172,4 +173,3 @@ class DesignScreen extends StatelessWidget {
     );
   }
 }
-

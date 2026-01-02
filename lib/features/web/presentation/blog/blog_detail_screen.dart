@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 
@@ -131,12 +132,12 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
               children: [
                 TopNavBar(
                   activeIndex: 4,
-                  onHome: () => context.go('/home'),
-                  onBlog: () => context.go('/blog'),
-                  onDesigns: () {},
-                  onAbout: () {},
+                  onHome: () => context.go(AppRouter.home),
+                  onBlog: () => context.pushNamed(AppRouter.blog),
+                  onDesigns: () => context.pushNamed(AppRouter.designs),
+                  onAbout: () => context.pushNamed(AppRouter.aboutUs),
                   onTestimonials: () {},
-                  onContact: () {},
+                  onContact: () => context.pushNamed(AppRouter.contact),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(

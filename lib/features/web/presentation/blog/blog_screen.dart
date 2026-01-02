@@ -6,6 +6,7 @@ import 'package:servicesplatform/features/web/presentation/home/hero_section.dar
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 import 'package:servicesplatform/services/hero_repository.dart';
 
+import '../../../../core/app_router.dart';
 import '../../../../core/hero/hero_mapper.dart';
 import '../../../../core/hero/hero_model.dart';
 import '../../models/blog_model.dart';
@@ -103,7 +104,7 @@ class _BlogScreenState extends State<BlogScreen> {
                 children: [
                   TopNavBar(
                     activeIndex: 4,
-                    onHome: () => context.go('/home'),
+                    onHome: () => context.go(AppRouter.home),
                     onDesigns: () {},
                     onAbout: () {},
                     onTestimonials: () {},
