@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/app_router.dart';
+import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 
 import '../../models/design_item_models.dart';
 import '../../widgets/button.dart';
@@ -15,6 +16,36 @@ class DesignsSection extends StatefulWidget {
 
 class _DesignsSectionState extends State<DesignsSection> {
   int? _hoveredIndex;
+
+  /// Logic to trigger the high-end Detail Overlay
+  void _showDesignDetail(BuildContext context, DesignItem item) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Design Detail',
+      barrierColor: Colors.black.withOpacity(0.85), // Premium dimming
+      transitionDuration: const Duration(milliseconds: 500),
+      pageBuilder: (context, anim1, anim2) {
+        // Note: You can pass the 'item' to the overlay if it accepts it
+        return const DesignDetailOverlay();
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.08), // Subtle slide up effect
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: anim1,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +63,6 @@ class _DesignsSectionState extends State<DesignsSection> {
         ),
       ),
       child: Column(
-        // Centers the header and the button at the bottom
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // 1. CENTERED HEADER
@@ -40,15 +70,13 @@ class _DesignsSectionState extends State<DesignsSection> {
 
           const SizedBox(height: 80),
 
-          // 2. 3x3 GRID (Total 9 Items)
+          // 2. GRID
           Padding(
             padding: EdgeInsets.symmetric(horizontal: sidePadding),
             child: GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount:
-                  designsData
-                      .length, // Ensure your designsData list has 9 items
+              itemCount: designsData.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: isDesktop ? 3 : 1,
                 mainAxisSpacing: 40,
@@ -57,6 +85,7 @@ class _DesignsSectionState extends State<DesignsSection> {
               ),
               itemBuilder: (context, index) {
                 final bool isHovered = _hoveredIndex == index;
+                final item = designsData[index];
 
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
@@ -66,7 +95,7 @@ class _DesignsSectionState extends State<DesignsSection> {
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      // AMBIENT GLOW (Matches Button Color)
+                      // AMBIENT GLOW EFFECT
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 500),
                         opacity: isHovered ? 0.4 : 0,
@@ -77,9 +106,7 @@ class _DesignsSectionState extends State<DesignsSection> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(
-                                  0xFF8E2DE2,
-                                ).withValues(alpha: .3),
+                                color: const Color(0xFF8E2DE2).withOpacity(0.3),
                                 blurRadius: 100,
                                 spreadRadius: 20,
                               ),
@@ -95,8 +122,9 @@ class _DesignsSectionState extends State<DesignsSection> {
                         curve: Curves.easeOutCubic,
                         child: RepaintBoundary(
                           child: LuxuryCard(
-                            item: designsData[index],
-                            hovered: isHovered,
+                            item: item,
+                            // Pass the tap function to open overlay
+                            onTap: () => _showDesignDetail(context, item),
                           ),
                         ),
                       ),
@@ -109,12 +137,11 @@ class _DesignsSectionState extends State<DesignsSection> {
 
           const SizedBox(height: 80),
 
-          // 3. CENTERED REUSABLE BUTTON
+          // 3. CENTERED BUTTON
           AppButton(
             text: "Explore more Designs",
             enableGlow: true,
             onPressed: () {
-              // Navigate to the design screen
               context.go(AppRouter.designs);
             },
           ),
@@ -146,7 +173,7 @@ class _Header extends StatelessWidget {
             "Explore our most popular designs crafted with precision and creativity to meet diverse business needs.",
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: .6),
+              color: Colors.white.withOpacity(0.6),
               fontSize: 16,
               height: 1.5,
             ),
