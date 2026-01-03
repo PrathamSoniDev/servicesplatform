@@ -13,11 +13,11 @@ class ThemeRepository {
     if (cached != null) {
       debugPrint("🎨 Theme from SQLite cache");
       return ThemeResponse.fromJson(cached);
+    } else {
+      final res = await DioClient.dio.get('/api/theme/?mode=dark');
+      await SQLiteCache.save('theme_data', res.data);
+
+      return ThemeResponse.fromJson(res.data);
     }
-
-    final res = await DioClient.dio.get('/api/theme/?mode=dark');
-    await SQLiteCache.save('theme_data', res.data);
-
-    return ThemeResponse.fromJson(res.data);
   }
 }

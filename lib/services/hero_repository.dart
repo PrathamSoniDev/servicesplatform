@@ -17,14 +17,14 @@ class HeroRepository {
     if (cached != null) {
       debugPrint("⚡ Heroes from SQLite cache");
       return (cached as List).map((e) => HeroModel.fromJson(e)).toList();
+    } else {
+      final response = await DioClient.dio.get('/api/hero/');
+      final List data = response.data;
+
+      await SQLiteCache.save(CacheKeys.heroBanners, data);
+
+      return data.map((e) => HeroModel.fromJson(e)).toList();
     }
-
-    final response = await DioClient.dio.get('/api/hero/');
-    final List data = response.data;
-
-    await SQLiteCache.save(CacheKeys.heroBanners, data);
-
-    return data.map((e) => HeroModel.fromJson(e)).toList();
   }
 
   Future<List<HeroModel>> refreshHeroes() async {
