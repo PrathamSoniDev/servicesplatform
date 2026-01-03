@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:servicesplatform/core/app_router.dart';
@@ -6,6 +7,12 @@ import 'package:servicesplatform/features/web/presentation/common/footer_section
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+
+import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
+import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
+import '../../../../core/hero/hero_mapper.dart';
+import '../home/custom_shimmer.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -48,13 +55,59 @@ class _ContactUsState extends State<ContactUs> {
           SingleChildScrollView(
             child: Column(
               children: [
-                const HeroSection(
-                  title: "Love to hear from you \n Get in touch",
-                  imagePath: "assets/images/image 18.png",
-                  isOverlayMode: true,
-                  contentAlignment: HeroContentAlignment.center,
-                  subtitle:
-                      "Ready to bring your digital vision to life? Contact us today and let's start\n building something amazing together.",
+                BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
+                  builder: (context, state) {
+                    switch (state.status) {
+                      case AppBootstrapStatus.loading:
+                        return const AdaptiveShimmer(
+                          layout: ShimmerLayout.hero,
+                        );
+
+                      case AppBootstrapStatus.failure:
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Failed to load app data'),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<AppBootstrapBloc>().add(
+                                    RetryAppBootstrap(),
+                                  );
+                                },
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                      case AppBootstrapStatus.success:
+                        final data = state.data!;
+                        final hero = data.heroes.firstWhere(
+                          (h) => h.key == 'contact' && h.isActive,
+                          orElse: () => data.heroes.first,
+                        );
+
+                        return HeroSection(
+                          title: hero.headingText,
+                          subtitle: hero.subHeadingText,
+                          imagePath: resolveAssetUrl(hero.assetUrl),
+                          gradientText: hero.gradientText,
+                          showGradient: hero.gradientText != null,
+                          isOverlayMode: true,
+                          contentAlignment:
+                              hero.isContentLeft
+                                  ? HeroContentAlignment.left
+                                  : hero.isContentRight
+                                  ? HeroContentAlignment.right
+                                  : HeroContentAlignment.center,
+                        );
+
+                      default:
+                        return const SizedBox.shrink();
+                    }
+                  },
                 ),
                 _buildHeroAndFormSection(context),
                 _buildContactInfoSection(context),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/contact_section.dart';
@@ -7,11 +8,14 @@ import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 import 'package:servicesplatform/services/hero_repository.dart';
 
 import '../../../../core/app_router.dart';
+import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
+import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
 import '../../../../core/hero/hero_mapper.dart';
-import '../../../../core/hero/hero_model.dart';
 import '../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
+import '../home/custom_shimmer.dart';
 
 class BlogScreen extends StatefulWidget {
   const BlogScreen({super.key});
@@ -121,49 +125,100 @@ class _BlogScreenState extends State<BlogScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(
-                                  0xFF8B5CF6,
-                                ).withValues(alpha: .05),
-                                blurRadius: 100,
-                                spreadRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: SizedBox(
-                            child: FutureBuilder<List<HeroModel>>(
-                              future: _heroRepository.getHeroes(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const SizedBox(
-                                    height: 600,
-                                    child: Center(
-                                      child: HeroSection(
-                                        title: "",
-                                        isLoading: true,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                // ❌ Error or empty
-                                if (snapshot.hasError ||
-                                    !snapshot.hasData ||
-                                    snapshot.data!.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-
-                                // ✅ Pick HOME hero
-                                final hero = snapshot.data!.firstWhere(
-                                  (h) => h.key == 'blog' && h.isActive,
-                                  orElse: () => snapshot.data!.first,
+                        // Container(
+                        //   decoration: BoxDecoration(
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: const Color(
+                        //           0xFF8B5CF6,
+                        //         ).withValues(alpha: .05),
+                        //         blurRadius: 100,
+                        //         spreadRadius: 10,
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: SizedBox(
+                        //     child: FutureBuilder<List<HeroModel>>(
+                        //       future: _heroRepository.getHeroes(),
+                        //       builder: (context, snapshot) {
+                        //         if (snapshot.connectionState ==
+                        //             ConnectionState.waiting) {
+                        //           return const SizedBox(
+                        //             height: 600,
+                        //             child: Center(
+                        //               child: HeroSection(
+                        //                 title: "",
+                        //                 isLoading: true,
+                        //               ),
+                        //             ),
+                        //           );
+                        //         }
+                        //
+                        //         // ❌ Error or empty
+                        //         if (snapshot.hasError ||
+                        //             !snapshot.hasData ||
+                        //             snapshot.data!.isEmpty) {
+                        //           return const SizedBox.shrink();
+                        //         }
+                        //
+                        //         // ✅ Pick HOME hero
+                        //         final hero = snapshot.data!.firstWhere(
+                        //           (h) => h.key == 'blog' && h.isActive,
+                        //           orElse: () => snapshot.data!.first,
+                        //         );
+                        //         debugPrint(
+                        //           "Debugging Asset Url : ${hero.assetUrl}",
+                        //         );
+                        //         return HeroSection(
+                        //           title: hero.headingText,
+                        //           subtitle: hero.subHeadingText,
+                        //           imagePath: resolveAssetUrl(hero.assetUrl),
+                        //           featuredText: hero.gradientText,
+                        //           showGradient: false,
+                        //           isOverlayMode: false,
+                        //           contentAlignment:
+                        //               hero.isContentLeft
+                        //                   ? HeroContentAlignment.left
+                        //                   : hero.isContentRight
+                        //                   ? HeroContentAlignment.right
+                        //                   : HeroContentAlignment.center,
+                        //         );
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
+                        BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
+                          builder: (context, state) {
+                            switch (state.status) {
+                              case AppBootstrapStatus.loading:
+                                return const AdaptiveShimmer(
+                                  layout: ShimmerLayout.hero,
                                 );
-                                debugPrint(
-                                  "Debugging Asset Url : ${hero.assetUrl}",
+
+                              case AppBootstrapStatus.failure:
+                                return Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text('Failed to load app data'),
+                                      const SizedBox(height: 12),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          context.read<AppBootstrapBloc>().add(
+                                            RetryAppBootstrap(),
+                                          );
+                                        },
+                                        child: const Text('Retry'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                              case AppBootstrapStatus.success:
+                                final data = state.data!;
+                                final hero = data.heroes.firstWhere(
+                                  (h) => h.key == 'blog' && h.isActive,
+                                  orElse: () => data.heroes.first,
                                 );
                                 return HeroSection(
                                   title: hero.headingText,
@@ -179,9 +234,11 @@ class _BlogScreenState extends State<BlogScreen> {
                                           ? HeroContentAlignment.right
                                           : HeroContentAlignment.center,
                                 );
-                              },
-                            ),
-                          ),
+
+                              default:
+                                return const SizedBox.shrink();
+                            }
+                          },
                         ),
                         const SizedBox(height: 100),
 

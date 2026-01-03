@@ -1,7 +1,11 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/widgets/button.dart';
+
 import '../utils/responsive.dart';
-import 'animated_border.dart'; // Ensure your AnimatedBorder file is in the same directory
+import 'animated_border.dart';
+import 'auth_popup.dart'; // Ensure your AnimatedBorder file is in the same directory
 
 class TopNavBar extends StatefulWidget {
   final int activeIndex;
@@ -33,13 +37,13 @@ class _TopNavBarState extends State<TopNavBar> {
   OverlayEntry? _overlayEntry;
 
   List<Map<String, dynamic>> get navLinks => [
-        {'title': "Home", 'index': 0, 'onTap': widget.onHome},
-        {'title': "Designs", 'index': 1, 'onTap': widget.onDesigns},
-        {'title': "About", 'index': 2, 'onTap': widget.onAbout},
-        {'title': "Reviews", 'index': 3, 'onTap': widget.onTestimonials},
-        {'title': "Blog", 'index': 4, 'onTap': widget.onBlog},
-        {'title': "Contact", 'index': 5, 'onTap': widget.onContact},
-      ];
+    {'title': "Home", 'index': 0, 'onTap': widget.onHome},
+    {'title': "Designs", 'index': 1, 'onTap': widget.onDesigns},
+    {'title': "About", 'index': 2, 'onTap': widget.onAbout},
+    {'title': "Reviews", 'index': 3, 'onTap': widget.onTestimonials},
+    {'title': "Blog", 'index': 4, 'onTap': widget.onBlog},
+    {'title': "Contact", 'index': 5, 'onTap': widget.onContact},
+  ];
 
   void _toggleMenu() {
     if (_isMenuOpen) {
@@ -62,7 +66,8 @@ class _TopNavBarState extends State<TopNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSmallScreen = Responsive.isMobile(context) || Responsive.isTablet(context);
+    final bool isSmallScreen =
+        Responsive.isMobile(context) || Responsive.isTablet(context);
     final theme = Theme.of(context);
 
     return ClipRect(
@@ -74,20 +79,40 @@ class _TopNavBarState extends State<TopNavBar> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 30),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-            border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
+            color: Colors.black.withValues(alpha: .4),
+            border: Border(
+              bottom: BorderSide(color: Colors.white.withValues(alpha: .05)),
+            ),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
               Align(
-                alignment: isSmallScreen ? Alignment.center : Alignment.centerLeft,
+                alignment:
+                    isSmallScreen ? Alignment.center : Alignment.centerLeft,
                 child: _buildLogo(theme),
               ),
               if (!isSmallScreen)
                 Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: navLinks.map((link) => _buildNavItem(context, link, false)).toList(),
+                  children:
+                      navLinks
+                          .map((link) => _buildNavItem(context, link, false))
+                          .toList(),
+                ),
+              if (!isSmallScreen)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: AppButton(
+                    text: "Get Started",
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (_) => const AuthPopup(),
+                      );
+                    },
+                  ),
                 ),
               if (isSmallScreen)
                 Align(
@@ -103,47 +128,59 @@ class _TopNavBarState extends State<TopNavBar> {
 
   OverlayEntry _createOverlayEntry() {
     return OverlayEntry(
-      builder: (context) => Positioned(
-        bottom: 40,
-        left: 20,
-        right: 20,
-        child: Material(
-          color: Colors.transparent,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) => Transform.scale(
-              scale: 0.95 + (0.05 * value),
-              child: Opacity(opacity: value, child: child),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                // Lower sigma for mobile overlay to prevent lag
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                child: Container(
-                  height: 75,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      )
-                    ],
-                  ),
-                  child: Center(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: navLinks.map((link) => _buildNavItem(context, link, true)).toList(),
+      builder:
+          (context) => Positioned(
+            bottom: 40,
+            left: 20,
+            right: 20,
+            child: Material(
+              color: Colors.transparent,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic,
+                builder:
+                    (context, value, child) => Transform.scale(
+                      scale: 0.95 + (0.05 * value),
+                      child: Opacity(opacity: value, child: child),
+                    ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    // Lower sigma for mobile overlay to prevent lag
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(
+                      height: 75,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .08),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: .1),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .5),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children:
+                                navLinks
+                                    .map(
+                                      (link) =>
+                                          _buildNavItem(context, link, true),
+                                    )
+                                    .toList(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -151,16 +188,19 @@ class _TopNavBarState extends State<TopNavBar> {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 
   Widget _buildLogo(ThemeData theme) {
     return ShaderMask(
-      shaderCallback: (bounds) => LinearGradient(
-        colors: [theme.colorScheme.primary, theme.colorScheme.secondary, theme.colorScheme.tertiary],
-      ).createShader(bounds),
+      shaderCallback:
+          (bounds) => LinearGradient(
+            colors: [
+              theme.colorScheme.primary,
+              theme.colorScheme.secondary,
+              theme.colorScheme.tertiary,
+            ],
+          ).createShader(bounds),
       child: Text(
         "Devnex Services",
         style: theme.textTheme.titleLarge?.copyWith(
@@ -172,7 +212,11 @@ class _TopNavBarState extends State<TopNavBar> {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, Map<String, dynamic> item, bool isMobile) {
+  Widget _buildNavItem(
+    BuildContext context,
+    Map<String, dynamic> item,
+    bool isMobile,
+  ) {
     final int index = item['index'];
     final bool isActive = widget.activeIndex == index;
     final bool isHovered = _hoveredIndex == index;
@@ -181,22 +225,25 @@ class _TopNavBarState extends State<TopNavBar> {
     Widget navContent = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 18 : 22, 
-        vertical: isMobile ? 12 : 10
+        horizontal: isMobile ? 18 : 22,
+        vertical: isMobile ? 12 : 10,
       ),
       decoration: BoxDecoration(
-        color: isActive 
-            ? Colors.white.withOpacity(0.05) 
-            : (isHovered ? Colors.white.withOpacity(0.1) : Colors.transparent),
+        color:
+            isActive
+                ? Colors.white.withValues(alpha: .05)
+                : (isHovered
+                    ? Colors.white.withValues(alpha: .1)
+                    : Colors.transparent),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         item['title'],
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isActive || isHovered ? Colors.white : Colors.white70,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              fontSize: isMobile ? 14 : 15,
-            ),
+          color: isActive || isHovered ? Colors.white : Colors.white70,
+          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+          fontSize: isMobile ? 14 : 15,
+        ),
       ),
     );
 
@@ -211,15 +258,16 @@ class _TopNavBarState extends State<TopNavBar> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           // ISOLATION: RepaintBoundary prevents the animation from lagging the whole screen
-          child: isActive 
-              ? RepaintBoundary(
-                  child: AnimatedBorder(
-                    radius: 12,
-                    strokeWidth: 2.0, // Thinner for Navbar
-                    child: navContent,
-                  ),
-                )
-              : navContent,
+          child:
+              isActive
+                  ? RepaintBoundary(
+                    child: AnimatedBorder(
+                      radius: 12,
+                      strokeWidth: 2.0, // Thinner for Navbar
+                      child: navContent,
+                    ),
+                  )
+                  : navContent,
         ),
       ),
     );
@@ -234,8 +282,16 @@ class _TopNavBarState extends State<TopNavBar> {
         width: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _isMenuOpen ? theme.colorScheme.primary.withOpacity(0.1) : Colors.white.withOpacity(0.05),
-          border: Border.all(color: _isMenuOpen ? theme.colorScheme.primary : Colors.white.withOpacity(0.1)),
+          color:
+              _isMenuOpen
+                  ? theme.colorScheme.primary.withValues(alpha: .1)
+                  : Colors.white.withValues(alpha: .05),
+          border: Border.all(
+            color:
+                _isMenuOpen
+                    ? theme.colorScheme.primary
+                    : Colors.white.withValues(alpha: .1),
+          ),
         ),
         child: AnimatedRotation(
           duration: const Duration(milliseconds: 400),
