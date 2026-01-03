@@ -4,7 +4,7 @@ import 'package:servicesplatform/core/app_router.dart';
 
 import '../../models/design_item_models.dart';
 import '../../widgets/button.dart';
-import '../../widgets/card.dart';
+import '../../widgets/design_lux_card.dart';
 
 class DesignsSection extends StatefulWidget {
   const DesignsSection({super.key});
