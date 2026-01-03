@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/testimonials_section.dart';
 import 'package:servicesplatform/features/web/widgets/button.dart';
 
-import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
-import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
-import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
 import '../../../../core/hero/hero_mapper.dart';
+import '../../../../core/hero/hero_model.dart';
 import '../../../../services/hero_repository.dart';
 import '../../widgets/top_nav_bar.dart';
 import '../common/footer_section.dart';
 import 'about_section.dart';
 import 'blog_section.dart';
 import 'contact_section.dart';
-import 'custom_shimmer.dart';
 import 'designs_section.dart';
 import 'hero_section.dart';
 
@@ -117,135 +113,83 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 72), // space for navbar
                 // Container(
                 //   key: heroKey,
-                //   child: FutureBuilder<List<HeroModel>>(
-                //     future: _heroRepository.getHeroes(),
-                //     builder: (context, snapshot) {
-                //       // ⏳ Loading (Shimmer / Placeholder)
-                //       if (snapshot.connectionState == ConnectionState.waiting) {
-                //         return HeroSection(title: "", isLoading: true);
-                //       }
-                //
-                //       // ❌ Error or empty
-                //       if (snapshot.hasError ||
-                //           !snapshot.hasData ||
-                //           snapshot.data!.isEmpty) {
-                //         return const SizedBox.shrink();
-                //       }
-                //
-                //       // ✅ Pick HOME hero
-                //       final hero = snapshot.data!.firstWhere(
-                //         (h) => h.key == 'home' && h.isActive,
-                //         orElse: () => snapshot.data!.first,
-                //       );
-                //       debugPrint("Debugging Asset Url : ${hero.assetUrl}");
-                //       return HeroSection(
-                //         title: hero.headingText,
-                //         subtitle: hero.subHeadingText,
-                //         imagePath: resolveAssetUrl(hero.assetUrl),
-                //         gradientText: hero.gradientText,
-                //         showGradient: hero.gradientText != null,
-                //
-                //         isOverlayMode: true,
-                //         contentAlignment:
-                //             hero.isContentLeft
-                //                 ? HeroContentAlignment.left
-                //                 : hero.isContentRight
-                //                 ? HeroContentAlignment.right
-                //                 : HeroContentAlignment.center,
-                //
-                //         customButtons: [
-                //           AppButton(
-                //             text: hero.primaryButtonText ?? "View Designs",
-                //             onPressed:
-                //                 () => context.push(
-                //                   hero.ctaPrimary ?? AppRouter.blog,
-                //                 ),
-                //           ),
-                //
-                //           AppButton(
-                //             text: "Book Us",
-                //             type: AppButtonType.outline,
-                //             onPressed: () => context.push(AppRouter.contact),
-                //           ),
-                //         ],
-                //       );
-                //     },
+                //   child: HeroSection(
+                //     title: "Your Digital Journey", // Main text
+                //     gradientText:
+                //         "Starts Here", // Text that will have the gradient
+                //     showGradient: true, // Turn on gradient for Home
+                //     subtitle: "Unlock bespoke web & app services.",
+                //     imagePath: "assets/gif/jelly.gif",
+                //     isOverlayMode: true,
+                //     contentAlignment: HeroContentAlignment.center,
+                //     customButtons: [
+                //       const AppButton(text: "View Designs", onPressed: null),
+                //       AppButton(
+                //         text: "Book Us",
+                //         type: AppButtonType.outline,
+                //         onPressed: () {
+                //           context.push(AppRouter.contact);
+                //         },
+                //       ),
+                //     ],
                 //   ),
                 // ),
-                BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
-                  builder: (context, state) {
-                    switch (state.status) {
-                      case AppBootstrapStatus.loading:
-                        return const AdaptiveShimmer(
-                          layout: ShimmerLayout.hero,
-                        );
+                Container(
+                  key: heroKey,
+                  child: FutureBuilder<List<HeroModel>>(
+                    future: _heroRepository.getHeroes(),
+                    builder: (context, snapshot) {
+                      // ⏳ Loading (Shimmer / Placeholder)
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return HeroSection(title: "", isLoading: true);
+                      }
 
-                      case AppBootstrapStatus.failure:
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Failed to load app data'),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<AppBootstrapBloc>().add(
-                                    RetryAppBootstrap(),
-                                  );
-                                },
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        );
-
-                      case AppBootstrapStatus.success:
-                        final data = state.data!;
-                        final hero = data.heroes.firstWhere(
-                          (h) => h.key == 'home' && h.isActive,
-                          orElse: () => data.heroes.first,
-                        );
-
-                        return Container(
-                          key: heroKey,
-                          child: HeroSection(
-                            title: hero.headingText,
-                            subtitle: hero.subHeadingText,
-                            imagePath: resolveAssetUrl(hero.assetUrl),
-                            gradientText: hero.gradientText,
-                            showGradient: hero.gradientText != null,
-
-                            isOverlayMode: true,
-                            contentAlignment:
-                                hero.isContentLeft
-                                    ? HeroContentAlignment.left
-                                    : hero.isContentRight
-                                    ? HeroContentAlignment.right
-                                    : HeroContentAlignment.center,
-
-                            customButtons: [
-                              AppButton(
-                                text: hero.primaryButtonText ?? "View Designs",
-                                onPressed:
-                                    () => context.pushNamed(
-                                      hero.ctaPrimary ?? AppRouter.blog,
-                                    ),
-                              ),
-
-                              AppButton(
-                                text: "Book Us",
-                                type: AppButtonType.outline,
-                                onPressed:
-                                    () => context.pushNamed(AppRouter.contact),
-                              ),
-                            ],
-                          ),
-                        );
-
-                      default:
+                      // ❌ Error or empty
+                      if (snapshot.hasError ||
+                          !snapshot.hasData ||
+                          snapshot.data!.isEmpty) {
                         return const SizedBox.shrink();
-                    }
-                  },
+                      }
+
+                      // ✅ Pick HOME hero
+                      final hero = snapshot.data!.firstWhere(
+                        (h) => h.key == 'home' && h.isActive,
+                        orElse: () => snapshot.data!.first,
+                      );
+                      debugPrint("Debugging Asset Url : ${hero.assetUrl}");
+                      return HeroSection(
+                        title: hero.headingText,
+                        subtitle: hero.subHeadingText,
+                        imagePath: resolveAssetUrl(hero.assetUrl),
+                        gradientText: hero.gradientText,
+                        showGradient: hero.gradientText != null,
+
+                        isOverlayMode: true,
+                        contentAlignment:
+                            hero.isContentLeft
+                                ? HeroContentAlignment.left
+                                : hero.isContentRight
+                                ? HeroContentAlignment.right
+                                : HeroContentAlignment.center,
+
+                        customButtons: [
+                          AppButton(
+                            text: hero.primaryButtonText ?? "View Designs",
+                            onPressed:
+                                () => context.push(
+                                  hero.ctaPrimary ?? AppRouter.blog,
+                                ),
+                          ),
+
+                          AppButton(
+                            text: "Book Us",
+                            type: AppButtonType.outline,
+                            onPressed: () => context.push(AppRouter.contact),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
 
                 Container(key: designsKey, child: const DesignsSection()),

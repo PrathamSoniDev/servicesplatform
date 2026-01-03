@@ -29,7 +29,7 @@ class _BlogScreenState extends State<BlogScreen> {
   int currentPage = 1;
   final int itemsPerPage = 9;
   final int totalPages = 10;
-  late HeroRepository _heroRepository;
+  late HeroRepository heroRepository;
   final List<String> categories = [
     "All",
     "Marketing",
@@ -89,7 +89,7 @@ class _BlogScreenState extends State<BlogScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _heroRepository = HeroRepository();
+    heroRepository = HeroRepository();
   }
 
   @override
