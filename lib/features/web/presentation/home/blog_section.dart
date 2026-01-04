@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/blog_model.dart';
+
+import '../../../../models/blog_model.dart';
 import '../../widgets/blog_card.dart';
-import '../../widgets/custom_text.dart';
 import '../../widgets/button.dart';
+import '../../widgets/custom_text.dart';
 
 class BlogSection extends StatelessWidget {
   const BlogSection({super.key});
@@ -23,8 +24,10 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "1",
         title: "The Future of AI",
-        description: "Explore our most popular designs crafted with precision and creativity.",
-        imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+        description:
+            "Explore our most popular designs crafted with precision and creativity.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "ED-Tech",
         authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
@@ -33,8 +36,10 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "2",
         title: "UI/UX Trends",
-        description: "Explore our most popular designs crafted with precision and creativity.",
-        imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+        description:
+            "Explore our most popular designs crafted with precision and creativity.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "Design",
         authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
@@ -43,8 +48,10 @@ class BlogSection extends StatelessWidget {
       BlogModel(
         id: "3",
         title: "Flutter Mastery",
-        description: "Explore our most popular designs crafted with precision and creativity.",
-        imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+        description:
+            "Explore our most popular designs crafted with precision and creativity.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
         category: "Development",
         authorName: "Admin",
         publishedAt: DateTime(2025, 12, 24),
@@ -94,7 +101,11 @@ class BlogSection extends StatelessWidget {
               final currentBlog = blogs[index];
               return BlogCard(
                 blog: currentBlog,
-                onTap: () => context.go('/blog/${currentBlog.id}', extra: currentBlog),
+                onTap:
+                    () => context.go(
+                      '/blog/${currentBlog.id}',
+                      extra: currentBlog,
+                    ),
               );
             },
           ),
@@ -105,12 +116,12 @@ class BlogSection extends StatelessWidget {
           AppButton(
             text: "Explore More",
             onPressed: () {
-              // DEBUG: Check your console. If this doesn't print, 
+              // DEBUG: Check your console. If this doesn't print,
               // the button is being covered by another widget.
-              debugPrint("Explore More clicked!"); 
-              
+              debugPrint("Explore More clicked!");
+
               // Try using .go instead of .push if /blog is a top-level route
-              context.go('/blog'); 
+              context.go('/blog');
             },
             type: AppButtonType.solid,
             color: Theme.of(context).colorScheme.primary,

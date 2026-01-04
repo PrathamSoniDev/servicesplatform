@@ -12,7 +12,7 @@ import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
 import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
 import '../../../../core/hero/hero_mapper.dart';
-import '../../models/blog_model.dart';
+import '../../../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
 import '../home/custom_shimmer.dart';

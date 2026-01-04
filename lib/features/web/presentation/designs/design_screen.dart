@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/features/web/models/design_item_models.dart';
+import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
-import 'package:servicesplatform/features/web/widgets/design_lux_card.dart'; 
+import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
-import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart'; 
+
 import '../../../../core/app_router.dart';
+import '../../../../models/design_item_models.dart';
 
 class DesignScreen extends StatelessWidget {
   const DesignScreen({super.key});
@@ -16,15 +17,19 @@ class DesignScreen extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Design Detail',
-      barrierColor: Colors.black.withOpacity(0.8), 
+      barrierColor: Colors.black.withOpacity(0.8),
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, anim1, anim2) => const DesignDetailOverlay(),
       transitionBuilder: (context, anim1, anim2, child) {
         return FadeTransition(
           opacity: anim1,
           child: SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
-                .animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.05),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+            ),
             child: child,
           ),
         );
@@ -77,7 +82,10 @@ class DesignScreen extends StatelessWidget {
                       width: isMobile ? double.infinity : 600,
                       child: Text(
                         "Browse our complete collection of professionally crafted designs for every business need.",
-                        style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white60, height: 1.6),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: Colors.white60,
+                          height: 1.6,
+                        ),
                       ),
                     ),
                     SizedBox(height: isMobile ? 32 : 50),
@@ -97,13 +105,17 @@ class DesignScreen extends StatelessWidget {
                         crossAxisSpacing: 30,
                         mainAxisSpacing: 30,
                         // FIXED: Changed from 0.75 to 1.45 to match your Home Section exactly
-                        childAspectRatio: 1.45, 
+                        childAspectRatio: 1.45,
                       ),
                       itemBuilder: (context, index) {
                         return LuxuryCard(
                           item: designsData[index],
                           tag: "Premium",
-                          onTap: () => _showDesignDetail(context, designsData[index]),
+                          onTap:
+                              () => _showDesignDetail(
+                                context,
+                                designsData[index],
+                              ),
                         );
                       },
                     ),
@@ -119,12 +131,14 @@ class DesignScreen extends StatelessWidget {
 
   // --- Helper methods remain the same ---
   Widget _buildSectionHeader(String title, ThemeData theme) {
-    return Text(title.toUpperCase(),
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: AppTheme.primary,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 2,
-        ));
+    return Text(
+      title.toUpperCase(),
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: AppTheme.primary,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 2,
+      ),
+    );
   }
 
   Widget _buildFilterAndSearchRow(bool isMobile, ThemeData theme) {
@@ -134,9 +148,13 @@ class DesignScreen extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: ["All", "Marketing", "SaaS", "E-Commerce", "Web Dev"]
-                .map((label) => _buildFilterChip(label, isActive: label == "All"))
-                .toList(),
+            children:
+                ["All", "Marketing", "SaaS", "E-Commerce", "Web Dev"]
+                    .map(
+                      (label) =>
+                          _buildFilterChip(label, isActive: label == "All"),
+                    )
+                    .toList(),
           ),
         ),
         const SizedBox(height: 24),
@@ -170,7 +188,10 @@ class DesignScreen extends StatelessWidget {
         onSelected: (val) {},
         selectedColor: AppTheme.primary,
         backgroundColor: Colors.white.withOpacity(0.05),
-        labelStyle: TextStyle(color: isActive ? Colors.white : Colors.white70, fontSize: 13),
+        labelStyle: TextStyle(
+          color: isActive ? Colors.white : Colors.white70,
+          fontSize: 13,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         side: BorderSide.none,
       ),

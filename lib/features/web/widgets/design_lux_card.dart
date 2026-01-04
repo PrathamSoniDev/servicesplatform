@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/design_item_models.dart';
+
+import '../../../models/design_item_models.dart';
 import 'animated_border.dart';
 
 class LuxuryCard extends StatefulWidget {
@@ -45,8 +46,9 @@ class _LuxuryCardState extends State<LuxuryCard> {
                       child: Image.network(
                         widget.item.image,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(color: Colors.grey[900]),
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                Container(color: Colors.grey[900]),
                       ),
                     ),
                   ),
@@ -56,7 +58,10 @@ class _LuxuryCardState extends State<LuxuryCard> {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF8B5CF6), Color(0xFFD946EF)],
@@ -99,10 +104,7 @@ class _LuxuryCardState extends State<LuxuryCard> {
                     left: 20,
                     right: 20,
                     bottom: 20,
-                    child: _CardContent(
-                      item: widget.item,
-                      visible: _isHovered,
-                    ),
+                    child: _CardContent(item: widget.item, visible: _isHovered),
                   ),
                 ],
               ),

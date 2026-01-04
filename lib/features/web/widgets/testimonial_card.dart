@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../models/testimonial_model.dart';
+import '../../../models/testimonial_model.dart';
 import '../utils/app_theme.dart';
 import 'rating_stars.dart';
 

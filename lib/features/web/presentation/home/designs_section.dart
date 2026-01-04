@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 
-import '../../models/design_item_models.dart';
+import '../../../../models/design_item_models.dart';
 import '../../widgets/button.dart';
 import '../../widgets/design_lux_card.dart';
 
@@ -36,10 +36,9 @@ class _DesignsSectionState extends State<DesignsSection> {
             position: Tween<Offset>(
               begin: const Offset(0, 0.08), // Subtle slide up effect
               end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: anim1,
-              curve: Curves.easeOutCubic,
-            )),
+            ).animate(
+              CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
+            ),
             child: child,
           ),
         );

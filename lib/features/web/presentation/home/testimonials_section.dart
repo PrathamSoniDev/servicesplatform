@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/testimonial_model.dart';
+import '../../../../models/testimonial_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/testimonial_card.dart';
 

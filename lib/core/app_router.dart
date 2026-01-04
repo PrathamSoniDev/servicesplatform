@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/features/web/models/blog_model.dart';
 import 'package:servicesplatform/features/web/presentation/about_us/about_screen.dart';
 import 'package:servicesplatform/features/web/presentation/blog/blog_detail_screen.dart';
 import 'package:servicesplatform/features/web/presentation/blog/blog_screen.dart';
@@ -7,6 +6,8 @@ import 'package:servicesplatform/features/web/presentation/contact_us/contact_us
 // Import your design screen here
 import 'package:servicesplatform/features/web/presentation/designs/design_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
+
+import '../models/blog_model.dart';
 
 class AppRouter {
   static const String home = '/';

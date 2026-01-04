@@ -5,7 +5,7 @@ import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 
-import '../../models/blog_model.dart';
+import '../../../../models/blog_model.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
 

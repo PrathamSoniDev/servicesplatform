@@ -1,7 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servicesplatform/features/auth/auth_bloc.dart';
 import 'package:servicesplatform/features/web/widgets/button.dart';
+import 'package:servicesplatform/services/auth_repository.dart';
 
 import '../utils/responsive.dart';
 import 'animated_border.dart';
@@ -109,7 +112,13 @@ class _TopNavBarState extends State<TopNavBar> {
                       showDialog(
                         context: context,
                         barrierDismissible: true,
-                        builder: (_) => const AuthPopup(),
+                        builder: (_) {
+                          final AuthRepository repository = AuthRepository();
+                          return BlocProvider(
+                            create: (context) => AuthBloc(repository),
+                            child: AuthPopup(),
+                          );
+                        },
                       );
                     },
                   ),

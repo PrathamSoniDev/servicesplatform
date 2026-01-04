@@ -49,6 +49,7 @@ dependencies:
   sqflite_common_ffi_web: ^1.0.0
   path: ^1.9.1
   equatable: ^2.0.7
+  snackify: ^1.2.4
 
 dev_dependencies:
   flutter_test:

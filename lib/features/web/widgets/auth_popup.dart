@@ -1,7 +1,13 @@
 import 'dart:math';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servicesplatform/features/auth/auth_bloc.dart';
+import 'package:snackify/enums/snack_enums.dart';
+
 import 'button.dart';
+import 'custom_snakbar.dart';
 
 class AuthPopup extends StatefulWidget {
   const AuthPopup({super.key});
@@ -10,11 +16,14 @@ class AuthPopup extends StatefulWidget {
   State<AuthPopup> createState() => _AuthPopupState();
 }
 
-class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMixin {
+class _AuthPopupState extends State<AuthPopup>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool isSignUp = true;
-
+  final TextEditingController nameController = TextEditingController(),
+      emailController = TextEditingController(),
+      passController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -24,15 +33,15 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
     );
 
     _animation = Tween<double>(begin: 0, end: pi).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutBack,
-      ),
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
     );
   }
 
   @override
   void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -52,67 +61,120 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final viewInsets = MediaQuery.of(context).viewInsets;
-    
+
     // Adaptive sizing
     final cardWidth = min(500.0, size.width * 0.9);
-    
+
     // We adjust height if keyboard is visible to prevent overflow
     final bool isKeyboardOpen = viewInsets.bottom > 0;
-    final double cardHeight = isKeyboardOpen 
-        ? min(600.0, size.height - viewInsets.bottom - 40)
-        : min(720.0, size.height * 0.85);
+    final double cardHeight =
+        isKeyboardOpen
+            ? min(600.0, size.height - viewInsets.bottom - 40)
+            : min(720.0, size.height * 0.85);
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      backgroundColor: Colors.transparent,
-      child: RepaintBoundary( // ✅ Performance Optimization
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            double motionBlurValue = (sin(_animation.value) * 6.0).abs();
-            
-            final transform = Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(_animation.value);
+    return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (previous, current) {
+        return previous.status != current.status;
+      },
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          showCustomSnakcbar(
+            context,
+            "Authentication Successful",
+            "Welcome ${state.user?.user?.email ?? ''}",
+            const LinearGradient(
+              colors: [Color(0xFF4ADE80), Color(0xFF22C55E)],
+            ),
+            SnackType.success,
+            SnackPosition.top,
+          );
 
-            return Transform(
-              transform: transform,
-              alignment: Alignment.center,
-              child: _animation.value <= pi / 2
-                  ? _buildCard(
-                      isSignUp: true, 
-                      motionBlur: motionBlurValue, 
-                      width: cardWidth, 
-                      height: cardHeight,
-                      screenSize: size,
-                    )
-                  : Transform(
-                      transform: Matrix4.rotationY(pi),
-                      alignment: Alignment.center,
-                      child: _buildCard(
-                        isSignUp: false, 
-                        motionBlur: motionBlurValue,
-                        width: cardWidth,
-                        height: cardHeight,
-                        screenSize: size,
-                      ),
-                    ),
-            );
-          },
-        ),
-      ),
+          // Optional: close dialog after success
+          Navigator.of(context).pop();
+        }
+
+        if (state.status == AuthStatus.failure) {
+          showCustomSnakcbar(
+            context,
+            "Authentication Failed",
+            state.errorMessage ?? "Something went wrong",
+            const LinearGradient(
+              colors: [Color(0xFFF87171), Color(0xFFEF4444)],
+            ),
+            SnackType.error,
+            SnackPosition.top,
+          );
+        }
+      },
+      builder: (context, state) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
+          backgroundColor: Colors.transparent,
+          child: RepaintBoundary(
+            // ✅ Performance Optimization
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                double motionBlurValue = (sin(_animation.value) * 6.0).abs();
+
+                final transform =
+                    Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(_animation.value);
+
+                return Transform(
+                  transform: transform,
+                  alignment: Alignment.center,
+                  child:
+                      _animation.value <= pi / 2
+                          ? _buildCard(
+                            isSignUp: true,
+                            motionBlur: motionBlurValue,
+                            width: cardWidth,
+                            height: cardHeight,
+                            screenSize: size,
+                            nameController: nameController,
+                            emailController: emailController,
+                            passController: passController,
+                          )
+                          : Transform(
+                            transform: Matrix4.rotationY(pi),
+                            alignment: Alignment.center,
+                            child: _buildCard(
+                              isSignUp: false,
+                              motionBlur: motionBlurValue,
+                              width: cardWidth,
+                              height: cardHeight,
+                              screenSize: size,
+                              nameController: nameController,
+                              emailController: emailController,
+                              passController: passController,
+                            ),
+                          ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildCard({
-    required bool isSignUp, 
+    required bool isSignUp,
     required double motionBlur,
     required double width,
     required double height,
     required Size screenSize,
+    required TextEditingController nameController,
+    required TextEditingController emailController,
+    required TextEditingController passController,
   }) {
     // Dynamic scaling based on the calculated card height
-    final bool isTight = height < 550; 
+    final bool isTight = height < 550;
     final double verticalPadding = isTight ? 16 : 40;
     final double headerSize = isTight ? 22 : 32;
     final double fieldSpacing = isTight ? 8 : 18;
@@ -128,10 +190,10 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: .5),
             blurRadius: 40,
             offset: const Offset(0, 15),
-          )
+          ),
         ],
       ),
       child: ClipRRect(
@@ -141,13 +203,14 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: verticalPadding),
+              padding: EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: verticalPadding,
+              ),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.45),
+                color: Colors.black.withValues(alpha: .45),
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.12),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: .12)),
               ),
               child: Column(
                 children: [
@@ -171,53 +234,71 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
                             : 'Sign in to access your designs',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: .6),
                           fontSize: isTight ? 12 : 14,
                         ),
                       ),
                     ],
                   ),
-                  
-                  const Spacer(), // Pushes content to middle
 
+                  const Spacer(), // Pushes content to middle
                   // Form Fields
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isSignUp)
+                        _InputField(
+                          label: 'Name',
+                          hint: 'Ex. John',
+                          isTight: isTight,
+                          controller: nameController,
+                        ),
+                      SizedBox(height: fieldSpacing),
                       _InputField(
-                        label: 'Email', 
-                        hint: 'email@example.com',
+                        label: 'Email',
+                        hint: 'Ex. example@gmail.com',
                         isTight: isTight,
+                        controller: emailController,
                       ),
+
                       SizedBox(height: fieldSpacing),
                       _InputField(
                         label: 'Password',
-                        hint: 'Enter your password',
+                        hint: 'Strong 6 characters strong Password',
                         obscure: true,
                         isTight: isTight,
+                        controller: passController,
                       ),
-                      if (isSignUp) ...[
-                        SizedBox(height: fieldSpacing),
-                        _InputField(
-                          label: 'Confirm Password',
-                          hint: 'Repeat your password',
-                          obscure: true,
-                          isTight: isTight,
-                        ),
-                      ],
                     ],
                   ),
 
                   const Spacer(), // Pushes actions to bottom
-
                   // Actions
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppButton(
                         text: isSignUp ? "Create Account" : "Sign In",
-                        onPressed: () {},
+                        onPressed: () {
+                          if (isSignUp) {
+                            context.read<AuthBloc>().add(
+                              AuthRegisterRequested(
+                                name: nameController.text.trim(),
+                                email: emailController.text.trim(),
+                                password: passController.text.trim(),
+                              ),
+                            );
+                          } else {
+                            context.read<AuthBloc>().add(
+                              AuthLoginRequested(
+                                email: emailController.text.trim(),
+                                password: passController.text.trim(),
+                              ),
+                            );
+                          }
+                        },
                       ),
+
                       SizedBox(height: isTight ? 12 : 24),
                       GestureDetector(
                         onTap: toggleMode,
@@ -227,11 +308,12 @@ class _AuthPopupState extends State<AuthPopup> with SingleTickerProviderStateMix
                           child: RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(
-                              text: isSignUp
-                                  ? 'Already have an account? '
-                                  : "Don't have an account? ",
+                              text:
+                                  isSignUp
+                                      ? 'Already have an account? '
+                                      : "Don't have an account? ",
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: .5),
                                 fontSize: isTight ? 12 : 13,
                               ),
                               children: [
@@ -264,12 +346,14 @@ class _InputField extends StatelessWidget {
   final String? hint;
   final bool obscure;
   final bool isTight;
+  final TextEditingController controller;
 
   const _InputField({
-    required this.label, 
-    this.hint, 
+    required this.label,
+    this.hint,
     this.obscure = false,
     required this.isTight,
+    required this.controller,
   });
 
   @override
@@ -294,27 +378,28 @@ class _InputField extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: .08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: .18),
                   width: 1.2,
                 ),
               ),
               child: TextField(
                 obscureText: obscure,
+                controller: controller,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 cursorColor: const Color(0xFF8B5CF6),
                 decoration: InputDecoration(
                   hintText: hint,
                   hintStyle: TextStyle(
-                    color: Colors.white.withOpacity(0.35),
+                    color: Colors.white.withValues(alpha: .35),
                     fontSize: 13,
                   ),
                   isDense: isTight, // ✅ Further reduces height
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: isTight ? 12 : 18, 
+                    vertical: isTight ? 12 : 18,
                   ),
                   border: InputBorder.none,
                 ),
