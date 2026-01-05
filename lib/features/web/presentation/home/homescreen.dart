@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final blogKey = GlobalKey();
   final contactKey = GlobalKey();
   late final List<GlobalKey> _sectionKeys;
-  late final HeroRepository _heroRepository;
+  late final HeroRepository heroRepository;
 
   int currentSectionIndex = 0;
 
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    _heroRepository = HeroRepository();
+    heroRepository = HeroRepository();
     // _heroRepository.refreshHeroes();
     _sectionKeys = [
       heroKey,

@@ -175,7 +175,7 @@ class _TopNavBarState extends State<TopNavBar> {
                                       (profile?.profileImg != null &&
                                               profile!.profileImg!.isNotEmpty)
                                           ? CachedNetworkImageProvider(
-                                            profile!.profileImg!,
+                                            profile.profileImg!,
                                           )
                                           : null,
                                   child:
