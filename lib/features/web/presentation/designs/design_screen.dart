@@ -17,7 +17,7 @@ class DesignScreen extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Design Detail',
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withValues(alpha: .8),
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, anim1, anim2) => const DesignDetailOverlay(),
       transitionBuilder: (context, anim1, anim2, child) {

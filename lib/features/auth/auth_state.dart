@@ -6,8 +6,13 @@ class AuthState extends Equatable {
   final AuthStatus status;
   final UserModel? user;
   final String? errorMessage;
-
-  const AuthState({required this.status, this.user, this.errorMessage});
+  final ProfileModel? profile;
+  const AuthState({
+    required this.status,
+    this.user,
+    this.errorMessage,
+    this.profile,
+  });
 
   /// 🔹 Initial state
   factory AuthState.initial() {
@@ -19,6 +24,7 @@ class AuthState extends Equatable {
     AuthStatus? status,
     UserModel? user,
     String? errorMessage,
+    ProfileModel? profile,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -26,9 +32,10 @@ class AuthState extends Equatable {
       status: status ?? this.status,
       user: clearUser ? null : user ?? this.user,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
+      profile: profile ?? this.profile,
     );
   }
 
   @override
-  List<Object?> get props => [status, user, errorMessage];
+  List<Object?> get props => [status, user, errorMessage, profile];
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../app_bootstrap_repository.dart';
@@ -10,6 +11,7 @@ class AppBootstrapBloc extends Bloc<AppBootstrapEvent, AppBootstrapState> {
   AppBootstrapBloc(this.repository) : super(const AppBootstrapState()) {
     on<LoadAppBootstrap>(_onLoad);
     on<RetryAppBootstrap>(_onLoad);
+    on<LoadUserProfile>(_onLoadProfile);
   }
 
   Future<void> _onLoad(
@@ -25,6 +27,22 @@ class AppBootstrapBloc extends Bloc<AppBootstrapEvent, AppBootstrapState> {
       emit(
         state.copyWith(status: AppBootstrapStatus.failure, error: e.toString()),
       );
+    }
+  }
+
+  Future<void> _onLoadProfile(
+    LoadUserProfile event,
+    Emitter<AppBootstrapState> emit,
+  ) async {
+    // Only update profile — do NOT touch other data
+    if (state.data == null) return;
+
+    try {
+      final profile = await repository.fetchUserProfile();
+
+      emit(state.copyWith(data: state.data!.copyWith(profile: profile)));
+    } catch (e) {
+      debugPrint("❌ Profile refresh failed: $e");
     }
   }
 }

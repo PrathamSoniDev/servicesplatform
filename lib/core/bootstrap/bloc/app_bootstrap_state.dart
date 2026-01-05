@@ -7,6 +7,7 @@ enum AppBootstrapStatus { initial, loading, success, failure }
 class AppBootstrapState extends Equatable {
   final AppBootstrapStatus status;
   final AppBootstrapModel? data;
+
   final String? error;
 
   const AppBootstrapState({

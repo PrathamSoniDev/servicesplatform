@@ -1,27 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:snackify/enums/snack_enums.dart';
-import 'package:snackify/snackify.dart';
-import 'package:snackify/tts_config.dart';
 
 void showCustomSnakcbar(
   BuildContext context,
   String title,
   String subTitle,
-  Gradient gradient,
-  SnackType type,
-  SnackPosition position,
+  Color backgroundColor,
 ) {
-  Snackify.show(
-    context: context,
-    type: type,
-    title: Text(title),
-    subtitle: Text(subTitle),
-    ttsConfig: TTSConfiguration(speakOnShow: true),
-    duration: const Duration(seconds: 3),
-    animationDuration: const Duration(milliseconds: 500),
-    backgroundGradient: gradient,
-    position: position,
-    persistent:
-        false, // Set to true to keep Snackbar visible until manually dismissed
+  final messenger = ScaffoldMessenger.maybeOf(context);
+
+  if (messenger == null) {
+    debugPrint("❌ No ScaffoldMessenger found");
+    return;
+  }
+
+  messenger.clearSnackBars();
+
+  messenger.showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: backgroundColor,
+      margin: const EdgeInsets.all(16),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(subTitle, style: const TextStyle(color: Colors.white)),
+        ],
+      ),
+    ),
   );
 }

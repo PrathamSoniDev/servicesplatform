@@ -1,82 +1,158 @@
 class DesignItem {
-  final String image;
-  final String title;
-  final String description;
-  final String likes;
-  final String views;
+  final String id;
+  final String categoryId;
+  final String? title;
+  final String? subtitle;
+  final String? bannerImage;
+  final List<String> images;
+  final int likesCount;
+  final int viewsCount;
+  final List<String> colors;
+  final Map<String, dynamic> fonts;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  DesignItem({
-    required this.image,
-    required this.title,
-    required this.description,
-    required this.likes,
-    required this.views,
+  const DesignItem({
+    required this.id,
+    required this.categoryId,
+    this.title,
+    this.subtitle,
+    this.bannerImage,
+    required this.images,
+    required this.likesCount,
+    required this.viewsCount,
+    required this.colors,
+    required this.fonts,
+    required this.createdAt,
+    required this.updatedAt,
   });
+
+  /// 🔹 Factory constructor for API response
+  factory DesignItem.fromJson(Map<String, dynamic> json) {
+    return DesignItem(
+      id: json['id'] ?? json['_id'],
+      categoryId:
+          json['categoryId'] is Map
+              ? json['categoryId']['id'] ?? json['categoryId']['_id']
+              : json['categoryId'],
+      title: json['title'] ?? "",
+      subtitle: json['subtitle'] ?? "",
+      bannerImage: json['bannerImage'] ?? "",
+      images: List<String>.from(json['images'] ?? []),
+      likesCount: json['likesCount'] ?? 0,
+      viewsCount: json['viewsCount'] ?? 0,
+      colors: List<String>.from(json['colors'] ?? []),
+      fonts: Map<String, dynamic>.from(json['fonts'] ?? {}),
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+
+  /// 🔹 Convert model back to JSON (for POST/PUT)
+  Map<String, dynamic> toJson() {
+    return {
+      'categoryId': categoryId,
+      'title': title,
+      'subtitle': subtitle,
+      'bannerImage': bannerImage,
+      'images': images,
+      'likesCount': likesCount,
+      'viewsCount': viewsCount,
+      'colors': colors,
+      'fonts': fonts,
+    };
+  }
 }
 
 // Updated to 9 items for a 3x3 grid
 final List<DesignItem> designsData = [
   DesignItem(
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564",
+    id: "demo-1",
+    categoryId: "ui-ux",
     title: "Abstract Flow",
-    description: "Modern minimal interface architecture.",
-    likes: "842",
-    views: "1.2k",
+    subtitle: "Modern minimal interface architecture.",
+    bannerImage:
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564",
+    images: [
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564",
+    ],
+    likesCount: 842,
+    viewsCount: 1200,
+    colors: ["#1E293B", "#6366F1", "#F8FAFC"],
+    fonts: {"title": "Montserrat", "body": "Inter"},
+    createdAt: DateTime.now().subtract(const Duration(days: 3)),
+    updatedAt: DateTime.now(),
   ),
+
   DesignItem(
-    image: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=2564",
+    id: "demo-2",
+    categoryId: "dashboard",
     title: "Cyber Vision",
-    description: "Futuristic dashboard concepts.",
-    likes: "1.1k",
-    views: "2.4k",
+    subtitle: "Futuristic dashboard concepts.",
+    bannerImage:
+        "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=2564",
+    images: [
+      "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=2564",
+    ],
+    likesCount: 1100,
+    viewsCount: 2400,
+    colors: ["#020617", "#22D3EE", "#A855F7"],
+    fonts: {"title": "Poppins", "body": "Roboto"},
+    createdAt: DateTime.now().subtract(const Duration(days: 5)),
+    updatedAt: DateTime.now(),
   ),
+
   DesignItem(
-    image: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2564",
+    id: "demo-3",
+    categoryId: "branding",
     title: "Gradient Mesh",
-    description: "Exploring organic color transitions.",
-    likes: "930",
-    views: "1.8k",
+    subtitle: "Exploring organic color transitions.",
+    bannerImage:
+        "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2564",
+    images: [
+      "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2564",
+    ],
+    likesCount: 930,
+    viewsCount: 1800,
+    colors: ["#EC4899", "#8B5CF6", "#0EA5E9"],
+    fonts: {"title": "DM Sans", "body": "Inter"},
+    createdAt: DateTime.now().subtract(const Duration(days: 7)),
+    updatedAt: DateTime.now(),
   ),
+
   DesignItem(
-    image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2564",
+    id: "demo-4",
+    categoryId: "ui-effects",
     title: "Glassmorphism",
-    description: "Soft UI and frosted glass effects.",
-    likes: "2.1k",
-    views: "5.2k",
+    subtitle: "Soft UI and frosted glass effects.",
+    bannerImage:
+        "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2564",
+    images: [
+      "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2564",
+    ],
+    likesCount: 2100,
+    viewsCount: 5200,
+    colors: ["#FFFFFF", "#CBD5E1", "#0F172A"],
+    fonts: {"title": "SF Pro", "body": "SF Pro"},
+    createdAt: DateTime.now().subtract(const Duration(days: 10)),
+    updatedAt: DateTime.now(),
   ),
+
   DesignItem(
-    image: "https://images.unsplash.com/photo-1618556450991-2f1af64e8191?q=80&w=2564",
+    id: "demo-5",
+    categoryId: "dark-ui",
     title: "Dark Mode",
-    description: "Optimizing contrast for night viewing.",
-    likes: "750",
-    views: "1.1k",
-  ),
-  DesignItem(
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2564",
-    title: "Code Struct",
-    description: "Visualizing complex data structures.",
-    likes: "1.4k",
-    views: "3.1k",
-  ),
-  DesignItem(
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2564",
-    title: "Retro Tech",
-    description: "Old school aesthetics in modern web.",
-    likes: "620",
-    views: "980",
-  ),
-  DesignItem(
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2564",
-    title: "Global Net",
-    description: "Connectivity and networking visuals.",
-    likes: "1.8k",
-    views: "4.0k",
-  ),
-  DesignItem(
-    image: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2564",
-    title: "Eco Logic",
-    description: "Sustainability meets digital design.",
-    likes: "950",
-    views: "2.2k",
+    subtitle: "Optimizing contrast for night viewing.",
+    bannerImage:
+        "https://images.unsplash.com/photo-1618556450991-2f1af64e8191?q=80&w=2564",
+    images: [
+      "https://images.unsplash.com/photo-1618556450991-2f1af64e8191?q=80&w=2564",
+    ],
+    likesCount: 750,
+    viewsCount: 1100,
+    colors: ["#020617", "#334155", "#E5E7EB"],
+    fonts: {"title": "Inter", "body": "Inter"},
+    createdAt: DateTime.now().subtract(const Duration(days: 2)),
+    updatedAt: DateTime.now(),
   ),
 ];

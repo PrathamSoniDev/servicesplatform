@@ -4,8 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servicesplatform/features/auth/auth_bloc.dart';
-import 'package:snackify/enums/snack_enums.dart';
 
+import '../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import '../../../core/bootstrap/bloc/app_bootstrap_event.dart';
 import 'button.dart';
 import 'custom_snakbar.dart';
 
@@ -77,35 +78,35 @@ class _AuthPopupState extends State<AuthPopup>
         return previous.status != current.status;
       },
       listener: (context, state) {
+        final pageContext = Navigator.of(context, rootNavigator: true).context;
+
         if (state.status == AuthStatus.authenticated) {
+          FocusScope.of(context).unfocus();
+
           showCustomSnakcbar(
-            context,
+            pageContext,
             "Authentication Successful",
             "Welcome ${state.user?.user?.email ?? ''}",
-            const LinearGradient(
-              colors: [Color(0xFF4ADE80), Color(0xFF22C55E)],
-            ),
-            SnackType.success,
-            SnackPosition.top,
+            Colors.green,
           );
-
-          // Optional: close dialog after success
-          Navigator.of(context).pop();
+          context.read<AppBootstrapBloc>().add(LoadUserProfile());
+          Future.microtask(() {
+            if (Navigator.of(context, rootNavigator: true).canPop()) {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          });
         }
 
         if (state.status == AuthStatus.failure) {
           showCustomSnakcbar(
-            context,
+            pageContext,
             "Authentication Failed",
             state.errorMessage ?? "Something went wrong",
-            const LinearGradient(
-              colors: [Color(0xFFF87171), Color(0xFFEF4444)],
-            ),
-            SnackType.error,
-            SnackPosition.top,
+            Colors.red,
           );
         }
       },
+
       builder: (context, state) {
         return Dialog(
           insetPadding: const EdgeInsets.symmetric(

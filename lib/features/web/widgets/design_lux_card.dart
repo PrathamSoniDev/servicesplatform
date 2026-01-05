@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/presentation/home/custom_shimmer.dart';
 
 import '../../../models/design_item_models.dart';
 import 'animated_border.dart';
@@ -43,12 +45,18 @@ class _LuxuryCardState extends State<LuxuryCard> {
                       scale: _isHovered ? 1.1 : 1.0,
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.easeOutCubic,
-                      child: Image.network(
-                        widget.item.image,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.item.bannerImage ?? "",
                         fit: BoxFit.cover,
-                        errorBuilder:
-                            (context, error, stackTrace) =>
-                                Container(color: Colors.grey[900]),
+                        placeholder:
+                            (_, _) =>
+                                AdaptiveShimmer(layout: ShimmerLayout.hero),
+                        errorWidget:
+                            (_, __, ___) => const Icon(
+                              Icons.broken_image,
+                              color: Colors.white54,
+                              size: 48,
+                            ),
                       ),
                     ),
                   ),
@@ -90,8 +98,8 @@ class _LuxuryCardState extends State<LuxuryCard> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.0),
-                              Colors.black.withOpacity(0.9),
+                              Colors.black.withValues(alpha: .0),
+                              Colors.black.withValues(alpha: .9),
                             ],
                           ),
                         ),
@@ -151,7 +159,7 @@ class _CardContent extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              item.title,
+              item.title ?? "",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -160,20 +168,26 @@ class _CardContent extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              item.description,
+              item.subtitle ?? "",
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: .7),
                 fontSize: 13,
               ),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                _buildStat(Icons.visibility_outlined, item.views),
+                _buildStat(
+                  Icons.visibility_outlined,
+                  item.viewsCount.toString(),
+                ),
                 const SizedBox(width: 16),
-                _buildStat(Icons.favorite_border_rounded, item.likes),
+                _buildStat(
+                  Icons.favorite_border_rounded,
+                  item.likesCount.toString(),
+                ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.all(8),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servicesplatform/features/auth/auth_bloc.dart';
+import 'package:servicesplatform/services/auth_repository.dart';
 
 import 'core/app_router.dart';
 import 'core/bootstrap/app_bootstrap_repository.dart';
@@ -16,14 +18,20 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    BlocProvider(
-      create:
-          (_) => AppBootstrapBloc(
-            AppBootstrapRepository(
-              themeRepository: ThemeRepository(),
-              heroRepository: HeroRepository(),
-            ),
-          )..add(LoadAppBootstrap()),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc(AuthRepository())),
+        BlocProvider(
+          create:
+              (_) => AppBootstrapBloc(
+                AppBootstrapRepository(
+                  themeRepository: ThemeRepository(),
+                  heroRepository: HeroRepository(),
+                  authRepository: AuthRepository(),
+                ),
+              )..add(LoadAppBootstrap()),
+        ),
+      ],
       child: const MyApp(),
     ),
   );

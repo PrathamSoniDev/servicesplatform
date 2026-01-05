@@ -8,3 +8,5 @@ abstract class AppBootstrapEvent extends Equatable {
 class LoadAppBootstrap extends AppBootstrapEvent {}
 
 class RetryAppBootstrap extends AppBootstrapEvent {}
+
+class LoadUserProfile extends AppBootstrapEvent {}

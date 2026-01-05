@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../core/storage/cache_keys.dart';
+import '../core/storage/sqlite_cache.dart';
+
 /// Centralized Dio client
 class DioClient {
   DioClient._internal();
@@ -24,6 +27,20 @@ class DioClient {
 
     // ───────────────── INTERCEPTORS ─────────────────
     dio.interceptors.addAll([
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await SQLiteCache.load(
+            CacheKeys.accessToken,
+            maxAge: Duration(days: 365),
+          );
+
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+
+          return handler.next(options);
+        },
+      ),
       _RetryInterceptor(dio: dio),
       if (kDebugMode) _LoggingInterceptor(),
     ]);

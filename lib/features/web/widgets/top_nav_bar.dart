@@ -1,11 +1,15 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_state.dart';
 import 'package:servicesplatform/features/auth/auth_bloc.dart';
 import 'package:servicesplatform/features/web/widgets/button.dart';
-import 'package:servicesplatform/services/auth_repository.dart';
 
+import '../../../core/bootstrap/bloc/app_bootstrap_event.dart';
+import '../presentation/home/custom_shimmer.dart';
 import '../utils/responsive.dart';
 import 'animated_border.dart';
 import 'auth_popup.dart'; // Ensure your AnimatedBorder file is in the same directory
@@ -77,59 +81,133 @@ class _TopNavBarState extends State<TopNavBar> {
       child: BackdropFilter(
         // Optimized blur for performance
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          height: 80,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: .4),
-            border: Border(
-              bottom: BorderSide(color: Colors.white.withValues(alpha: .05)),
-            ),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment:
-                    isSmallScreen ? Alignment.center : Alignment.centerLeft,
-                child: _buildLogo(theme),
-              ),
-              if (!isSmallScreen)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children:
-                      navLinks
-                          .map((link) => _buildNavItem(context, link, false))
-                          .toList(),
-                ),
-              if (!isSmallScreen)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: AppButton(
-                    text: "Get Started",
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (_) {
-                          final AuthRepository repository = AuthRepository();
-                          return BlocProvider(
-                            create: (context) => AuthBloc(repository),
-                            child: AuthPopup(),
+        child: BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
+          builder: (context, state) {
+            switch (state.status) {
+              case AppBootstrapStatus.loading:
+                return const AdaptiveShimmer(layout: ShimmerLayout.hero);
+
+              case AppBootstrapStatus.failure:
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Failed to load app data'),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<AppBootstrapBloc>().add(
+                            RetryAppBootstrap(),
                           );
                         },
-                      );
-                    },
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
-                ),
-              if (isSmallScreen)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _buildAdaptiveToggle(theme),
-                ),
-            ],
-          ),
+                );
+              case AppBootstrapStatus.initial:
+                // TODO: Handle this case.
+                throw UnimplementedError();
+              case AppBootstrapStatus.success:
+                final data = state.data!;
+                final profile = data.profile;
+                return Container(
+                  height: 80,
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: .4),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.white.withValues(alpha: .05),
+                      ),
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        alignment:
+                            isSmallScreen
+                                ? Alignment.center
+                                : Alignment.centerLeft,
+                        child: _buildLogo(theme),
+                      ),
+                      if (!isSmallScreen)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children:
+                              navLinks
+                                  .map(
+                                    (link) =>
+                                        _buildNavItem(context, link, false),
+                                  )
+                                  .toList(),
+                        ),
+                      !isSmallScreen && profile == null
+                          ? Align(
+                            alignment: Alignment.centerRight,
+                            child: AppButton(
+                              text: "Get Started",
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (dialogContext) {
+                                    return BlocProvider.value(
+                                      value: context.read<AuthBloc>(),
+                                      child: const AuthPopup(),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          )
+                          : Align(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 26,
+                                  backgroundColor: Colors.grey.shade800,
+                                  backgroundImage:
+                                      (profile?.profileImg != null &&
+                                              profile!.profileImg!.isNotEmpty)
+                                          ? CachedNetworkImageProvider(
+                                            profile!.profileImg!,
+                                          )
+                                          : null,
+                                  child:
+                                      (profile?.profileImg == null ||
+                                              profile!.profileImg!.isEmpty)
+                                          ? const Icon(
+                                            Icons.person,
+                                            color: Colors.white,
+                                          )
+                                          : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  profile?.email ?? "",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                      if (isSmallScreen)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: _buildAdaptiveToggle(theme),
+                        ),
+                    ],
+                  ),
+                );
+            }
+          },
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:servicesplatform/core/storage/cache_keys.dart';
 import 'package:servicesplatform/core/storage/sqlite_cache.dart';
+import 'package:servicesplatform/models/profile_model.dart';
 import 'package:servicesplatform/models/user_model.dart';
 
 import '../../services/auth_repository.dart';
@@ -17,6 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegister);
     on<AuthCheckRequested>(_onCheckAuth);
     on<AuthLogoutRequested>(_onLogout);
+    on<AuthProfileFetched>(_onProfileFetched);
   }
 
   /// 🔐 LOGIN
@@ -33,6 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(state.copyWith(status: AuthStatus.authenticated, user: user));
+      add(const AuthProfileFetched());
     } catch (e) {
       emit(
         state.copyWith(status: AuthStatus.failure, errorMessage: e.toString()),
@@ -82,6 +85,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (_) {
       emit(state.copyWith(status: AuthStatus.unauthenticated, clearUser: true));
+    }
+  }
+
+  Future<void> _onProfileFetched(
+    AuthProfileFetched event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await SQLiteCache.load(
+        CacheKeys.accessToken,
+        maxAge: const Duration(days: 365),
+      );
+      final profile = await _authRepository.getUserProfile();
+      emit(state.copyWith(profile: profile));
+    } catch (e) {
+      emit(state.copyWith(errorMessage: e.toString()));
     }
   }
 

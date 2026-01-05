@@ -39,6 +39,10 @@ final class AuthCheckRequested extends AuthEvent {
   const AuthCheckRequested();
 }
 
+final class AuthProfileFetched extends AuthEvent {
+  const AuthProfileFetched();
+}
+
 /// 🚪 Logout
 final class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
