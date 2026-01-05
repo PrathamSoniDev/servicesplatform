@@ -12,29 +12,24 @@ class AdaptiveShimmer extends StatelessWidget {
     this.customChild,
   });
 
-  /// Preset layout type
   final ShimmerLayout layout;
-
-  /// Number of text lines (for list / card)
   final int lines;
-
-  /// Optional avatar / image placeholder
   final bool showAvatar;
-
-  /// Custom shimmer child (advanced use)
   final Widget? customChild;
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    final highlightColor = isDark ? Colors.grey.shade600 : Colors.grey.shade100;
-
+    
+    // ULTRA-PREMIUM PALETTE
+    // Using deep charcoal and subtle slate-silver for a metallic finish
+    const baseColor = Color(0xFF0A0A0A);      // Near Black
+    const highlightColor = Color(0xFF1F1F23); // Gunmetal Highlight
+    
     return Shimmer.fromColors(
       baseColor: baseColor,
       highlightColor: highlightColor,
+      period: const Duration(milliseconds: 2200), // Slightly slower is more "prestigious"
       child: customChild ?? _buildLayout(context, size),
     );
   }
@@ -52,35 +47,60 @@ class AdaptiveShimmer extends StatelessWidget {
     }
   }
 
-  // ================= HERO =================
+  // ================= ULTRA-LUXURY HERO =================
   Widget _heroSkeleton(Size size) {
     final width = size.width;
     final isMobile = width < 700;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _line(width * 0.3, 14),
-        const SizedBox(height: 20),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 24 : width * 0.1, 
+        vertical: 80
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Elegant Badge/Tag
+          _line(90, 24, radius: 100, opacity: 0.15),
+          const SizedBox(height: 32),
 
-        _line(width * (isMobile ? 0.85 : 0.6), 48),
-        const SizedBox(height: 12),
+          // Layered Typography
+          _line(width * (isMobile ? 0.8 : 0.4), 64, radius: 12),
+          const SizedBox(height: 16),
+          _line(width * (isMobile ? 0.6 : 0.3), 64, radius: 12),
+          const SizedBox(height: 40),
 
-        _line(width * (isMobile ? 0.65 : 0.45), 40),
-        const SizedBox(height: 28),
+          // Multi-line Descriptive Block (More lines = More Premium)
+          _line(width * (isMobile ? 0.9 : 0.45), 14, opacity: 0.3, radius: 4),
+          const SizedBox(height: 10),
+          _line(width * (isMobile ? 0.85 : 0.4), 14, opacity: 0.3, radius: 4),
+          const SizedBox(height: 10),
+          _line(width * (isMobile ? 0.7 : 0.35), 14, opacity: 0.2, radius: 4),
+          
+          const SizedBox(height: 60),
 
-        _line(width * 0.9, 16),
-      ],
+          // Sophisticated Interactive Elements
+          Row(
+            children: [
+              _line(180, 56, radius: 12), // Bold Button
+              const SizedBox(width: 20),
+              _line(56, 56, radius: 12, opacity: 0.1), // Square Utility Button
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  // ================= CARD =================
+  // ================= GLASS-DECO CARD =================
   Widget _cardSkeleton(Size size) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: Colors.white.withOpacity(0.03), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,45 +108,68 @@ class AdaptiveShimmer extends StatelessWidget {
           if (showAvatar)
             Row(
               children: [
-                _circle(44),
-                const SizedBox(width: 12),
-                Expanded(child: _line(size.width * 0.4, 14)),
+                _circle(56),
+                const SizedBox(width: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _line(140, 16, radius: 4),
+                    const SizedBox(height: 8),
+                    _line(90, 12, opacity: 0.3, radius: 4),
+                  ],
+                ),
+                const Spacer(),
+                _line(24, 24, radius: 6, opacity: 0.1), // Tiny icon placeholder
               ],
             ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 32),
+          _line(size.width * 0.6, 24, radius: 6), // Bold Title
+          const SizedBox(height: 20),
+          
+          // Paragraph structure
           ...List.generate(
             lines,
             (i) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _line(size.width * (0.8 - i * 0.1), 14),
+              child: _line(
+                size.width * (0.85 - (i * 0.1)), 
+                12, 
+                opacity: 0.2, 
+                radius: 4
+              ),
             ),
           ),
+          
+          const SizedBox(height: 24),
+          // Metadata line
+          _line(100, 12, radius: 4, opacity: 0.1),
         ],
       ),
     );
   }
 
-  // ================= LIST =================
+  // ================= MINIMALIST LIST =================
   Widget _listSkeleton(Size size) {
     return Column(
       children: List.generate(
         lines,
-        (_) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        (index) => Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: Row(
             children: [
-              if (showAvatar) _circle(40),
-              if (showAvatar) const SizedBox(width: 12),
+              if (showAvatar) _circle(52),
+              if (showAvatar) const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _line(size.width * 0.7, 14),
-                    const SizedBox(height: 8),
-                    _line(size.width * 0.5, 12),
+                    _line(size.width * 0.45, 18, radius: 4),
+                    const SizedBox(height: 10),
+                    _line(size.width * 0.25, 12, opacity: 0.25, radius: 4),
                   ],
                 ),
               ),
+              _line(40, 14, radius: 4, opacity: 0.1), // Date/Status tag
             ],
           ),
         ),
@@ -134,14 +177,23 @@ class AdaptiveShimmer extends StatelessWidget {
     );
   }
 
-  // ================= HELPERS =================
-  Widget _line(double width, double height) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(height / 2),
+  // ================= LUXURY COMPONENTS =================
+  Widget _line(double width, double height, {double radius = 8, double opacity = 1.0}) {
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          // Using a subtle gradient here prevents the "flat" look during animation
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withOpacity(0.9),
+              Colors.white.withOpacity(1.0),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(radius),
+        ),
       ),
     );
   }
@@ -150,9 +202,10 @@ class AdaptiveShimmer extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
+        border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
       ),
     );
   }
