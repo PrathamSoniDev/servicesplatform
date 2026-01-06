@@ -53,12 +53,15 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     _currentBlog = BlogModel(
       id: widget.id ?? "1",
       title: "How to Scale your Business ${widget.id}",
-      description: "This data was fetched because you refreshed the browser!",
-      imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
-      category: "Marketing",
-      authorName: "John Doe",
-      publishedAt: DateTime.now(),
-      readMinutes: 3,
+      shortDescription:
+          "This data was fetched because you refreshed the browser!",
+      placeholderImage:
+          "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+      categoryId: "Marketing",
+      author: "John Doe",
+      createdAt: DateTime.now(),
+      readingTime: 3,
+      categoryName: "",
     );
 
     if (mounted) setState(() => _isLoading = false);
@@ -120,7 +123,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     final double horizontalPadding = isMobile ? 20 : (isTablet ? 60 : 40);
     final String date = DateFormat(
       "MMMM dd, yyyy",
-    ).format(_currentBlog!.publishedAt);
+    ).format(_currentBlog!.createdAt);
 
     return Scaffold(
       backgroundColor: const Color(0xFF080808),
@@ -212,8 +215,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           tag: 'blog_image_${blog.id}',
           child: HeroSection(
             title: blog.title,
-            subtitle: blog.description,
-            imagePath: blog.imageUrl,
+            subtitle: blog.shortDescription,
+            imagePath: blog.placeholderImage,
             featuredText: "FEATURED ARTICLE",
             featuredColor: const Color(0xFF8B5CF6),
             showNavigationArrows: false,
@@ -295,11 +298,11 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 ],
               ),
             ),
-            if (!isMobile) _metaChip(blog.category.toUpperCase()),
+            if (!isMobile) _metaChip(blog.categoryId.toUpperCase()),
           ],
         ),
         if (isMobile) const SizedBox(height: 25),
-        if (isMobile) _metaChip(blog.category.toUpperCase()),
+        if (isMobile) _metaChip(blog.categoryId.toUpperCase()),
         const SizedBox(height: 20),
         Wrap(
           alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
@@ -314,12 +317,12 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   radius: 14,
                   backgroundColor: const Color(0xFF8B5CF6),
                   backgroundImage: NetworkImage(
-                    "https://ui-avatars.com/api/?name=${blog.authorName}&background=8B5CF6&color=fff",
+                    "https://ui-avatars.com/api/?name=${blog.author}&background=8B5CF6&color=fff",
                   ),
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  blog.authorName,
+                  blog.author,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -329,7 +332,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
               ],
             ),
             _verticalDivider(),
-            _metaText("${blog.readMinutes} MIN READ"),
+            _metaText("${blog.readingTime} MIN READ"),
             _verticalDivider(),
             _metaText(date.toUpperCase()),
           ],
@@ -376,7 +379,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          blog.description,
+          blog.shortDescription,
           style: TextStyle(
             color: Colors.white,
             fontSize: isMobile ? 20 : 26,
@@ -500,12 +503,14 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         final blog = BlogModel(
           id: "feat_$index",
           title: "Trending Post $index",
-          description: "Summary of the trending content.",
-          imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978",
-          category: "DESIGN",
-          authorName: "Alex Rivera",
-          publishedAt: DateTime.now(),
-          readMinutes: 5,
+          shortDescription: "Summary of the trending content.",
+          placeholderImage:
+              "https://images.unsplash.com/photo-1552664730-d307ca884978",
+          categoryId: "DESIGN",
+          author: "Alex Rivera",
+          createdAt: DateTime.now(),
+          readingTime: 5,
+          categoryName: "",
         );
         return BlogCard(
           blog: blog,

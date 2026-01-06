@@ -93,4 +93,36 @@ class AuthRepository {
       throw Exception("Error while fetching the Profile :$e");
     }
   }
+
+  Future<void> likeDesign(String designId) async {
+    try {
+      final String accessToken = await getAccessToken();
+      final Response response = await DioClient.dio.post(
+        '/api/profiles/me/like',
+        options: Options(headers: {"Authorization": "Bearer $accessToken"}),
+        data: {"designId": designId},
+      );
+      debugPrint("Debugging User Like Design : ${response.data}");
+      return response.data;
+    } catch (e) {
+      debugPrint("Error while liking the design : $e");
+      throw Exception("Error : $e");
+    }
+  }
+
+  Future<void> addRecentView(String designId) async {
+    try {
+      final String accessToken = await getAccessToken();
+      final Response response = await DioClient.dio.post(
+        '/api/profiles/me/recent-viewed',
+        options: Options(headers: {"Authorization": "Bearer $accessToken"}),
+        data: {"designId": designId},
+      );
+      debugPrint("Debugging User Recent View Design : ${response.data}");
+      return response.data;
+    } catch (e) {
+      debugPrint("Error while Recent View the design : $e");
+      throw Exception("Error : $e");
+    }
+  }
 }

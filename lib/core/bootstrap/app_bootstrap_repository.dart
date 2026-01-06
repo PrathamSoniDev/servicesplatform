@@ -3,6 +3,8 @@ import 'package:servicesplatform/core/storage/cache_keys.dart';
 import 'package:servicesplatform/core/storage/sqlite_cache.dart';
 import 'package:servicesplatform/models/profile_model.dart';
 import 'package:servicesplatform/services/auth_repository.dart';
+import 'package:servicesplatform/services/blog_repository.dart';
+import 'package:servicesplatform/services/design_repository.dart';
 
 import '../../services/hero_repository.dart';
 import '../../services/theme_repository.dart';
@@ -12,11 +14,14 @@ class AppBootstrapRepository {
   final ThemeRepository themeRepository;
   final HeroRepository heroRepository;
   final AuthRepository authRepository;
-
+  final BlogRepository blogRepository;
+  final DesignRepository designRepository;
   AppBootstrapRepository({
     required this.themeRepository,
     required this.heroRepository,
     required this.authRepository,
+    required this.blogRepository,
+    required this.designRepository,
   });
 
   Future<AppBootstrapModel> bootstrap() async {
@@ -35,14 +40,16 @@ class AppBootstrapRepository {
       // 🔹 Public data (always required)
       final themeFuture = ThemeRepository.getTheme();
       final heroFuture = heroRepository.getHeroes();
-
+      final designFuture = designRepository.listDesigns();
+      final blogFuture = blogRepository.listBlogs();
       // 🔹 Optional profile
       final profileFuture =
           accessToken != null ? authRepository.getUserProfile() : null;
 
       final theme = await themeFuture;
       final heroes = await heroFuture;
-
+      final designs = await designFuture;
+      final blogs = await blogFuture;
       ProfileModel? profile;
       if (profileFuture != null) {
         try {
@@ -53,7 +60,13 @@ class AppBootstrapRepository {
         }
       }
 
-      return AppBootstrapModel(theme: theme, heroes: heroes, profile: profile);
+      return AppBootstrapModel(
+        theme: theme,
+        heroes: heroes,
+        profile: profile,
+        designs: designs,
+        blogs: blogs,
+      );
     } catch (e, st) {
       debugPrint('❌ Bootstrap failed: $e\n$st');
       rethrow;

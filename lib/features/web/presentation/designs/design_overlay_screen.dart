@@ -1,57 +1,27 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/widgets/floating_bar.dart';
+import 'package:servicesplatform/models/design_item_models.dart';
 
-// 1. DATA MODEL FOR BACKEND INTEGRATION
-class ProjectData {
-  final String title;
-  final String subtitle;
-  final String backgroundText;
-  final String themeName;
-  final List<Color> colorPalette;
-  final String typography;
-  final List<String> imageUrls;
-
-  ProjectData({
-    required this.title,
-    required this.subtitle,
-    required this.backgroundText,
-    required this.themeName,
-    required this.colorPalette,
-    required this.typography,
-    required this.imageUrls,
-  });
-}
-
-// Custom Behavior to hide scrollbar
 class NoScrollbarBehavior extends ScrollBehavior {
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     return child;
   }
 }
 
 class DesignDetailOverlay extends StatelessWidget {
-  final ProjectData? data;
+  final DesignItem data;
 
-  const DesignDetailOverlay({super.key, this.data});
+  const DesignDetailOverlay({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final project = data ?? ProjectData(
-      title: "Fintech 2.0",
-      subtitle: "THE NEW STANDARD",
-      backgroundText: "EVOLUTION",
-      themeName: "Obsidian Glass",
-      typography: "Inter / 800 Extra Bold",
-      colorPalette: [const Color(0xFF0D0D0D), const Color(0xFF007AFF), const Color(0xFF5E5CE6), Colors.white],
-      imageUrls: [
-        'https://images.unsplash.com/photo-1614332287897-cdc485fa562d',
-        'https://images.unsplash.com/photo-1551434678-e076c223a692',
-        'https://images.unsplash.com/photo-1558655146-d09347e92766',
-      ],
-    );
-
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 600;
 
@@ -79,9 +49,9 @@ class DesignDetailOverlay extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildUniqueHeader(context),
-                    _buildArtisticHero(isMobile, project),
-                    _buildVerticalShowcase(project.imageUrls),
-                    _buildDesignDNAFooter(project),
+                    _buildArtisticHero(isMobile, data!),
+                    _buildVerticalShowcase(data!.images),
+                    _buildDesignDNAFooter(data!),
                     _buildBookingCTA(context),
                     const SizedBox(height: 120),
                   ],
@@ -115,8 +85,22 @@ class DesignDetailOverlay extends StatelessWidget {
     );
   }
 
+  Color parseHexColor(String hex) {
+    final value = hex.replaceAll('#', '').toUpperCase();
+
+    if (value.length == 6) {
+      return Color(int.parse('FF$value', radix: 16));
+    } else if (value.length == 8) {
+      return Color(int.parse(value, radix: 16));
+    }
+
+    throw FormatException('Invalid hex color: $hex');
+  }
+
   // --- DESIGN DNA FOOTER ---
-  Widget _buildDesignDNAFooter(ProjectData project) {
+  Widget _buildDesignDNAFooter(DesignItem project) {
+    final palette = project.colors.map(parseHexColor).toList(growable: false);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 40),
       child: Column(
@@ -128,9 +112,9 @@ class DesignDetailOverlay extends StatelessWidget {
             runSpacing: 40,
             alignment: WrapAlignment.center,
             children: [
-              _infoBlock("THEME", project.themeName.toUpperCase()),
-              _colorPaletteBlock("PALETTE", project.colorPalette),
-              _infoBlock("TYPOGRAPHY", project.typography.toUpperCase()),
+              //_infoBlock("THEME", project.themeName.toUpperCase()),
+              _colorPaletteBlock("PALETTE", palette),
+              _infoBlock("TYPOGRAPHY", project.fonts.toUpperCase()),
             ],
           ),
         ],
@@ -145,17 +129,22 @@ class DesignDetailOverlay extends StatelessWidget {
         const SizedBox(height: 16),
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: colors.map((c) => Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              color: c,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white10),
-            ),
-          )).toList(),
-        )
+          children:
+              colors
+                  .map(
+                    (c) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: c,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white10),
+                      ),
+                    ),
+                  )
+                  .toList(),
+        ),
       ],
     );
   }
@@ -174,11 +163,18 @@ class DesignDetailOverlay extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.blueAccent, width: 1),
           padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100),
+          ),
         ),
         child: Text(
           "BOOK THIS EXPERIENCE",
-          style: _luxuryStyle(12, color: Colors.blueAccent, spacing: 4, weight: FontWeight.bold),
+          style: _luxuryStyle(
+            12,
+            color: Colors.blueAccent,
+            spacing: 4,
+            weight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -189,10 +185,15 @@ class DesignDetailOverlay extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
-        children: images.map((url) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _luxuryImageCard(url),
-        )).toList(),
+        children:
+            images
+                .map(
+                  (url) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _luxuryImageCard(url),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -206,41 +207,54 @@ class DesignDetailOverlay extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.network(
-          url,
-          width: double.infinity,
-          fit: BoxFit.fitWidth,
-        ),
+        child: Image.network(url, width: double.infinity, fit: BoxFit.fitWidth),
       ),
     );
   }
 
   // --- HERO SECTION ---
-  Widget _buildArtisticHero(bool isMobile, ProjectData project) {
+  Widget _buildArtisticHero(bool isMobile, DesignItem project) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 100, vertical: 120),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 20 : 100,
+        vertical: 120,
+      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Text(
-            project.backgroundText.toUpperCase(),
+            project.title!.toUpperCase(),
             style: TextStyle(
               fontSize: isMobile ? 70 : 160,
-              foreground: Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 1
-                ..color = Colors.white.withOpacity(0.03),
+              foreground:
+                  Paint()
+                    ..style = PaintingStyle.stroke
+                    ..strokeWidth = 1
+                    ..color = Colors.white.withOpacity(0.03),
               fontWeight: FontWeight.w900,
             ),
           ),
           Column(
             children: [
-              Text(project.subtitle, style: _luxuryStyle(12, color: Colors.blueAccent, spacing: 8, weight: FontWeight.w900)),
+              Text(
+                project.subtitle ?? "",
+                style: _luxuryStyle(
+                  12,
+                  color: Colors.blueAccent,
+                  spacing: 8,
+                  weight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 10),
               Text(
-                project.title,
+                project.title ?? "",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: isMobile ? 42 : 84, fontWeight: FontWeight.w800, letterSpacing: -2),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isMobile ? 42 : 84,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -2,
+                ),
               ),
             ],
           ),
@@ -266,7 +280,11 @@ class DesignDetailOverlay extends StatelessWidget {
         children: [
           _blurButton(
             onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.close_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -282,7 +300,10 @@ class DesignDetailOverlay extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              shape: BoxShape.circle,
+            ),
             child: child,
           ),
         ),
@@ -290,7 +311,18 @@ class DesignDetailOverlay extends StatelessWidget {
     );
   }
 
-  TextStyle _luxuryStyle(double size, {Color color = Colors.white, double spacing = 0, FontWeight weight = FontWeight.normal}) {
-    return TextStyle(fontSize: size, color: color, letterSpacing: spacing, fontWeight: weight, fontFamily: 'Inter');
+  TextStyle _luxuryStyle(
+    double size, {
+    Color color = Colors.white,
+    double spacing = 0,
+    FontWeight weight = FontWeight.normal,
+  }) {
+    return TextStyle(
+      fontSize: size,
+      color: color,
+      letterSpacing: spacing,
+      fontWeight: weight,
+      fontFamily: 'Inter',
+    );
   }
 }

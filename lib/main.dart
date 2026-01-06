@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:servicesplatform/features/auth/auth_bloc.dart';
+import 'package:servicesplatform/features/web/presentation/designs/bloc/designs_bloc.dart';
 import 'package:servicesplatform/services/auth_repository.dart';
+import 'package:servicesplatform/services/blog_repository.dart';
+import 'package:servicesplatform/services/design_repository.dart';
 
 import 'core/app_router.dart';
 import 'core/bootstrap/app_bootstrap_repository.dart';
@@ -21,6 +24,7 @@ void main() {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AuthBloc(AuthRepository())),
+        BlocProvider(create: (_) => DesignsBloc(DesignRepository())),
         BlocProvider(
           create:
               (_) => AppBootstrapBloc(
@@ -28,6 +32,8 @@ void main() {
                   themeRepository: ThemeRepository(),
                   heroRepository: HeroRepository(),
                   authRepository: AuthRepository(),
+                  designRepository: DesignRepository(),
+                  blogRepository: BlogRepository(),
                 ),
               )..add(LoadAppBootstrap()),
         ),
