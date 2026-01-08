@@ -49,9 +49,9 @@ class DesignDetailOverlay extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildUniqueHeader(context),
-                    _buildArtisticHero(isMobile, data!),
-                    _buildVerticalShowcase(data!.images),
-                    _buildDesignDNAFooter(data!),
+                    _buildArtisticHero(isMobile, data),
+                    _buildVerticalShowcase(data.images),
+                    _buildDesignDNAFooter(data),
                     _buildBookingCTA(context),
                     const SizedBox(height: 120),
                   ],
