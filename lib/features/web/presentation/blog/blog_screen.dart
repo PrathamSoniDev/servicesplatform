@@ -533,10 +533,7 @@ class _BlogScreenState extends State<BlogScreen> {
     final isTablet = Responsive.isTablet(context);
 
     return BlocProvider(
-      create:
-          (_) =>
-              BlogBloc(context.read<BlogRepository>())
-                ..add(const FetchBlogs(page: 1)),
+      create: (_) => BlogBloc(BlogRepository())..add(const FetchBlogs(page: 1)),
       child: Scaffold(
         backgroundColor: const Color(0xFF080808),
         body: SingleChildScrollView(
@@ -708,11 +705,11 @@ class _BlogScreenState extends State<BlogScreen> {
                     ),
 
                     const SizedBox(height: 80),
-                    const ContactSection(),
-                    const FooterSection(),
                   ],
                 ),
               ),
+              const ContactSection(),
+              const FooterSection(),
             ],
           ),
         ),
