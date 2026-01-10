@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/features/web/widgets/floating_bar.dart';
+
+import 'package:servicesplatform/features/web/widgets/floating_bottom_bar.dart';
 import 'package:servicesplatform/models/design_item_models.dart';
 
 class NoScrollbarBehavior extends ScrollBehavior {

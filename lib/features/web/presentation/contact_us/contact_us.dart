@@ -1,15 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:servicesplatform/core/app_router.dart';
 import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+import 'package:servicesplatform/features/web/widgets/button.dart'; 
 
 import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
-import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
 import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
 import '../../../../core/hero/hero_mapper.dart';
 import '../home/custom_shimmer.dart';
@@ -22,27 +22,22 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
-  final _formKey = GlobalKey<FormState>();
-  String? _selectedRole;
-  int _selectedDesignOption = 0; // 0: None, 1: Liked, 2: Own, 3: Custom
-
-  // Controllers
+  // ─── CONTROLLERS ───
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
-  final List<String> _roles = [
-    'Product Designer',
-    'Developer',
-    'Founder',
-    'Other',
-  ];
+  // ─── STATE NOTIFIERS ───
+  final ValueNotifier<String> _selectedRoleNotifier = ValueNotifier("Founder");
+  final ValueNotifier<String> _selectedOptionNotifier = ValueNotifier("I want a custom design");
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _messageController.dispose();
+    _selectedRoleNotifier.dispose();
+    _selectedOptionNotifier.dispose();
     super.dispose();
   }
 
@@ -55,475 +50,354 @@ class _ContactUsState extends State<ContactUs> {
           SingleChildScrollView(
             child: Column(
               children: [
+                // 1. DYNAMIC HERO SECTION
                 BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
                   builder: (context, state) {
-                    switch (state.status) {
-                      case AppBootstrapStatus.loading:
-                        return const AdaptiveShimmer(
-                          layout: ShimmerLayout.hero,
-                        );
-
-                      case AppBootstrapStatus.failure:
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('Failed to load app data'),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<AppBootstrapBloc>().add(
-                                    RetryAppBootstrap(),
-                                  );
-                                },
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        );
-
-                      case AppBootstrapStatus.success:
-                        final data = state.data!;
-                        final hero = data.heroes.firstWhere(
-                          (h) => h.key == 'contact' && h.isActive,
-                          orElse: () => data.heroes.first,
-                        );
-
-                        return HeroSection(
-                          title: hero.headingText,
-                          subtitle: hero.subHeadingText,
-                          imagePath: resolveAssetUrl(hero.assetUrl),
-                          gradientText: hero.gradientText,
-                          showGradient: hero.gradientText != null,
-                          isOverlayMode: true,
-                          contentAlignment:
-                              hero.isContentLeft
-                                  ? HeroContentAlignment.left
-                                  : hero.isContentRight
-                                  ? HeroContentAlignment.right
-                                  : HeroContentAlignment.center,
-                        );
-
-                      default:
-                        return const SizedBox.shrink();
+                    if (state.status == AppBootstrapStatus.loading) {
+                      return const AdaptiveShimmer(layout: ShimmerLayout.hero);
                     }
+                    if (state.status == AppBootstrapStatus.success) {
+                      final data = state.data!;
+                      final hero = data.heroes.firstWhere(
+                        (h) => h.key == 'contact' && h.isActive,
+                        orElse: () => data.heroes.first,
+                      );
+
+                      return HeroSection(
+                        title: hero.headingText,
+                        subtitle: hero.subHeadingText,
+                        imagePath: resolveAssetUrl(hero.assetUrl),
+                        gradientText: hero.gradientText,
+                        showGradient: hero.gradientText != null,
+                        isOverlayMode: true,
+                        contentAlignment: hero.isContentLeft
+                            ? HeroContentAlignment.left
+                            : hero.isContentRight
+                                ? HeroContentAlignment.right
+                                : HeroContentAlignment.center,
+                      );
+                    }
+                    return const SizedBox(height: 100);
                   },
                 ),
-                _buildHeroAndFormSection(context),
-                _buildContactInfoSection(context),
+
+                // 2. THE MODERN CONTACT FORM
+                _buildModernFormSection(context),
+
                 const FooterSection(),
               ],
             ),
           ),
+
+          // 3. NAVIGATION
           TopNavBar(
             activeIndex: 5,
             onHome: () => context.go(AppRouter.home),
-            onDesigns:
-                () => context.go(
-                  AppRouter.home,
-                ), // Scroll handling could be improved if needed
+            onDesigns: () => context.go(AppRouter.home),
             onAbout: () => context.push(AppRouter.aboutUs),
             onTestimonials: () => context.go(AppRouter.home),
             onBlog: () => context.push(AppRouter.blog),
-            onContact: () {}, // Already here
+            onContact: () {},
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeroAndFormSection(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
+  Widget _buildModernFormSection(BuildContext context) {
+    final bool isDesktop = Responsive.isDesktop(context);
+    final double horizontalPadding = MediaQuery.of(context).size.width * (isDesktop ? 0.08 : 0.05);
 
-    return Stack(
-      children: [
-        // Content
-        Container(
-          padding: EdgeInsets.only(
-            top: 20, // Navbar space
-            left: isMobile ? 20 : 100,
-            right: isMobile ? 20 : 100,
-            bottom: 80,
-          ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 80, horizontal: horizontalPadding),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── Form ───
-              Container(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Row 1: Name & Email
-                      if (isMobile) ...[
-                        _buildTextField(
-                          "Your name",
-                          "Enter your name",
-                          _nameController,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildTextField(
-                          "Your e-mail",
-                          "Enter your mail",
-                          _emailController,
-                        ),
-                      ] else
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildTextField(
-                                "Your name",
-                                "Enter your name",
-                                _nameController,
-                              ),
-                            ),
-                            const SizedBox(width: 40),
-                            Expanded(
-                              child: _buildTextField(
-                                "Your e-mail",
-                                "Enter your mail",
-                                _emailController,
-                              ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 24),
-                      if (!isMobile)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Left Column
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Role
-                                  _buildDropdownField(
-                                    "Your role",
-                                    "Select your role",
-                                  ),
-                                  const SizedBox(height: 40),
+              const _SectionLabel(label: "I AM A..."),
+              const SizedBox(height: 16),
+              _buildProfessionalRoleSelector(),
 
-                                  // Radio Buttons
-                                  _buildRadioOption(
-                                    "Do you have any liked design?",
-                                    1,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildRadioOption(
-                                    "Do you have your own design?",
-                                    2,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildRadioOption(
-                                    "I want a custom design",
-                                    3,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 40),
-                            // Right Column
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel("Message *"),
-                                  const SizedBox(height: 12),
-                                  TextFormField(
-                                    controller: _messageController,
-                                    maxLines: 9,
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                    ),
-                                    decoration: _inputDecoration(
-                                      "Tell us about your project",
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        )
-                      else ...[
-                        _buildDropdownField("Your role", "Select your role"),
-                        const SizedBox(height: 24),
-                        _buildLabel("Message *"),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _messageController,
-                          maxLines: 5,
-                          style: GoogleFonts.outfit(color: Colors.white),
-                          decoration: _inputDecoration(
-                            "Tell us about your project",
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        _buildRadioOption("Do you have any liked design?", 1),
-                        const SizedBox(height: 16),
-                        _buildRadioOption("Do you have your own design?", 2),
-                        const SizedBox(height: 16),
-                        _buildRadioOption("I want a custom design", 3),
-                      ],
+              const SizedBox(height: 48),
 
-                      const SizedBox(height: 40),
-
-                      // Submit Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B3DFF), // Purple
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            "Send",
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+              if (isDesktop)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _SectionLabel(label: "YOUR NAME"),
+                          const SizedBox(height: 10),
+                          _buildGlassField("Full Name", "Enter your name", _nameController),
+                          const SizedBox(height: 32),
+                          const _SectionLabel(label: "PROJECT STATUS"),
+                          const SizedBox(height: 12),
+                          _buildRadioOption("Do you have any liked design?"),
+                          _buildRadioOption("Do you have your own design?"),
+                          _buildRadioOption("I want a custom design"),
+                        ],
                       ),
-                    ],
+                    ),
+                    const SizedBox(width: 48),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _SectionLabel(label: "YOUR E-MAIL"),
+                          const SizedBox(height: 10),
+                          _buildGlassField("Email Address", "Enter your email", _emailController),
+                          const SizedBox(height: 32),
+                          const _SectionLabel(label: "MESSAGE *"),
+                          const SizedBox(height: 10),
+                          _buildGlassField(
+                            "Message",
+                            "Tell us about your project details...",
+                            _messageController,
+                            maxLines: 7,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _SectionLabel(label: "YOUR NAME"),
+                    const SizedBox(height: 8),
+                    _buildGlassField("Full Name", "Enter your name", _nameController),
+                    const SizedBox(height: 24),
+                    const _SectionLabel(label: "YOUR E-MAIL"),
+                    const SizedBox(height: 8),
+                    _buildGlassField("Email Address", "Enter your email", _emailController),
+                    const SizedBox(height: 24),
+                    const _SectionLabel(label: "PROJECT STATUS"),
+                    const SizedBox(height: 8),
+                    _buildRadioOption("Do you have any liked design?"),
+                    _buildRadioOption("Do you have your own design?"),
+                    _buildRadioOption("I want a custom design"),
+                    const SizedBox(height: 24),
+                    const _SectionLabel(label: "MESSAGE *"),
+                    const SizedBox(height: 8),
+                    _buildGlassField("Message", "Tell us about your project", _messageController, maxLines: 5),
+                  ],
+                ),
+
+              const SizedBox(height: 60),
+
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: AppButton(
+                    text: "Send Message",
+                    enableGlow: true,
+                    onPressed: () {},
                   ),
                 ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildContactInfoSection(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
-
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        // Use the second background image here if needed, or stick to dark
-        color: Colors.black, // Fallback
-        image: DecorationImage(
-          image: AssetImage(
-            'assets/images/contact_bg_1.png',
-          ), // Using the second image provided
-          fit: BoxFit.cover,
-        ),
-      ),
-      padding: EdgeInsets.symmetric(
-        vertical: 100,
-        horizontal: isMobile ? 20 : 100,
-      ),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child:
-              isMobile
-                  ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildContactTitle(),
-                      const SizedBox(height: 40),
-                      _buildInfoItem(Icons.phone_outlined, "+91- 98765 56789"),
-                      const SizedBox(height: 20),
-                      _buildInfoItem(
-                        Icons.email_outlined,
-                        "hello@servicesplatform.com",
-                      ),
-                    ],
-                  )
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: _buildContactTitle()),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildInfoItem(
-                              Icons.phone_outlined,
-                              "+91- 98765 56789",
-                            ),
-                            const SizedBox(height: 30),
-                            _buildInfoItem(
-                              Icons.email_outlined,
-                              "hello@servicesplatform.com",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+  Widget _buildProfessionalRoleSelector() {
+    final roles = ["Founder", "Product Designer", "Developer", "Other"];
+    return ValueListenableBuilder<String>(
+      valueListenable: _selectedRoleNotifier,
+      builder: (context, selected, _) {
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: roles.map((role) {
+            final isSelected = selected == role;
+            return GestureDetector(
+              onTap: () => _selectedRoleNotifier.value = role,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF8E2DE2) : Colors.white.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF8E2DE2) : Colors.white.withOpacity(0.08),
+                    width: 1,
                   ),
+                ),
+                child: Text(
+                  role,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.white54,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildGlassField(String label, String hint, TextEditingController controller, {int maxLines = 1}) {
+    return _AnimatedInputField(
+      controller: controller,
+      hint: hint,
+      maxLines: maxLines,
+    );
+  }
+
+  Widget _buildRadioOption(String title) {
+    return ValueListenableBuilder<String>(
+      valueListenable: _selectedOptionNotifier,
+      builder: (context, selected, _) {
+        final isSelected = selected == title;
+        return InkWell(
+          onTap: () => _selectedOptionNotifier.value = title,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? const Color(0xFF8E2DE2) : Colors.white.withOpacity(0.2),
+                      width: isSelected ? 6 : 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.white60,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ─── INTERNAL HELPER WIDGETS ───
+
+class _AnimatedInputField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final int maxLines;
+
+  const _AnimatedInputField({
+    required this.controller,
+    required this.hint,
+    required this.maxLines,
+  });
+
+  @override
+  State<_AnimatedInputField> createState() => _AnimatedInputFieldState();
+}
+
+class _AnimatedInputFieldState extends State<_AnimatedInputField> {
+  bool _isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color focusGrey = Colors.white.withOpacity(0.4);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(_isFocused ? 0.05 : 0.02),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: _isFocused ? focusGrey : Colors.white.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Focus(
+        onFocusChange: (focus) => setState(() => _isFocused = focus),
+        child: TextField(
+          controller: widget.controller,
+          maxLines: widget.maxLines,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+          cursorColor: focusGrey, 
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
+            contentPadding: const EdgeInsets.all(18),
+            border: InputBorder.none,
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildContactTitle() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Contact\nInformation",
-          style: GoogleFonts.outfit(
-            fontSize: 48,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            height: 1.1,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          "Have a question or ready to start your\nproject? We're here to help!",
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            color: Colors.white70,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
 
-  Widget _buildInfoItem(IconData icon, String text) {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white70, size: 28),
-        const SizedBox(width: 20),
+        // UPDATED: Tapered Pointed Dash
+        CustomPaint(
+          size: const Size(28, 4), // Width 28, Height 4
+          painter: _TaperedDashPainter(),
+        ),
+        const SizedBox(width: 10),
         Text(
-          text,
-          style: GoogleFonts.outfit(
-            fontSize: 20,
-            color: Colors.white,
-            fontWeight: FontWeight.w400,
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.4), 
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildTextField(
-    String label,
-    String hint,
-    TextEditingController controller,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel(label),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: controller,
-          style: GoogleFonts.outfit(color: Colors.white),
-          decoration: _inputDecoration(hint),
-        ),
-      ],
-    );
+/// Custom Painter to draw a dash that tapers to a point on the right
+class _TaperedDashPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ).createShader(Offset.zero & size)
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path()
+      ..moveTo(0, 0) // Top left
+      ..lineTo(0, size.height) // Bottom left
+      ..lineTo(size.width, size.height / 2) // Middle right (Point)
+      ..close();
+
+    canvas.drawPath(path, paint);
   }
 
-  Widget _buildDropdownField(String label, String hint) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel(label),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          value: _selectedRole,
-          dropdownColor: const Color(0xFF1E1E1E),
-          style: GoogleFonts.outfit(color: Colors.white),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70),
-          decoration: _inputDecoration(hint),
-          items:
-              _roles.map((role) {
-                return DropdownMenuItem(value: role, child: Text(role));
-              }).toList(),
-          onChanged: (val) {
-            setState(() {
-              _selectedRole = val;
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRadioOption(String text, int value) {
-    final isSelected = _selectedDesignOption == value;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedDesignOption = value;
-        });
-      },
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? const Color(0xFF8B3DFF) : Colors.white54,
-                width: 2,
-              ),
-            ),
-            padding: const EdgeInsets.all(4),
-            child:
-                isSelected
-                    ? Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF8B3DFF),
-                      ),
-                    )
-                    : null,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            text,
-            style: GoogleFonts.outfit(fontSize: 16, color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.outfit(
-        fontSize: 14,
-        color: Colors.white70,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.transparent,
-      hintText: hint,
-      hintStyle: GoogleFonts.outfit(color: Colors.white24),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white24, width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white, width: 1),
-      ),
-    );
-  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

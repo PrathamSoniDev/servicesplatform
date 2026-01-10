@@ -610,18 +610,24 @@ class _AnimatedInputField extends StatefulWidget {
   State<_AnimatedInputField> createState() => _AnimatedInputFieldState();
 }
 
+
 class _AnimatedInputFieldState extends State<_AnimatedInputField> {
   bool _isFocused = false;
 
   @override
   Widget build(BuildContext context) {
+    // Define the light grey color used for focus
+    final Color focusGrey = Colors.white.withOpacity(0.4);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02),
-        borderRadius: BorderRadius.circular(6),
+        // Slightly brighten background on focus
+        color: Colors.white.withOpacity(_isFocused ? 0.05 : 0.02),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _isFocused ? const Color(0xFF8E2DE2).withOpacity(0.8) : Colors.white.withOpacity(0.1),
+          // CHANGED: Use focusGrey instead of Purple when _isFocused is true
+          color: _isFocused ? focusGrey : Colors.white.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -630,12 +636,13 @@ class _AnimatedInputFieldState extends State<_AnimatedInputField> {
         child: TextField(
           controller: widget.controller,
           maxLines: widget.maxLines,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
-          cursorColor: const Color(0xFF8E2DE2),
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+          // CHANGED: Cursor color now matches the light grey theme
+          cursorColor: focusGrey, 
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 13),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
+            contentPadding: const EdgeInsets.all(18),
             border: InputBorder.none,
           ),
         ),
@@ -643,7 +650,6 @@ class _AnimatedInputFieldState extends State<_AnimatedInputField> {
     );
   }
 }
-
 class _SectionLabel extends StatelessWidget {
   final String label;
   const _SectionLabel({required this.label});
@@ -652,22 +658,47 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 4,
-          height: 4,
-          decoration: const BoxDecoration(color: Color(0xFF8E2DE2), shape: BoxShape.circle),
+        // This CustomPaint creates the line that tapers to a point
+        CustomPaint(
+          size: const Size(28, 4), // Width is 28, height is 4
+          painter: _TaperedDashPainter(),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.4),
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
+            color: Colors.white.withOpacity(0.4), 
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
           ),
         ),
       ],
     );
   }
 }
+
+class _TaperedDashPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ).createShader(Offset.zero & size)
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path()
+      ..moveTo(0, 0) // Start top-left
+      ..lineTo(0, size.height) // Draw to bottom-left
+      ..lineTo(size.width, size.height / 2) // Taper to a point at middle-right
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+  
