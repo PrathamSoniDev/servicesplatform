@@ -208,11 +208,6 @@ class _DesignsSectionState extends State<DesignsSection> {
   @override
   void initState() {
     super.initState();
-
-    /// Fetch latest 6 designs for homepage section
-    context.read<DesignsBloc>().add(
-      const FetchDesigns(page: 1, loadMore: false),
-    );
   }
 
   /// High-end Detail Overlay

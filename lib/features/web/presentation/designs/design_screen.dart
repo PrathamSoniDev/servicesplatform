@@ -270,7 +270,7 @@ class _DesignScreenState extends State<DesignScreen> {
         preferredSize: Size(double.infinity, isMobile ? 60 : 80),
         child: TopNavBar(
           activeIndex: 1,
-          onHome: () => context.go('/home'),
+          onHome: () => context.go('/'),
           onDesigns: () => context.go('/designs'),
           onAbout: () => context.go('/about'),
           onTestimonials: () {},
