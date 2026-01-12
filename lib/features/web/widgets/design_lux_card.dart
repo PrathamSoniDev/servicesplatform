@@ -5,12 +5,12 @@ import 'package:servicesplatform/features/web/presentation/home/custom_shimmer.d
 import '../../../models/design_item_models.dart';
 import 'animated_border.dart';
 
-class LuxuryCard extends StatefulWidget {
+class DesignLuxuryCard extends StatefulWidget {
   final DesignItem item;
   final VoidCallback onTap;
   final String tag;
 
-  const LuxuryCard({
+  const DesignLuxuryCard({
     super.key,
     required this.item,
     required this.onTap,
@@ -18,10 +18,10 @@ class LuxuryCard extends StatefulWidget {
   });
 
   @override
-  State<LuxuryCard> createState() => _LuxuryCardState();
+  State<DesignLuxuryCard> createState() => _DesignLuxuryCardState();
 }
 
-class _LuxuryCardState extends State<LuxuryCard> {
+class _DesignLuxuryCardState extends State<DesignLuxuryCard> {
   bool _isHovered = false;
 
   @override
