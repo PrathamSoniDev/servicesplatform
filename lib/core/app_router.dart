@@ -6,6 +6,7 @@ import 'package:servicesplatform/features/web/presentation/contact_us/contact_us
 // Import your design screen here
 import 'package:servicesplatform/features/web/presentation/designs/design_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
+import 'package:servicesplatform/features/web/presentation/profile/profile_screen.dart';
 
 import '../models/blog_model.dart';
 
@@ -15,6 +16,7 @@ class AppRouter {
   static const String blog = '/blog';
   static const String contact = '/contact';
   static const String designs = '/designs'; // Added Design Path constant
+  static const String profile = '/profile';
 
   final GoRouter router = GoRouter(
     initialLocation: home,
@@ -55,6 +57,12 @@ class AppRouter {
         path: contact,
         name: contact,
         builder: (context, state) => const ContactUs(),
+      ),
+
+      GoRoute(
+        path: profile,
+        name: profile,
+        builder: (context, state) => const ProfileScreen(),
       ),
 
       // DESIGN SCREEN ROUTE

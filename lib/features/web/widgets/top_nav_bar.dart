@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_state.dart';
 import 'package:servicesplatform/features/auth/auth_bloc.dart';
@@ -165,36 +166,41 @@ class _TopNavBarState extends State<TopNavBar> {
                           )
                           : Align(
                             alignment: Alignment.centerRight,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                CircleAvatar(
-                                  radius: 26,
-                                  backgroundColor: Colors.grey.shade800,
-                                  backgroundImage:
-                                      (profile?.profileImg != null &&
-                                              profile!.profileImg!.isNotEmpty)
-                                          ? CachedNetworkImageProvider(
-                                            profile.profileImg!,
-                                          )
-                                          : null,
-                                  child:
-                                      (profile?.profileImg == null ||
-                                              profile!.profileImg!.isEmpty)
-                                          ? const Icon(
-                                            Icons.person,
-                                            color: Colors.white,
-                                          )
-                                          : null,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  profile?.email ?? "",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
+                            child: InkWell(
+                              onTap: () {
+                                context.go("/profile");
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 26,
+                                    backgroundColor: Colors.grey.shade800,
+                                    backgroundImage:
+                                        (profile?.profileImg != null &&
+                                                profile!.profileImg!.isNotEmpty)
+                                            ? CachedNetworkImageProvider(
+                                              profile.profileImg!,
+                                            )
+                                            : null,
+                                    child:
+                                        (profile?.profileImg == null ||
+                                                profile!.profileImg!.isEmpty)
+                                            ? const Icon(
+                                              Icons.person,
+                                              color: Colors.white,
+                                            )
+                                            : null,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    profile?.email ?? "",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
 

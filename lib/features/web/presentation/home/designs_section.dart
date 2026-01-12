@@ -246,117 +246,128 @@ class _DesignsSectionState extends State<DesignsSection> {
     final bool isDesktop = MediaQuery.of(context).size.width > 1024;
     final double sidePadding = isDesktop ? 88 : 24;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 100),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.black, Color(0xFF0A0A0A)],
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            "assets/images/background_lines.png",
+            fit: BoxFit.fill,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const _Header(),
-          const SizedBox(height: 80),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 100),
+          decoration: const BoxDecoration(
+            // gradient: LinearGradient(
+            //   begin: Alignment.topCenter,
+            //   end: Alignment.bottomCenter,
+            //   colors: [Colors.black, Color(0xFF0A0A0A)],
+            // ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const _Header(),
+              const SizedBox(height: 80),
 
-          /// 🔹 DESIGNS GRID
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sidePadding),
-            child: BlocBuilder<DesignsBloc, DesignsState>(
-              builder: (context, state) {
-                // ⏳ Loading
-                if (state.listStatus == DesignsStatus.loading) {
-                  return _buildLoadingGrid(isDesktop);
-                }
+              /// 🔹 DESIGNS GRID
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: sidePadding),
+                child: BlocBuilder<DesignsBloc, DesignsState>(
+                  builder: (context, state) {
+                    // ⏳ Loading
+                    if (state.listStatus == DesignsStatus.loading) {
+                      return _buildLoadingGrid(isDesktop);
+                    }
 
-                // ❌ Error
-                if (state.listStatus == DesignsStatus.failure) {
-                  return _buildErrorState(state.errorMessage);
-                }
+                    // ❌ Error
+                    if (state.listStatus == DesignsStatus.failure) {
+                      return _buildErrorState(state.errorMessage);
+                    }
 
-                final designs = state.designs.take(6).toList();
+                    final designs = state.designs.take(6).toList();
 
-                // 📭 Empty
-                if (designs.isEmpty) {
-                  return _buildEmptyState();
-                }
+                    // 📭 Empty
+                    if (designs.isEmpty) {
+                      return _buildEmptyState();
+                    }
 
-                // ✅ Success Grid
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: designs.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isDesktop ? 3 : 1,
-                    mainAxisSpacing: 40,
-                    crossAxisSpacing: 40,
-                    childAspectRatio: 1.45,
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = designs[index];
-                    final isHovered = _hoveredIndex == index;
-
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      onEnter: (_) => setState(() => _hoveredIndex = index),
-                      onExit: (_) => setState(() => _hoveredIndex = null),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        clipBehavior: Clip.none,
-                        children: [
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 500),
-                            opacity: isHovered ? 0.4 : 0,
-                            child: Container(
-                              width: 200,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF8E2DE2,
-                                    ).withValues(alpha: .3),
-                                    blurRadius: 100,
-                                    spreadRadius: 20,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          AnimatedScale(
-                            scale: isHovered ? 1.02 : 1.0,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeOutCubic,
-                            child: RepaintBoundary(
-                              child: LuxuryCard(
-                                item: item,
-                                onTap: () => _showDesignDetail(context, item),
-                              ),
-                            ),
-                          ),
-                        ],
+                    // ✅ Success Grid
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: designs.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: isDesktop ? 3 : 1,
+                        mainAxisSpacing: 40,
+                        crossAxisSpacing: 40,
+                        childAspectRatio: 1.45,
                       ),
+                      itemBuilder: (context, index) {
+                        final item = designs[index];
+                        final isHovered = _hoveredIndex == index;
+
+                        return MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          onEnter: (_) => setState(() => _hoveredIndex = index),
+                          onExit: (_) => setState(() => _hoveredIndex = null),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 500),
+                                opacity: isHovered ? 0.4 : 0,
+                                child: Container(
+                                  width: 200,
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFF8E2DE2,
+                                        ).withValues(alpha: .3),
+                                        blurRadius: 100,
+                                        spreadRadius: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              AnimatedScale(
+                                scale: isHovered ? 1.02 : 1.0,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                                child: RepaintBoundary(
+                                  child: LuxuryCard(
+                                    item: item,
+                                    onTap:
+                                        () => _showDesignDetail(context, item),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
-          ),
+                ),
+              ),
 
-          const SizedBox(height: 80),
+              const SizedBox(height: 80),
 
-          /// 🔹 CTA
-          AppButton(
-            text: "Explore more Designs",
-            enableGlow: true,
-            onPressed: () => context.go(AppRouter.designs),
+              /// 🔹 CTA
+              AppButton(
+                text: "Explore more Designs",
+                enableGlow: true,
+                onPressed: () => context.go(AppRouter.designs),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
