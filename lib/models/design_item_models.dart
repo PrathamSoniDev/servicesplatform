@@ -1,6 +1,7 @@
 class DesignItem {
   final String id;
   final String categoryId;
+  final String? categoryName;
   final String? title;
   final String? subtitle;
   final String? bannerImage;
@@ -15,6 +16,7 @@ class DesignItem {
   const DesignItem({
     required this.id,
     required this.categoryId,
+    this.categoryName,
     this.title,
     this.subtitle,
     this.bannerImage,
@@ -43,6 +45,7 @@ class DesignItem {
           json['categoryId'] is Map
               ? json['categoryId']['id'] ?? json['categoryId']['_id']
               : json['categoryId'],
+      categoryName: '',
       title: json['title'] ?? "",
       subtitle: json['subtitle'] ?? "",
       bannerImage: json['bannerImage'] ?? "",
@@ -61,6 +64,7 @@ class DesignItem {
     return {
       'categoryId': categoryId,
       'title': title,
+      'categoryName': categoryName,
       'subtitle': subtitle,
       'bannerImage': bannerImage,
       'images': images,
@@ -69,5 +73,25 @@ class DesignItem {
       'colors': colors,
       'fonts': fonts,
     };
+  }
+}
+
+extension DesignItemCopy on DesignItem {
+  DesignItem copyWith({String? categoryName}) {
+    return DesignItem(
+      id: id,
+      categoryId: categoryId,
+      categoryName: categoryName ?? this.categoryName,
+      title: title,
+      subtitle: subtitle,
+      bannerImage: bannerImage,
+      images: images,
+      likesCount: likesCount,
+      viewsCount: viewsCount,
+      colors: colors,
+      fonts: fonts,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
   }
 }

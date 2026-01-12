@@ -202,13 +202,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
+import 'package:servicesplatform/models/category_model.dart';
 
-import '../../../../core/app_router.dart';
 import '../../../../models/design_item_models.dart';
 import 'bloc/designs_bloc.dart';
 import 'bloc/designs_event.dart';
@@ -228,11 +229,6 @@ class _DesignScreenState extends State<DesignScreen> {
   @override
   void initState() {
     super.initState();
-
-    /// Initial load
-    context.read<DesignsBloc>().add(
-      const FetchDesigns(page: 1, loadMore: false),
-    );
   }
 
   void _showDesignDetail(BuildContext context, DesignItem item) {
@@ -265,15 +261,17 @@ class _DesignScreenState extends State<DesignScreen> {
     final theme = Theme.of(context);
     final isMobile = Responsive.isMobile(context);
     final isDesktop = Responsive.isDesktop(context);
-
+    final designList =
+        context.watch<AppBootstrapBloc>().state.data?.designs?.items;
+    final categoryList = context.watch<AppBootstrapBloc>().state.data?.category;
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: PreferredSize(
         preferredSize: Size(double.infinity, isMobile ? 60 : 80),
         child: TopNavBar(
           activeIndex: 1,
-          onHome: () => context.go(AppRouter.home),
-          onDesigns: () => context.go(AppRouter.designs),
+          onHome: () => context.go('/home'),
+          onDesigns: () => context.go('/designs'),
           onAbout: () => context.go('/about'),
           onTestimonials: () {},
           onBlog: () => context.go('/blog'),
@@ -315,21 +313,13 @@ class _DesignScreenState extends State<DesignScreen> {
 
                 _sectionLabel("Filter by Category", theme),
                 const SizedBox(height: 20),
-                _buildFilters(theme),
+                _buildFilters(theme, categoryList!),
                 const SizedBox(height: 40),
 
                 /// ───────── GRID ─────────
                 BlocBuilder<DesignsBloc, DesignsState>(
                   builder: (context, state) {
-                    if (state.listStatus == DesignsStatus.loading) {
-                      return _buildLoadingGrid(isDesktop, isMobile);
-                    }
-
-                    if (state.listStatus == DesignsStatus.failure) {
-                      return _buildError(state.errorMessage);
-                    }
-
-                    if (state.designs.isEmpty) {
+                    if (designList!.isEmpty) {
                       return _buildEmpty();
                     }
 
@@ -344,7 +334,7 @@ class _DesignScreenState extends State<DesignScreen> {
                         childAspectRatio: 1.45,
                       ),
                       itemBuilder: (context, index) {
-                        final item = state.designs[index];
+                        final item = designList[index];
                         return LuxuryCard(
                           item: item,
                           tag: "Premium",
@@ -364,9 +354,13 @@ class _DesignScreenState extends State<DesignScreen> {
 
   // ───────────────── FILTERS ─────────────────
 
-  Widget _buildFilters(ThemeData theme) {
-    final categories = ["All", "Marketing", "SaaS", "E-Commerce", "Web Dev"];
-
+  Widget _buildFilters(ThemeData theme, List<CategoryModel> categories) {
+    // Add virtual "All" category at runtime
+    final filterCategories = [
+      CategoryModel(id: 'all', name: 'All', imageUrl: ''),
+      ...categories,
+    ];
+    _selectedCategory = 'all';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,12 +368,13 @@ class _DesignScreenState extends State<DesignScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children:
-                categories.map((cat) {
-                  final isActive = _selectedCategory == cat;
+                filterCategories.map((cat) {
+                  final isActive = _selectedCategory == cat.id;
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: ChoiceChip(
-                      label: Text(cat),
+                      label: Text(cat.name),
                       selected: isActive,
                       selectedColor: AppTheme.primary,
                       backgroundColor: Colors.white.withValues(alpha: .05),
@@ -388,9 +383,14 @@ class _DesignScreenState extends State<DesignScreen> {
                         fontSize: 13,
                       ),
                       onSelected: (_) {
-                        setState(() => _selectedCategory = cat);
+                        setState(() {
+                          _selectedCategory = cat.id;
+                        });
+
                         context.read<DesignsBloc>().add(
-                          FetchDesignsByCategory(cat == 'All' ? null : cat),
+                          FetchDesignsByCategory(
+                            cat.id == 'all' ? null : cat.id,
+                          ),
                         );
                       },
                     ),
@@ -426,27 +426,27 @@ class _DesignScreenState extends State<DesignScreen> {
 
   // ───────────────── UI STATES ─────────────────
 
-  Widget _buildLoadingGrid(bool isDesktop, bool isMobile) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: isDesktop ? 6 : 3,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
-        crossAxisSpacing: 30,
-        mainAxisSpacing: 30,
-        childAspectRatio: 1.45,
-      ),
-      itemBuilder:
-          (_, __) => Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .04),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            height: 240,
-          ),
-    );
-  }
+  // Widget _buildLoadingGrid(bool isDesktop, bool isMobile) {
+  //   return GridView.builder(
+  //     shrinkWrap: true,
+  //     physics: const NeverScrollableScrollPhysics(),
+  //     itemCount: isDesktop ? 6 : 3,
+  //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //       crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
+  //       crossAxisSpacing: 30,
+  //       mainAxisSpacing: 30,
+  //       childAspectRatio: 1.45,
+  //     ),
+  //     itemBuilder:
+  //         (_, __) => Container(
+  //           decoration: BoxDecoration(
+  //             color: Colors.white.withValues(alpha: .04),
+  //             borderRadius: BorderRadius.circular(24),
+  //           ),
+  //           height: 240,
+  //         ),
+  //   );
+  // }
 
   Widget _buildEmpty() {
     return Center(
@@ -472,14 +472,14 @@ class _DesignScreenState extends State<DesignScreen> {
     );
   }
 
-  Widget _buildError(String? message) {
-    return Center(
-      child: Text(
-        message ?? "Failed to load designs",
-        style: const TextStyle(color: Colors.redAccent),
-      ),
-    );
-  }
+  // Widget _buildError(String? message) {
+  //   return Center(
+  //     child: Text(
+  //       message ?? "Failed to load designs",
+  //       style: const TextStyle(color: Colors.redAccent),
+  //     ),
+  //   );
+  // }
 
   Widget _sectionLabel(String text, ThemeData theme) {
     return Text(

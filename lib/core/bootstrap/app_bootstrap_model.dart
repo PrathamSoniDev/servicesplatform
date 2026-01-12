@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:servicesplatform/models/category_model.dart';
 import 'package:servicesplatform/models/design_list_response.dart';
 import 'package:servicesplatform/models/paginated_blogs.dart';
 import 'package:servicesplatform/models/profile_model.dart';
@@ -11,11 +12,13 @@ class AppBootstrapModel extends Equatable {
   final List<HeroModel> heroes;
   final ProfileModel? profile;
   final PaginatedBlogs? blogs;
+  final List<CategoryModel> category;
   final DesignListResponse? designs;
 
   const AppBootstrapModel({
     required this.theme,
     required this.heroes,
+    required this.category,
     this.profile,
     this.blogs,
     this.designs,
@@ -24,6 +27,7 @@ class AppBootstrapModel extends Equatable {
   AppBootstrapModel copyWith({
     ThemeResponse? theme,
     List<HeroModel>? heroes,
+    List<CategoryModel>? category,
     PaginatedBlogs? blogs,
     DesignListResponse? designs,
     ProfileModel? profile,
@@ -31,6 +35,7 @@ class AppBootstrapModel extends Equatable {
   }) {
     return AppBootstrapModel(
       theme: theme ?? this.theme,
+      category: category ?? this.category,
       heroes: heroes ?? this.heroes,
       profile: clearProfile ? null : profile ?? this.profile,
       blogs: blogs ?? this.blogs,
@@ -39,5 +44,5 @@ class AppBootstrapModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [theme, heroes, profile, blogs, designs];
+  List<Object?> get props => [theme, heroes, profile, blogs, designs, category];
 }

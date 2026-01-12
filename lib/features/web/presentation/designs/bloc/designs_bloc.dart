@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../models/design_item_models.dart';
 import '../../../../../services/design_repository.dart';
 import 'designs_event.dart';
 import 'designs_state.dart';
@@ -12,7 +13,18 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
 
   Timer? _searchDebounce;
 
-  DesignsBloc(this.repository) : super(const DesignsState()) {
+  DesignsBloc(this.repository, {List<DesignItem>? initialDesigns})
+    : super(
+        DesignsState(
+          designs: initialDesigns ?? const [],
+          listStatus:
+              initialDesigns != null && initialDesigns.isNotEmpty
+                  ? DesignsStatus.success
+                  : DesignsStatus.initial,
+          page: 1,
+          hasMore: true,
+        ),
+      ) {
     on<FetchDesigns>(_onFetchDesigns);
     on<FetchDesignsByCategory>(_onFetchByCategory);
     on<SearchDesigns>(_onSearchDesigns);
@@ -20,23 +32,27 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
     on<ToggleDesignLike>(_onToggleLike);
     on<IncrementDesignView>(_onIncrementView);
   }
-
   // ───────────────── FETCH DESIGNS ─────────────────
 
   Future<void> _onFetchDesigns(
     FetchDesigns event,
     Emitter<DesignsState> emit,
   ) async {
-    if (!event.loadMore) {
-      emit(
-        state.copyWith(
-          listStatus: DesignsStatus.loading,
-          page: 1,
-          hasMore: true,
-          errorMessage: null,
-        ),
-      );
+    // 🔒 Prevent refetch if already bootstrapped and not loadMore
+    if (!event.loadMore &&
+        state.designs.isNotEmpty &&
+        state.listStatus == DesignsStatus.success) {
+      return;
     }
+
+    emit(
+      state.copyWith(
+        listStatus: DesignsStatus.loading,
+        page: 1,
+        hasMore: true,
+        errorMessage: null,
+      ),
+    );
 
     try {
       final response = await repository.listDesigns(
@@ -44,21 +60,15 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
         categoryId: state.selectedCategory,
       );
 
-      final designs =
-          event.loadMore
-              ? [...state.designs, ...response.items]
-              : response.items;
-
       emit(
         state.copyWith(
           listStatus: DesignsStatus.success,
-          designs: designs,
+          designs: response.items,
           page: response.page,
           hasMore: response.page < response.totalPages,
         ),
       );
     } catch (e) {
-      debugPrint('❌ FetchDesigns error: $e');
       emit(
         state.copyWith(
           listStatus: DesignsStatus.failure,

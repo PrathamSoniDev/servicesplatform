@@ -77,7 +77,7 @@ class _LuxuryCardState extends State<LuxuryCard> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        widget.tag,
+                        widget.item.categoryName!,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,

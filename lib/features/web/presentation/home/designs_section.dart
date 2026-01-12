@@ -185,7 +185,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/core/app_router.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 
 import '../../../../models/design_item_models.dart';
@@ -245,7 +245,7 @@ class _DesignsSectionState extends State<DesignsSection> {
   Widget build(BuildContext context) {
     final bool isDesktop = MediaQuery.of(context).size.width > 1024;
     final double sidePadding = isDesktop ? 88 : 24;
-
+    final designsList = context.watch<AppBootstrapBloc>().state.data?.designs;
     return Stack(
       children: [
         Positioned.fill(
@@ -285,10 +285,10 @@ class _DesignsSectionState extends State<DesignsSection> {
                       return _buildErrorState(state.errorMessage);
                     }
 
-                    final designs = state.designs.take(6).toList();
+                    final designs = designsList?.items.take(6).toList();
 
                     // 📭 Empty
-                    if (designs.isEmpty) {
+                    if (designs!.isEmpty) {
                       return _buildEmptyState();
                     }
 
@@ -304,7 +304,7 @@ class _DesignsSectionState extends State<DesignsSection> {
                         childAspectRatio: 1.45,
                       ),
                       itemBuilder: (context, index) {
-                        final item = designs[index];
+                        final item = designsList?.items[index];
                         final isHovered = _hoveredIndex == index;
 
                         return MouseRegion(
@@ -341,9 +341,13 @@ class _DesignsSectionState extends State<DesignsSection> {
                                 curve: Curves.easeOutCubic,
                                 child: RepaintBoundary(
                                   child: LuxuryCard(
-                                    item: item,
-                                    onTap:
-                                        () => _showDesignDetail(context, item),
+                                    item: item!,
+                                    onTap: () {
+                                      _showDesignDetail(context, item);
+                                      context.read<DesignsBloc>().add(
+                                        IncrementDesignView(item.id),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
@@ -362,7 +366,7 @@ class _DesignsSectionState extends State<DesignsSection> {
               AppButton(
                 text: "Explore more Designs",
                 enableGlow: true,
-                onPressed: () => context.go(AppRouter.designs),
+                onPressed: () => context.go('/designs'),
               ),
             ],
           ),

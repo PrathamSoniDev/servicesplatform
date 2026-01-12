@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/core/storage/cache_keys.dart';
 import 'package:servicesplatform/core/storage/sqlite_cache.dart';
+import 'package:servicesplatform/models/design_item_models.dart';
+import 'package:servicesplatform/models/design_list_response.dart';
 import 'package:servicesplatform/models/profile_model.dart';
 import 'package:servicesplatform/services/auth_repository.dart';
 import 'package:servicesplatform/services/blog_repository.dart';
@@ -39,17 +41,39 @@ class AppBootstrapRepository {
 
       // 🔹 Public data (always required)
       final themeFuture = ThemeRepository.getTheme();
+      final categories = designRepository.fetchCategories();
       final heroFuture = heroRepository.getHeroes();
       final designFuture = designRepository.listDesigns();
       final blogFuture = blogRepository.listBlogs();
       // 🔹 Optional profile
       final profileFuture =
           accessToken != null ? authRepository.getUserProfile() : null;
-
+      final category = await categories;
       final theme = await themeFuture;
       final heroes = await heroFuture;
       final designs = await designFuture;
       final blogs = await blogFuture;
+
+      final Map<String, String> categoryMap = {
+        for (final c in category) c.id: c.name,
+      };
+
+      // 🔹 Enrich designs with categoryName
+      final DesignListResponse enrichedDesigns = DesignListResponse(
+        items:
+            designs.items
+                .map(
+                  (design) => design.copyWith(
+                    categoryName: categoryMap[design.categoryId],
+                  ),
+                )
+                .toList(),
+        total: designs.total,
+        page: designs.page,
+        limit: designs.limit,
+        totalPages: designs.totalPages,
+      );
+
       ProfileModel? profile;
       if (profileFuture != null) {
         try {
@@ -59,12 +83,15 @@ class AppBootstrapRepository {
           profile = null;
         }
       }
-
+      debugPrint(
+        "Final Enrich Designs are : ${enrichedDesigns.items[0].categoryName}",
+      );
       return AppBootstrapModel(
+        category: category,
         theme: theme,
         heroes: heroes,
         profile: profile,
-        designs: designs,
+        designs: enrichedDesigns,
         blogs: blogs,
       );
     } catch (e, st) {

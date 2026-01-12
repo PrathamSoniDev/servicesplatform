@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:servicesplatform/models/category_model.dart';
 import 'package:servicesplatform/services/auth_repository.dart';
 
 import '../models/design_feedback_response.dart';
@@ -57,7 +58,7 @@ class DesignRepository {
 
   Future<DesignItem> incrementLikes(String id, {int delta = 1}) async {
     try {
-      debugPrint('📡 PATCH /api/designs/$id/likes');
+      debugPrint('📡 PATCH /api/designs/$id/like');
 
       final response = await _dio.patch(
         '/api/designs/$id/likes',
@@ -71,9 +72,9 @@ class DesignRepository {
 
   Future<DesignItem> incrementViews(String id) async {
     try {
-      debugPrint('📡 PATCH /api/designs/$id/views');
+      debugPrint('📡 PATCH /api/designs/$id/view');
 
-      final response = await _dio.patch('/api/designs/$id/views');
+      final response = await _dio.post('/api/designs/$id/view');
       return DesignItem.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception(_extractError(e));
@@ -99,6 +100,36 @@ class DesignRepository {
     } on DioException catch (e) {
       debugPrint('❌ submitFeedback error: ${e.response?.data}');
       throw Exception(_extractError(e));
+    }
+  }
+
+  Future<List<CategoryModel>> fetchCategories() async {
+    try {
+      debugPrint("📡 GET /api/categories");
+
+      final response = await _dio.get('/api/categories');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        // Case 1: API returns { data: [...] }
+        final List list =
+            data is Map<String, dynamic>
+                ? (data['data'] as List? ?? [])
+                : data as List;
+
+        return list.map((json) => CategoryModel.fromJson(json)).toList();
+      }
+
+      throw Exception(
+        'Failed to fetch categories (status: ${response.statusCode})',
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ fetchCategories DioError: ${e.response?.data}');
+      throw Exception(_extractError(e));
+    } catch (e) {
+      debugPrint('❌ fetchCategories Error: $e');
+      throw Exception('Unexpected error while fetching categories');
     }
   }
 

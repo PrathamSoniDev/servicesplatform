@@ -50,6 +50,7 @@ dependencies:
   path: ^1.9.1
   equatable: ^2.0.7
   snackify: ^1.2.4
+  share_plus: ^12.0.1
 
 dev_dependencies:
   flutter_test:

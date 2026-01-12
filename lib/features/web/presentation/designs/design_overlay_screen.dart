@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/widgets/floating_bottom_bar.dart';
 import 'package:servicesplatform/models/design_item_models.dart';
 
@@ -70,13 +70,11 @@ class DesignDetailOverlay extends StatelessWidget {
               child: Center(
                 child: LuxuryFloatingBottomBar(
                   isMobile: isMobile,
-                  views: "12,400",
-                  likes: '1,250',
-                  onLike: () {
-                    print("Project Liked");
-                  },
+                  views: data.viewsCount.toString(),
+                  likes: data.likesCount.toString(),
+                  onLike: () {},
                   onHire: () {
-                    print("Hire Requested");
+                    context.go('/contact');
                   },
                 ),
               ),
@@ -159,7 +157,7 @@ class DesignDetailOverlay extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Redirecting to Booking System...")),
           );
-          print("Booking Process Initiated");
+          debugPrint("Booking Process Initiated");
         },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.blueAccent, width: 1),
@@ -204,7 +202,7 @@ class DesignDetailOverlay extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 1100),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: .05)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -231,7 +229,7 @@ class DesignDetailOverlay extends StatelessWidget {
                   Paint()
                     ..style = PaintingStyle.stroke
                     ..strokeWidth = 1
-                    ..color = Colors.white.withOpacity(0.03),
+                    ..color = Colors.white.withValues(alpha: .03),
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -302,7 +300,7 @@ class DesignDetailOverlay extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: .05),
               shape: BoxShape.circle,
             ),
             child: child,
