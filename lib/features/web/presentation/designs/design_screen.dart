@@ -345,7 +345,7 @@ class _DesignScreenState extends State<DesignScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = state.designs[index];
-                        return LuxuryCard(
+                        return DesignLuxuryCard(
                           item: item,
                           tag: "Premium",
                           onTap: () => _showDesignDetail(context, item),

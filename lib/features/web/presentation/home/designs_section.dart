@@ -340,7 +340,7 @@ class _DesignsSectionState extends State<DesignsSection> {
                                 duration: const Duration(milliseconds: 400),
                                 curve: Curves.easeOutCubic,
                                 child: RepaintBoundary(
-                                  child: LuxuryCard(
+                                  child: DesignLuxuryCard(
                                     item: item,
                                     onTap:
                                         () => _showDesignDetail(context, item),
