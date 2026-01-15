@@ -203,7 +203,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/blog_section.dart';
+import 'package:servicesplatform/features/web/presentation/home/contact_section.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
@@ -261,8 +264,7 @@ class _DesignScreenState extends State<DesignScreen> {
     final theme = Theme.of(context);
     final isMobile = Responsive.isMobile(context);
     final isDesktop = Responsive.isDesktop(context);
-    final designList =
-        context.watch<AppBootstrapBloc>().state.data?.designs?.items;
+    final designList = context.watch<DesignsBloc>().state.designs;
     final categoryList = context.watch<AppBootstrapBloc>().state.data?.category;
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -319,11 +321,18 @@ class _DesignScreenState extends State<DesignScreen> {
                 /// ───────── GRID ─────────
                 BlocBuilder<DesignsBloc, DesignsState>(
                   builder: (context, state) {
-                    if (designList!.isEmpty) {
+                    if (state.listStatus == DesignsStatus.loading &&
+                        state.designs.isEmpty) {
+                      return _buildLoadingGrid(isDesktop, isMobile);
+                    }
+                    if (designList.isEmpty) {
                       return _buildEmpty();
                     }
 
                     return GridView.builder(
+                      addAutomaticKeepAlives: true,
+                      addRepaintBoundaries: true,
+                      addSemanticIndexes: true,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: state.designs.length,
@@ -335,15 +344,25 @@ class _DesignScreenState extends State<DesignScreen> {
                       ),
                       itemBuilder: (context, index) {
                         final item = designList[index];
-                        return DesignLuxuryCard(
-                          item: item,
-                          tag: "Premium",
-                          onTap: () => _showDesignDetail(context, item),
+                        return RepaintBoundary(
+                          child: DesignLuxuryCard(
+                            item: item,
+                            tag: item.categoryName!,
+                            onTap: () {
+                              _showDesignDetail(context, item);
+                              context.read<DesignsBloc>().add(
+                                IncrementDesignView(item.id),
+                              );
+                            },
+                          ),
                         );
                       },
                     );
                   },
                 ),
+                const BlogSection(),
+                const ContactSection(),
+                const FooterSection(),
               ],
             ),
           ),
@@ -360,7 +379,6 @@ class _DesignScreenState extends State<DesignScreen> {
       CategoryModel(id: 'all', name: 'All', imageUrl: ''),
       ...categories,
     ];
-    _selectedCategory = 'all';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -426,27 +444,27 @@ class _DesignScreenState extends State<DesignScreen> {
 
   // ───────────────── UI STATES ─────────────────
 
-  // Widget _buildLoadingGrid(bool isDesktop, bool isMobile) {
-  //   return GridView.builder(
-  //     shrinkWrap: true,
-  //     physics: const NeverScrollableScrollPhysics(),
-  //     itemCount: isDesktop ? 6 : 3,
-  //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //       crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
-  //       crossAxisSpacing: 30,
-  //       mainAxisSpacing: 30,
-  //       childAspectRatio: 1.45,
-  //     ),
-  //     itemBuilder:
-  //         (_, __) => Container(
-  //           decoration: BoxDecoration(
-  //             color: Colors.white.withValues(alpha: .04),
-  //             borderRadius: BorderRadius.circular(24),
-  //           ),
-  //           height: 240,
-  //         ),
-  //   );
-  // }
+  Widget _buildLoadingGrid(bool isDesktop, bool isMobile) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: isDesktop ? 6 : 3,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
+        crossAxisSpacing: 30,
+        mainAxisSpacing: 30,
+        childAspectRatio: 1.45,
+      ),
+      itemBuilder:
+          (_, __) => Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: .04),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            height: 240,
+          ),
+    );
+  }
 
   Widget _buildEmpty() {
     return Center(

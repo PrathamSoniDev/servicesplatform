@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../../models/category_model.dart';
 import '../../../../../models/design_item_models.dart';
 
 enum DesignsStatus { initial, loading, success, failure }
@@ -7,7 +8,8 @@ enum DesignsStatus { initial, loading, success, failure }
 class DesignsState extends Equatable {
   final DesignsStatus listStatus;
   final List<DesignItem> designs;
-
+  final List<DesignItem> allDesigns;
+  final List<CategoryModel> categories;
   final int page;
   final bool hasMore;
 
@@ -21,6 +23,8 @@ class DesignsState extends Equatable {
 
   const DesignsState({
     this.listStatus = DesignsStatus.initial,
+    this.allDesigns = const [],
+    this.categories = const [],
     this.designs = const [],
     this.page = 1,
     this.hasMore = true,
@@ -34,6 +38,8 @@ class DesignsState extends Equatable {
   DesignsState copyWith({
     DesignsStatus? listStatus,
     List<DesignItem>? designs,
+    List<DesignItem>? allDesigns,
+    List<CategoryModel>? categories,
     int? page,
     bool? hasMore,
     String? selectedCategory,
@@ -45,7 +51,9 @@ class DesignsState extends Equatable {
     return DesignsState(
       listStatus: listStatus ?? this.listStatus,
       designs: designs ?? this.designs,
+      categories: categories ?? this.categories,
       page: page ?? this.page,
+      allDesigns: allDesigns ?? this.allDesigns,
       hasMore: hasMore ?? this.hasMore,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       searchQuery: searchQuery ?? this.searchQuery,

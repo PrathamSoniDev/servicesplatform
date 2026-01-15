@@ -40,9 +40,10 @@ class TopNavBar extends StatefulWidget {
 }
 
 class _TopNavBarState extends State<TopNavBar> {
-  int? _hoveredIndex;
+  //  int? _hoveredIndex;
   bool _isMenuOpen = false;
   OverlayEntry? _overlayEntry;
+  final ValueNotifier<int?> _hoveredIndex = ValueNotifier(null);
 
   List<Map<String, dynamic>> get navLinks => [
     {'title': "Home", 'index': 0, 'onTap': widget.onHome},
@@ -69,6 +70,7 @@ class _TopNavBarState extends State<TopNavBar> {
   @override
   void dispose() {
     _overlayEntry?.remove();
+    _hoveredIndex.dispose();
     super.dispose();
   }
 
@@ -173,24 +175,29 @@ class _TopNavBarState extends State<TopNavBar> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  CircleAvatar(
+                                  AnimatedBorder(
                                     radius: 26,
-                                    backgroundColor: Colors.grey.shade800,
-                                    backgroundImage:
-                                        (profile?.profileImg != null &&
-                                                profile!.profileImg!.isNotEmpty)
-                                            ? CachedNetworkImageProvider(
-                                              profile.profileImg!,
-                                            )
-                                            : null,
-                                    child:
-                                        (profile?.profileImg == null ||
-                                                profile!.profileImg!.isEmpty)
-                                            ? const Icon(
-                                              Icons.person,
-                                              color: Colors.white,
-                                            )
-                                            : null,
+                                    child: CircleAvatar(
+                                      radius: 26,
+                                      backgroundColor: Colors.grey.shade800,
+                                      backgroundImage:
+                                          (profile?.profileImg != null &&
+                                                  profile!
+                                                      .profileImg!
+                                                      .isNotEmpty)
+                                              ? CachedNetworkImageProvider(
+                                                profile.profileImg!,
+                                              )
+                                              : null,
+                                      child:
+                                          (profile?.profileImg == null ||
+                                                  profile!.profileImg!.isEmpty)
+                                              ? const Icon(
+                                                Icons.person,
+                                                color: Colors.white,
+                                              )
+                                              : null,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
@@ -312,59 +319,127 @@ class _TopNavBarState extends State<TopNavBar> {
   ) {
     final int index = item['index'];
     final bool isActive = widget.activeIndex == index;
-    final bool isHovered = _hoveredIndex == index;
 
-    // The base UI of the button
-    Widget navContent = AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 18 : 22,
-        vertical: isMobile ? 12 : 10,
-      ),
-      decoration: BoxDecoration(
-        color:
-            isActive
-                ? Colors.white.withValues(alpha: .05)
-                : (isHovered
-                    ? Colors.white.withValues(alpha: .1)
-                    : Colors.transparent),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        item['title'],
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: isActive || isHovered ? Colors.white : Colors.white70,
-          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-          fontSize: isMobile ? 14 : 15,
-        ),
-      ),
-    );
+    return ValueListenableBuilder<int?>(
+      valueListenable: _hoveredIndex,
+      builder: (_, hovered, __) {
+        final bool isHovered = hovered == index;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hoveredIndex = index),
-      onExit: (_) => setState(() => _hoveredIndex = null),
-      child: GestureDetector(
-        onTap: () {
-          item['onTap']();
-          if (_isMenuOpen) _toggleMenu();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          // ISOLATION: RepaintBoundary prevents the animation from lagging the whole screen
-          child:
-              isActive
-                  ? RepaintBoundary(
-                    child: AnimatedBorder(
-                      radius: 12,
-                      strokeWidth: 2.0, // Thinner for Navbar
-                      child: navContent,
-                    ),
-                  )
-                  : navContent,
-        ),
-      ),
+        final navContent = AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 18 : 22,
+            vertical: isMobile ? 12 : 10,
+          ),
+          decoration: BoxDecoration(
+            color:
+                isActive
+                    ? Colors.white.withValues(alpha: .06)
+                    : (isHovered
+                        ? Colors.white.withValues(alpha: .12)
+                        : Colors.transparent),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            item['title'],
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: isActive || isHovered ? Colors.white : Colors.white70,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        );
+
+        return MouseRegion(
+          onEnter: (_) => _hoveredIndex.value = index,
+          onExit: (_) => _hoveredIndex.value = null,
+          child: GestureDetector(
+            onTap: () {
+              item['onTap']();
+              if (_isMenuOpen) _toggleMenu();
+            },
+            child: SizedBox(
+              height: 44,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child:
+                    isActive
+                        ? RepaintBoundary(
+                          child: AnimatedBorder(
+                            radius: 12,
+                            strokeWidth: 1.5,
+                            child: navContent,
+                          ),
+                        )
+                        : navContent,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+
+  // Widget _buildNavItem(
+  //   BuildContext context,
+  //   Map<String, dynamic> item,
+  //   bool isMobile,
+  // ) {
+  //   final int index = item['index'];
+  //   final bool isActive = widget.activeIndex == index;
+  //   final bool isHovered = _hoveredIndex == index;
+  //
+  //   // The base UI of the button
+  //   Widget navContent = AnimatedContainer(
+  //     duration: const Duration(milliseconds: 200),
+  //     padding: EdgeInsets.symmetric(
+  //       horizontal: isMobile ? 18 : 22,
+  //       vertical: isMobile ? 12 : 10,
+  //     ),
+  //     decoration: BoxDecoration(
+  //       color:
+  //           isActive
+  //               ? Colors.white.withValues(alpha: .05)
+  //               : (isHovered
+  //                   ? Colors.white.withValues(alpha: .1)
+  //                   : Colors.transparent),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Text(
+  //       item['title'],
+  //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  //         color: isActive || isHovered ? Colors.white : Colors.white70,
+  //         fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+  //         fontSize: isMobile ? 14 : 15,
+  //       ),
+  //     ),
+  //   );
+  //
+  //   return MouseRegion(
+  //     onEnter: (_) => setState(() => _hoveredIndex = index),
+  //     onExit: (_) => setState(() => _hoveredIndex = null),
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         item['onTap']();
+  //         if (_isMenuOpen) _toggleMenu();
+  //       },
+  //       child: Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 4),
+  //         // ISOLATION: RepaintBoundary prevents the animation from lagging the whole screen
+  //         child:
+  //             isActive
+  //                 ? RepaintBoundary(
+  //                   child: AnimatedBorder(
+  //                     radius: 12,
+  //                     strokeWidth: 2.0, // Thinner for Navbar
+  //                     child: navContent,
+  //                   ),
+  //                 )
+  //                 : navContent,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildAdaptiveToggle(ThemeData theme) {
     return GestureDetector(

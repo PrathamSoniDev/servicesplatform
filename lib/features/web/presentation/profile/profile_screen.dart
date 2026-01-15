@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
@@ -6,9 +5,9 @@ import 'package:servicesplatform/features/web/widgets/blog_card.dart';
 import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
 import 'package:servicesplatform/features/web/widgets/prodile_tab_bar.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
-import 'package:servicesplatform/models/profile_model.dart';
-import 'package:servicesplatform/models/design_item_models.dart';
 import 'package:servicesplatform/models/blog_model.dart';
+import 'package:servicesplatform/models/design_item_models.dart';
+import 'package:servicesplatform/models/profile_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -49,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       bannerImage:
           "https://images.unsplash.com/photo-1558655146-d09347e92766?w=800",
       viewsCount: 1200,
+      categoryName: "name",
       likesCount: 340,
       categoryId: 'design',
       images: const [],
@@ -119,8 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: ProfileTabBar(
                         selectedIndex: selectedTabIndex,
                         tabs: tabs,
-                        onTabSelected: (i) =>
-                            setState(() => selectedTabIndex = i),
+                        onTabSelected:
+                            (i) => setState(() => selectedTabIndex = i),
                       ),
                     ),
                   ),
@@ -156,25 +156,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     switch (selectedTabIndex) {
       case 0: // Likes
         designTitle = "DESIGN INSPIRATIONS";
-        designSub = "A collection of interfaces that set the standard for modern digital craft.";
+        designSub =
+            "A collection of interfaces that set the standard for modern digital craft.";
         blogTitle = "BOOKMARKED INSIGHTS";
-        blogSub = "Key industry perspectives and technical breakthroughs saved for reference.";
+        blogSub =
+            "Key industry perspectives and technical breakthroughs saved for reference.";
         designCount = profile.likedDesigns.length;
-        blogCount = 3; 
+        blogCount = 3;
         break;
       case 1: // Shared
         designTitle = "SHARED PORTFOLIO";
-        designSub = "Publicly showcased projects demonstrating technical and visual expertise.";
+        designSub =
+            "Publicly showcased projects demonstrating technical and visual expertise.";
         blogTitle = "PUBLISHED ARTICLES";
-        blogSub = "Original thoughts shared with the community on design and engineering.";
+        blogSub =
+            "Original thoughts shared with the community on design and engineering.";
         designCount = 4;
         blogCount = 2;
         break;
       default: // Recent View
         designTitle = "RECENT ACTIVITY";
-        designSub = "A chronological view of design patterns and concepts recently explored.";
+        designSub =
+            "A chronological view of design patterns and concepts recently explored.";
         blogTitle = "READING HISTORY";
-        blogSub = "Technical deep-dives and editorial content visited in your latest sessions.";
+        blogSub =
+            "Technical deep-dives and editorial content visited in your latest sessions.";
         designCount = profile.recentDesigns.length;
         blogCount = 5;
     }
@@ -207,14 +213,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 transitionDuration: const Duration(milliseconds: 350),
                 barrierDismissible: true,
                 barrierColor: Colors.black.withOpacity(0.8),
-                pageBuilder: (_, __, ___) =>
-                    DesignDetailOverlay(data: dummyDesign),
+                pageBuilder:
+                    (_, __, ___) => DesignDetailOverlay(data: dummyDesign),
                 transitionsBuilder: (_, animation, __, child) {
                   return FadeTransition(
                     opacity: animation,
                     child: ScaleTransition(
                       scale: Tween<double>(begin: 0.98, end: 1.0).animate(
-                        CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
                       ),
                       child: child,
                     ),
@@ -286,9 +295,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (isDesktop)
           Row(
             children: [
-              _buildHeaderStat(profile.recentDesigns.length.toString(), "DESIGN VIEWS"),
+              _buildHeaderStat(
+                profile.recentDesigns.length.toString(),
+                "DESIGN VIEWS",
+              ),
               _buildHeaderDivider(),
-              _buildHeaderStat(profile.likedDesigns.length.toString(), "LIKED DESIGNS"),
+              _buildHeaderStat(
+                profile.likedDesigns.length.toString(),
+                "LIKED DESIGNS",
+              ),
             ],
           ),
       ],
@@ -378,11 +393,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blueAccent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.blueAccent.withOpacity(0.3), width: 0.5),
+                    border: Border.all(
+                      color: Colors.blueAccent.withOpacity(0.3),
+                      width: 0.5,
+                    ),
                   ),
                   child: Text(
                     count.toString().padLeft(2, '0'),
@@ -443,8 +464,10 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 70;
   @override
   Widget build(
-          BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      child;
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => child;
   @override
   bool shouldRebuild(covariant _StickyTabBarDelegate oldDelegate) => true;
 }

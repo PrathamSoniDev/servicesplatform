@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../models/category_model.dart';
 import '../../../../../models/design_item_models.dart';
+import '../../../../../models/design_list_response.dart';
 import '../../../../../services/design_repository.dart';
 import 'designs_event.dart';
 import 'designs_state.dart';
@@ -13,18 +15,21 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
 
   Timer? _searchDebounce;
 
-  DesignsBloc(this.repository, {List<DesignItem>? initialDesigns})
-    : super(
-        DesignsState(
-          designs: initialDesigns ?? const [],
-          listStatus:
-              initialDesigns != null && initialDesigns.isNotEmpty
-                  ? DesignsStatus.success
-                  : DesignsStatus.initial,
-          page: 1,
-          hasMore: true,
-        ),
-      ) {
+  DesignsBloc(
+    this.repository, {
+    List<DesignItem>? initialDesigns,
+    List<CategoryModel>? categories,
+  }) : super(
+         DesignsState(
+           designs: initialDesigns ?? const [],
+           allDesigns: initialDesigns ?? const [],
+           categories: categories ?? const [],
+           listStatus:
+               initialDesigns != null && initialDesigns.isNotEmpty
+                   ? DesignsStatus.success
+                   : DesignsStatus.initial,
+         ),
+       ) {
     on<FetchDesigns>(_onFetchDesigns);
     on<FetchDesignsByCategory>(_onFetchByCategory);
     on<SearchDesigns>(_onSearchDesigns);
@@ -39,9 +44,14 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
     Emitter<DesignsState> emit,
   ) async {
     // 🔒 Prevent refetch if already bootstrapped and not loadMore
-    if (!event.loadMore &&
+    final isInitialBootstrap =
+        !event.loadMore &&
         state.designs.isNotEmpty &&
-        state.listStatus == DesignsStatus.success) {
+        state.listStatus == DesignsStatus.success &&
+        state.selectedCategory == null &&
+        state.searchQuery.isEmpty;
+
+    if (isInitialBootstrap) {
       return;
     }
 
@@ -59,11 +69,28 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
         page: event.page,
         categoryId: state.selectedCategory,
       );
-
+      final Map<String, String> categoryMap = {
+        for (final c in state.categories) c.id: c.name,
+      };
+      final DesignListResponse enrichedDesigns = DesignListResponse(
+        items:
+            response.items
+                .map(
+                  (design) => design.copyWith(
+                    categoryName: categoryMap[design.categoryId],
+                  ),
+                )
+                .toList(),
+        total: response.total,
+        page: response.page,
+        limit: response.limit,
+        totalPages: response.totalPages,
+      );
       emit(
         state.copyWith(
           listStatus: DesignsStatus.success,
-          designs: response.items,
+          designs: enrichedDesigns.items,
+          allDesigns: response.items, // 🔑 source list
           page: response.page,
           hasMore: response.page < response.totalPages,
         ),
@@ -87,8 +114,11 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
     emit(
       state.copyWith(
         selectedCategory: event.categoryId,
+        designs: const [],
+        allDesigns: const [],
         page: 1,
         hasMore: true,
+        listStatus: DesignsStatus.loading,
       ),
     );
 
@@ -101,8 +131,27 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
     _searchDebounce?.cancel();
 
     _searchDebounce = Timer(const Duration(milliseconds: 450), () {
-      emit(state.copyWith(searchQuery: event.query, page: 1, hasMore: true));
-      add(const FetchDesigns());
+      final query = event.query.trim().toLowerCase();
+
+      // 🔹 Clear search → restore full list
+      if (query.isEmpty) {
+        emit(state.copyWith(searchQuery: '', designs: state.allDesigns));
+        return;
+      }
+
+      // 🔹 Filter locally
+      final filtered =
+          state.allDesigns.where((design) {
+            final title = design.title?.toLowerCase() ?? '';
+            final subtitle = design.subtitle?.toLowerCase() ?? '';
+            final category = design.categoryName?.toLowerCase() ?? '';
+
+            return title.contains(query) ||
+                subtitle.contains(query) ||
+                category.contains(query);
+          }).toList();
+
+      emit(state.copyWith(searchQuery: query, designs: filtered));
     });
   }
 

@@ -117,6 +117,7 @@ class MyApp extends StatelessWidget {
                     (_) => DesignsBloc(
                       context.read<DesignRepository>(),
                       initialDesigns: bootstrapData.designs?.items,
+                      categories: bootstrapData.category,
                     ),
               ),
             ],
