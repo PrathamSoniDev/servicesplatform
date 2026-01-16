@@ -1,75 +1,93 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/presentation/about_us/about_screen.dart';
 import 'package:servicesplatform/features/web/presentation/blog/blog_detail_screen.dart';
 import 'package:servicesplatform/features/web/presentation/blog/blog_screen.dart';
 import 'package:servicesplatform/features/web/presentation/contact_us/contact_us.dart';
-// Import your design screen here
 import 'package:servicesplatform/features/web/presentation/designs/design_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
 import 'package:servicesplatform/features/web/presentation/profile/profile_screen.dart';
 
+import '../features/web/presentation/designs/design_overlay_screen.dart';
 import '../models/blog_model.dart';
+import '../models/design_item_models.dart';
 
 class AppRouter {
+  AppRouter._();
+
+  static final GlobalKey<NavigatorState> rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+
   static const String home = '/';
   static const String aboutUs = '/about';
   static const String blog = '/blog';
   static const String contact = '/contact';
-  static const String designs = '/designs'; // Added Design Path constant
+  static const String designs = '/designs';
   static const String profile = '/profile';
 
-  final GoRouter router = GoRouter(
+  static final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: home,
     debugLogDiagnostics: true,
     routes: [
-      GoRoute(
-        path: home,
-        name: home,
-        builder: (context, state) => const HomeScreen(),
-      ),
-      GoRoute(
-        path: aboutUs,
-        name: aboutUs,
-        builder: (context, state) => const AboutScreen(),
-      ),
+      GoRoute(path: home, builder: (_, __) => const HomeScreen()),
 
-      // BLOG PARENT ROUTE
+      GoRoute(path: aboutUs, builder: (_, __) => const AboutScreen()),
+
       GoRoute(
         path: blog,
-        name: blog,
-        builder: (context, state) => const BlogScreen(),
+        builder: (_, __) => const BlogScreen(),
         routes: [
-          // BLOG DETAIL CHILD ROUTE
           GoRoute(
             path: ':id',
-            name: ':id',
             builder: (context, state) {
-              final id = state.pathParameters['id'];
-              final blogModel = state.extra as BlogModel?;
-
-              return BlogDetailScreen(id: id, blog: blogModel);
+              final id = state.pathParameters['id']!;
+              final blog = state.extra as BlogModel?;
+              return BlogDetailScreen(id: id, blog: blog);
             },
           ),
         ],
       ),
 
-      GoRoute(
-        path: contact,
-        name: contact,
-        builder: (context, state) => const ContactUs(),
-      ),
+      GoRoute(path: contact, builder: (_, __) => const ContactUs()),
 
-      GoRoute(
-        path: profile,
-        name: profile,
-        builder: (context, state) => const ProfileScreen(),
-      ),
+      GoRoute(path: profile, builder: (_, __) => const ProfileScreen()),
 
-      // DESIGN SCREEN ROUTE
+      GoRoute(path: designs, builder: (_, __) => const DesignScreen()),
+
+      // ✅ DESIGN OVERLAY ROUTE
       GoRoute(
-        path: designs,
-        name: designs,
-        builder: (context, state) => const DesignScreen(),
+        path: '/design/:slug',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final design = state.extra as DesignItem?;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            opaque: false,
+            barrierDismissible: true,
+            barrierColor: Colors.black.withValues(alpha: .85),
+            transitionDuration: const Duration(milliseconds: 450),
+            child: DesignDetailOverlay(data: design!),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.08),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
+                  child: child,
+                ),
+              );
+            },
+          );
+        },
       ),
     ],
   );

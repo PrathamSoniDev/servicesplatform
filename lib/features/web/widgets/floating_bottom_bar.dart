@@ -1,21 +1,26 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class LuxuryFloatingBottomBar extends StatefulWidget {
+class LuxuryFloatingBottomBar extends StatelessWidget {
   final bool isMobile;
   final VoidCallback? onLike;
   final VoidCallback? onShare;
   final VoidCallback? onSave;
 
-  // Kept for compatibility with your existing parent widgets
   final String? views;
   final String? likes;
   final VoidCallback? onHire;
 
+  final bool isLiked;
+  final bool isSaved;
+
   const LuxuryFloatingBottomBar({
     super.key,
     required this.isMobile,
+    required this.isLiked,
+    required this.isSaved,
     this.onLike,
     this.onShare,
     this.onSave,
@@ -25,60 +30,50 @@ class LuxuryFloatingBottomBar extends StatefulWidget {
   });
 
   @override
-  State<LuxuryFloatingBottomBar> createState() => _LuxuryFloatingBottomBarState();
-}
-
-class _LuxuryFloatingBottomBarState extends State<LuxuryFloatingBottomBar> {
-  bool _isLiked = false;
-  bool _isSaved = false;
-
-  @override
   Widget build(BuildContext context) {
-    return _buildVerticalGlassBar();
+    return _buildVerticalGlassBar(context);
   }
 
-  Widget _buildVerticalGlassBar() {
+  Widget _buildVerticalGlassBar(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(100),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30), // Enhanced luxury blur
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
         child: Container(
-          width: 80, // Fixed width for a consistent vertical look
+          width: 80,
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.03),
+            color: Colors.white.withValues(alpha: .03),
             borderRadius: BorderRadius.circular(100),
             border: Border.all(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withValues(alpha: .12),
               width: 0.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: .3),
                 blurRadius: 40,
                 spreadRadius: -10,
-              )
+              ),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // LIKE ACTION
               _buildVerticalAction(
-                icon: _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                icon:
+                    isLiked
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
                 label: "LIKE",
-                color: _isLiked ? Colors.pinkAccent : Colors.white,
-                isActive: _isLiked,
+                color: isLiked ? Colors.pinkAccent : Colors.white,
+                isActive: isLiked,
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  setState(() => _isLiked = !_isLiked);
-                  widget.onLike?.call();
+                  onLike?.call(); // 🔑 Bloc decides
                 },
               ),
-              
-              _buildHorizontalDivider(),
-
-              // SHARE ACTION
+              _divider(),
               _buildVerticalAction(
                 icon: Icons.ios_share_rounded,
                 label: "SHARE",
@@ -86,22 +81,21 @@ class _LuxuryFloatingBottomBarState extends State<LuxuryFloatingBottomBar> {
                 isActive: false,
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  widget.onShare?.call();
+                  onShare?.call();
                 },
               ),
-
-              _buildHorizontalDivider(),
-
-              // SAVE ACTION
+              _divider(),
               _buildVerticalAction(
-                icon: _isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                icon:
+                    isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
                 label: "SAVE",
-                color: _isSaved ? Colors.amberAccent : Colors.white,
-                isActive: _isSaved,
+                color: isSaved ? Colors.amberAccent : Colors.white,
+                isActive: isSaved,
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  setState(() => _isSaved = !_isSaved);
-                  widget.onSave?.call();
+                  onSave?.call();
                 },
               ),
             ],
@@ -123,28 +117,31 @@ class _LuxuryFloatingBottomBarState extends State<LuxuryFloatingBottomBar> {
       borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         width: double.infinity,
         decoration: BoxDecoration(
-          boxShadow: isActive ? [
-            BoxShadow(
-              color: color.withOpacity(0.1),
-              blurRadius: 20,
-            )
-          ] : [],
+          boxShadow:
+              isActive
+                  ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: .15),
+                      blurRadius: 20,
+                    ),
+                  ]
+                  : [],
         ),
         child: Column(
           children: [
             Icon(
               icon,
-              color: color.withOpacity(isActive ? 1.0 : 0.7),
+              color: color.withValues(alpha: isActive ? 1 : 0.7),
               size: 24,
             ),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
-                color: color.withOpacity(isActive ? 0.9 : 0.3),
+                color: color.withValues(alpha: isActive ? 0.9 : 0.3),
                 fontSize: 8,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.5,
@@ -156,12 +153,12 @@ class _LuxuryFloatingBottomBarState extends State<LuxuryFloatingBottomBar> {
     );
   }
 
-  Widget _buildHorizontalDivider() {
+  Widget _divider() {
     return Container(
       width: 30,
       height: 1,
       margin: const EdgeInsets.symmetric(vertical: 10),
-      color: Colors.white.withOpacity(0.06),
+      color: Colors.white.withValues(alpha: .06),
     );
   }
 }

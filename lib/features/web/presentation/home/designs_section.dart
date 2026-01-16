@@ -210,6 +210,14 @@ class _DesignsSectionState extends State<DesignsSection> {
     super.initState();
   }
 
+  String toSlug(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+  }
+
   /// High-end Detail Overlay
   void _showDesignDetail(BuildContext context, DesignItem item) {
     showGeneralDialog(
@@ -338,7 +346,17 @@ class _DesignsSectionState extends State<DesignsSection> {
                                   child: DesignLuxuryCard(
                                     item: item!,
                                     onTap: () {
-                                      _showDesignDetail(context, item);
+                                      final slug = toSlug(
+                                        item.title ?? item.id,
+                                      );
+                                      debugPrint(
+                                        "Navigating to design detail: $slug",
+                                      );
+                                      context.go(
+                                        '/design/$slug',
+                                        extra: item, // pass full model
+                                      );
+
                                       context.read<DesignsBloc>().add(
                                         IncrementDesignView(item.id),
                                       );

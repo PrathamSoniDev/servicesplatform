@@ -204,7 +204,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/features/web/presentation/common/footer_section.dart';
-import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/blog_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/contact_section.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
@@ -213,7 +212,6 @@ import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
 import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 import 'package:servicesplatform/models/category_model.dart';
 
-import '../../../../models/design_item_models.dart';
 import 'bloc/designs_bloc.dart';
 import 'bloc/designs_event.dart';
 import 'bloc/designs_state.dart';
@@ -234,30 +232,38 @@ class _DesignScreenState extends State<DesignScreen> {
     super.initState();
   }
 
-  void _showDesignDetail(BuildContext context, DesignItem item) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Design Detail',
-      barrierColor: Colors.black.withValues(alpha: .8),
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (_, __, ___) => DesignDetailOverlay(data: item),
-      transitionBuilder: (_, anim, __, child) {
-        return FadeTransition(
-          opacity: anim,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.05),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
-            ),
-            child: child,
-          ),
-        );
-      },
-    );
+  String toSlug(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
   }
+
+  // void _showDesignDetail(BuildContext context, DesignItem item) {
+  //   showGeneralDialog(
+  //     context: context,
+  //     barrierDismissible: true,
+  //     barrierLabel: 'Design Detail',
+  //     barrierColor: Colors.black.withValues(alpha: .8),
+  //     transitionDuration: const Duration(milliseconds: 400),
+  //     pageBuilder: (_, __, ___) => DesignDetailOverlay(data: item),
+  //     transitionBuilder: (_, anim, __, child) {
+  //       return FadeTransition(
+  //         opacity: anim,
+  //         child: SlideTransition(
+  //           position: Tween<Offset>(
+  //             begin: const Offset(0, 0.05),
+  //             end: Offset.zero,
+  //           ).animate(
+  //             CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+  //           ),
+  //           child: child,
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -282,89 +288,91 @@ class _DesignScreenState extends State<DesignScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 80 : 24,
-              vertical: isMobile ? 32 : 60,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// ───────── HEADER ─────────
-                Text(
-                  "All Designs",
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: isMobile ? 36 : 56,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// ───────── HEADER ─────────
+              Text(
+                "All Designs",
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontSize: isMobile ? 36 : 56,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: isMobile ? double.infinity : 600,
+                child: Text(
+                  "Browse our complete collection of professionally crafted designs for every business need.",
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white60,
+                    height: 1.6,
                   ),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: isMobile ? double.infinity : 600,
-                  child: Text(
-                    "Browse our complete collection of professionally crafted designs for every business need.",
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white60,
-                      height: 1.6,
+              ),
+
+              const SizedBox(height: 50),
+
+              _sectionLabel("Filter by Category", theme),
+              const SizedBox(height: 20),
+              _buildFilters(theme, categoryList!),
+              const SizedBox(height: 40),
+
+              /// ───────── GRID ─────────
+              BlocBuilder<DesignsBloc, DesignsState>(
+                builder: (context, state) {
+                  if (state.listStatus == DesignsStatus.loading &&
+                      state.designs.isEmpty) {
+                    return _buildLoadingGrid(isDesktop, isMobile);
+                  }
+                  if (designList.isEmpty) {
+                    return _buildEmpty();
+                  }
+
+                  return GridView.builder(
+                    addAutomaticKeepAlives: true,
+                    addRepaintBoundaries: true,
+                    addSemanticIndexes: true,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.designs.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
+                      crossAxisSpacing: 30,
+                      mainAxisSpacing: 30,
+                      childAspectRatio: 1.45,
                     ),
-                  ),
-                ),
+                    itemBuilder: (context, index) {
+                      final item = designList[index];
+                      return RepaintBoundary(
+                        child: DesignLuxuryCard(
+                          item: item,
+                          tag: item.categoryName!,
+                          onTap: () {
+                            final slug = toSlug(item.title ?? item.id);
+                            state.selectedDesign = item;
+                            context.push(
+                              '/design/$slug',
+                              extra:
+                                  state.selectedDesign ??
+                                  item, // pass full model
+                            );
 
-                const SizedBox(height: 50),
-
-                _sectionLabel("Filter by Category", theme),
-                const SizedBox(height: 20),
-                _buildFilters(theme, categoryList!),
-                const SizedBox(height: 40),
-
-                /// ───────── GRID ─────────
-                BlocBuilder<DesignsBloc, DesignsState>(
-                  builder: (context, state) {
-                    if (state.listStatus == DesignsStatus.loading &&
-                        state.designs.isEmpty) {
-                      return _buildLoadingGrid(isDesktop, isMobile);
-                    }
-                    if (designList.isEmpty) {
-                      return _buildEmpty();
-                    }
-
-                    return GridView.builder(
-                      addAutomaticKeepAlives: true,
-                      addRepaintBoundaries: true,
-                      addSemanticIndexes: true,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: state.designs.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isDesktop ? 3 : (isMobile ? 1 : 2),
-                        crossAxisSpacing: 30,
-                        mainAxisSpacing: 30,
-                        childAspectRatio: 1.45,
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = designList[index];
-                        return RepaintBoundary(
-                          child: DesignLuxuryCard(
-                            item: item,
-                            tag: item.categoryName!,
-                            onTap: () {
-                              _showDesignDetail(context, item);
-                              context.read<DesignsBloc>().add(
-                                IncrementDesignView(item.id),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const BlogSection(),
-                const ContactSection(),
-                const FooterSection(),
-              ],
-            ),
+                            context.read<DesignsBloc>().add(
+                              IncrementDesignView(item.id),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const BlogSection(),
+              const ContactSection(),
+              const FooterSection(),
+            ],
           ),
         ),
       ),
@@ -391,26 +399,28 @@ class _DesignScreenState extends State<DesignScreen> {
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 10),
-                    child: ChoiceChip(
-                      label: Text(cat.name),
-                      selected: isActive,
-                      selectedColor: AppTheme.primary,
-                      backgroundColor: Colors.white.withValues(alpha: .05),
-                      labelStyle: TextStyle(
-                        color: isActive ? Colors.white : Colors.white70,
-                        fontSize: 13,
-                      ),
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedCategory = cat.id;
-                        });
+                    child: RepaintBoundary(
+                      child: ChoiceChip(
+                        label: Text(cat.name),
+                        selected: isActive,
+                        selectedColor: AppTheme.primary,
+                        backgroundColor: Colors.white.withValues(alpha: .05),
+                        labelStyle: TextStyle(
+                          color: isActive ? Colors.white : Colors.white70,
+                          fontSize: 13,
+                        ),
+                        onSelected: (_) {
+                          setState(() {
+                            _selectedCategory = cat.id;
+                          });
 
-                        context.read<DesignsBloc>().add(
-                          FetchDesignsByCategory(
-                            cat.id == 'all' ? null : cat.id,
-                          ),
-                        );
-                      },
+                          context.read<DesignsBloc>().add(
+                            FetchDesignsByCategory(
+                              cat.id == 'all' ? null : cat.id,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   );
                 }).toList(),

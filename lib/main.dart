@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:servicesplatform/features/web/presentation/blog/bloc/blog_bloc.dart';
 
 import 'core/app_router.dart';
 import 'core/bootstrap/app_bootstrap_repository.dart';
@@ -98,7 +99,7 @@ class MyApp extends StatelessWidget {
             child: MaterialApp.router(
               debugShowCheckedModeBanner: false,
               theme: ThemeData.dark(useMaterial3: true),
-              routerConfig: AppRouter().router,
+              routerConfig: AppRouter.router,
             ),
           );
         }
@@ -120,12 +121,19 @@ class MyApp extends StatelessWidget {
                       categories: bootstrapData.category,
                     ),
               ),
+              BlocProvider(
+                create:
+                    (_) => BlogBloc(
+                      context.read<BlogRepository>(),
+                      initialBlogs: bootstrapData.blogs?.items,
+                    ),
+              ),
             ],
             child: MaterialApp.router(
               debugShowCheckedModeBanner: false,
               title: 'Devnex Services',
               theme: AppThemeBuilder.build(theme),
-              routerConfig: AppRouter().router,
+              routerConfig: AppRouter.router,
             ),
           ),
         );

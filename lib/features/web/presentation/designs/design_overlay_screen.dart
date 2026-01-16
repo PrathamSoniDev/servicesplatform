@@ -1,9 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
+import 'package:servicesplatform/core/share/share_functions.dart';
+import 'package:servicesplatform/features/web/presentation/designs/bloc/designs_bloc.dart';
+import 'package:servicesplatform/features/web/presentation/designs/bloc/designs_event.dart';
+import 'package:servicesplatform/features/web/widgets/auth_popup.dart';
 import 'package:servicesplatform/features/web/widgets/floating_bottom_bar.dart';
 import 'package:servicesplatform/models/design_item_models.dart';
+
+import '../../../../core/share/uri_utils.dart';
+import '../../../auth/auth_bloc.dart';
 
 class NoScrollbarBehavior extends ScrollBehavior {
   @override
@@ -25,7 +34,8 @@ class DesignDetailOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 600;
-
+    final designBloc = context.read<DesignsBloc>();
+    final appBootStrap = context.watch<AppBootstrapBloc>().state.data?.profile;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -69,12 +79,46 @@ class DesignDetailOverlay extends StatelessWidget {
               bottom: 0,
               child: Center(
                 child: LuxuryFloatingBottomBar(
+                  isLiked: data.isLiked!,
+                  isSaved: false,
+                  onShare: () {
+                    final url = UrlUtils.designUrl(
+                      slug: data.title!.toString().toLowerCase().replaceAll(
+                        '',
+                        '-',
+                      ),
+                    );
+
+                    ShareFunctions().shareLink(
+                      title: data.title ?? 'Design',
+                      description: data.subtitle ?? '',
+                      url: url,
+                    );
+                  },
                   isMobile: isMobile,
                   views: data.viewsCount.toString(),
                   likes: data.likesCount.toString(),
-                  onLike: () {},
+                  onLike: () {
+                    if (appBootStrap != null &&
+                        !appBootStrap.likedDesigns.contains(data.id)) {
+                      designBloc.add(ToggleDesignLike(data.id));
+
+                      return;
+                    } else if (appBootStrap == null) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (dialogContext) {
+                          return BlocProvider.value(
+                            value: context.read<AuthBloc>(),
+                            child: const AuthPopup(),
+                          );
+                        },
+                      );
+                    }
+                  },
                   onHire: () {
-                    context.go('/contact');
+                    context.push('/contact');
                   },
                 ),
               ),
@@ -278,7 +322,13 @@ class DesignDetailOverlay extends StatelessWidget {
       child: Row(
         children: [
           _blurButton(
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
             child: const Icon(
               Icons.close_rounded,
               color: Colors.white,

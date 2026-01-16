@@ -190,15 +190,31 @@ class DesignsBloc extends Bloc<DesignsEvent, DesignsState> {
     Emitter<DesignsState> emit,
   ) async {
     try {
-      final updated = await repository.incrementLikes(
-        event.designId,
-        delta: event.delta,
+      // 1️⃣ Find design (from list or detail)
+      final DesignItem? current = state.designs.firstWhere(
+        (d) => d.id == event.designId,
+        orElse: () => state.selectedDesign!,
       );
 
+      if (current == null) return;
+
+      // 2️⃣ Decide action based on user behavior
+      final bool? isAlreadyLiked = current.isLiked;
+
+      final DesignItem updated =
+          isAlreadyLiked!
+              ? await repository.decrementLikes(current.id)
+              : await repository.incrementLikes(current.id);
+
+      // 3️⃣ Update list + detail atomically
       emit(
         state.copyWith(
           designs:
               state.designs
+                  .map((d) => d.id == updated.id ? updated : d)
+                  .toList(),
+          allDesigns:
+              state.allDesigns
                   .map((d) => d.id == updated.id ? updated : d)
                   .toList(),
           selectedDesign:

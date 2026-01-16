@@ -53,27 +53,6 @@ class AppBootstrapRepository {
       final heroes = await heroFuture;
       final designs = await designFuture;
       final blogs = await blogFuture;
-
-      final Map<String, String> categoryMap = {
-        for (final c in category) c.id: c.name,
-      };
-
-      // 🔹 Enrich designs with categoryName
-      final DesignListResponse enrichedDesigns = DesignListResponse(
-        items:
-            designs.items
-                .map(
-                  (design) => design.copyWith(
-                    categoryName: categoryMap[design.categoryId],
-                  ),
-                )
-                .toList(),
-        total: designs.total,
-        page: designs.page,
-        limit: designs.limit,
-        totalPages: designs.totalPages,
-      );
-
       ProfileModel? profile;
       if (profileFuture != null) {
         try {
@@ -83,6 +62,27 @@ class AppBootstrapRepository {
           profile = null;
         }
       }
+      final Map<String, String> categoryMap = {
+        for (final c in category) c.id: c.name,
+      };
+      final Set<String> likedDesignIds =
+          profile?.likedDesigns.toSet() ?? <String>{};
+      // 🔹 Enrich designs with categoryName
+      final DesignListResponse enrichedDesigns = DesignListResponse(
+        items:
+            designs.items.map((design) {
+              final bool isLiked = likedDesignIds.contains(design.id);
+              return design.copyWith(
+                categoryName: categoryMap[design.categoryId],
+                isLiked: isLiked,
+              );
+            }).toList(),
+        total: designs.total,
+        page: designs.page,
+        limit: designs.limit,
+        totalPages: designs.totalPages,
+      );
+
       debugPrint(
         "Final Enrich Designs are : ${enrichedDesigns.items[0].categoryName}",
       );

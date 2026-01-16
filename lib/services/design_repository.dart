@@ -60,8 +60,22 @@ class DesignRepository {
     try {
       debugPrint('📡 PATCH /api/designs/$id/like');
 
-      final response = await _dio.patch(
-        '/api/designs/$id/likes',
+      final response = await _dio.post(
+        '/api/designs/$id/like',
+        data: {'delta': delta},
+      );
+      return DesignItem.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(_extractError(e));
+    }
+  }
+
+  Future<DesignItem> decrementLikes(String id, {int delta = 1}) async {
+    try {
+      debugPrint('📡 POST /api/designs/$id/unlike');
+
+      final response = await _dio.post(
+        '/api/designs/$id/unlike',
         data: {'delta': delta},
       );
       return DesignItem.fromJson(response.data);

@@ -12,11 +12,13 @@ class DesignItem {
   final String fonts;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool? isLiked;
 
   const DesignItem({
     required this.id,
     required this.categoryId,
     this.categoryName,
+    this.isLiked,
     this.title,
     this.subtitle,
     this.bannerImage,
@@ -77,7 +79,7 @@ class DesignItem {
 }
 
 extension DesignItemCopy on DesignItem {
-  DesignItem copyWith({String? categoryName}) {
+  DesignItem copyWith({String? categoryName, bool? isLiked}) {
     return DesignItem(
       id: id,
       categoryId: categoryId,
@@ -92,6 +94,7 @@ extension DesignItemCopy on DesignItem {
       fonts: fonts,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      isLiked: isLiked,
     );
   }
 }

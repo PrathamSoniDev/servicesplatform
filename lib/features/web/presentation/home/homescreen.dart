@@ -34,8 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final contactKey = GlobalKey();
   late final List<GlobalKey> _sectionKeys;
   late final HeroRepository _heroRepository;
-
-  int currentSectionIndex = 0;
+  bool _isAutoScrolling = false;
+  final ValueNotifier<int> _sectionIndex = ValueNotifier(0);
 
   @override
   void initState() {
@@ -58,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _sectionIndex.dispose();
     super.dispose();
   }
 
@@ -70,16 +71,15 @@ class _HomeScreenState extends State<HomeScreen> {
   // ───────────────── SCROLL SPY ─────────────────
   void _onScroll() {
     for (int i = 0; i < _sectionKeys.length; i++) {
-      final context = _sectionKeys[i].currentContext;
-      if (context == null) continue;
+      final ctx = _sectionKeys[i].currentContext;
+      if (ctx == null) continue;
 
-      final box = context.findRenderObject() as RenderBox;
+      final box = ctx.findRenderObject() as RenderBox;
       final position = box.localToGlobal(Offset.zero).dy;
 
-      // Navbar height ≈ 72
       if (position <= 120 && position + box.size.height > 120) {
-        if (currentSectionIndex != i) {
-          setState(() => currentSectionIndex = i);
+        if (_sectionIndex.value != i) {
+          _sectionIndex.value = i; // ✅ NO REBUILD
         }
         break;
       }
@@ -87,16 +87,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ───────────────── SCROLL TO SECTION ─────────────────
-  void scrollToSection(int index) {
+  void scrollToSection(int index) async {
     final ctx = _sectionKeys[index].currentContext;
-    if (ctx != null) {
-      Scrollable.ensureVisible(
-        ctx,
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutCubic,
-        alignment: 0.0,
-      );
-    }
+    if (ctx == null) return;
+
+    _isAutoScrolling = true;
+
+    await Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeInOutCubic,
+    );
+
+    // Delay allows scroll to settle
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _isAutoScrolling = false;
+    });
   }
 
   @override
@@ -206,26 +212,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // ───────── NAVBAR ─────────
-          TopNavBar(
-            activeIndex: currentSectionIndex,
-            onHome:
-                () =>
-                    currentRoute == AppRouter.home
-                        ? scrollToSection(0)
-                        : context.go(AppRouter.home),
-            onDesigns: () => scrollToSection(1),
-            onAbout:
-                () =>
-                    currentRoute == AppRouter.home
-                        ? scrollToSection(2)
-                        : context.push(AppRouter.aboutUs),
-            onTestimonials: () => scrollToSection(3),
-            onBlog: () => scrollToSection(4),
-            onContact:
-                () =>
-                    currentRoute == AppRouter.home
-                        ? scrollToSection(5)
-                        : context.push(AppRouter.contact),
+          ValueListenableBuilder<int>(
+            valueListenable: _sectionIndex,
+            builder: (_, index, __) {
+              return TopNavBar(
+                activeIndex: index,
+                onHome: () => scrollToSection(0),
+                onDesigns: () => scrollToSection(1),
+                onAbout: () => scrollToSection(2),
+                onTestimonials: () => scrollToSection(3),
+                onBlog: () => scrollToSection(4),
+                onContact: () => scrollToSection(5),
+              );
+            },
           ),
         ],
       ),

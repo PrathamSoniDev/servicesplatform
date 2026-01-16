@@ -252,7 +252,6 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/features/web/presentation/home/custom_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../utils/responsive.dart';
@@ -426,19 +425,13 @@ class _HeroContent extends StatelessWidget {
 
         _ShimmerText(
           isLoading: isLoading,
-          child:
-              isLoading
-                  ? AdaptiveShimmer(
-                    layout: ShimmerLayout.hero,
-                    showAvatar: true,
-                  )
-                  : _HeroTitle(
-                    title: title,
-                    fontSize: titleFontSize,
-                    alignment: crossAxisAlignment,
-                    showGradient: showGradient,
-                    gradientText: gradientText,
-                  ),
+          child: _HeroTitle(
+            title: title,
+            fontSize: titleFontSize,
+            alignment: crossAxisAlignment,
+            showGradient: showGradient,
+            gradientText: gradientText,
+          ),
         ),
 
         if (subtitle != null) ...[

@@ -64,3 +64,19 @@ class AddBlogComment extends BlogEvent {
   @override
   List<Object?> get props => [blogId, comment, rating];
 }
+
+class FetchBlogsByCategory extends BlogEvent {
+  final String? categoryId;
+  const FetchBlogsByCategory(this.categoryId);
+
+  @override
+  List<Object?> get props => [categoryId];
+}
+
+class SearchBlogs extends BlogEvent {
+  final String query;
+  const SearchBlogs(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

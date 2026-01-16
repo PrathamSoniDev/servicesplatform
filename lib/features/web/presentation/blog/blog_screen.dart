@@ -482,9 +482,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import '../../../../core/bootstrap/bloc/app_bootstrap_event.dart';
-import '../../../../core/bootstrap/bloc/app_bootstrap_state.dart';
 import '../../../../core/hero/hero_mapper.dart';
-import '../../../../services/blog_repository.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/blog_card.dart';
 import '../../widgets/top_nav_bar.dart';
@@ -531,187 +529,189 @@ class _BlogScreenState extends State<BlogScreen> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
+    final heros = context.watch<AppBootstrapBloc>().state.data;
+    final bootStrap = context.watch<AppBootstrapBloc>().state.data?.profile;
+    return Scaffold(
+      backgroundColor: const Color(0xFF080808),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            TopNavBar(
+              activeIndex: 4,
+              onHome: () => context.push("/"),
+              onDesigns: () => context.push("/designs"),
+              onAbout: () => context.push("/about"),
+              onTestimonials: () {},
+              onBlog: () {},
+              onContact: () => context.push("/contact"),
+            ),
 
-    return BlocProvider(
-      create: (_) => BlogBloc(BlogRepository())..add(const FetchBlogs(page: 1)),
-      child: Scaffold(
-        backgroundColor: const Color(0xFF080808),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              TopNavBar(
-                activeIndex: 4,
-                onHome: () => context.go("/"),
-                onDesigns: () => context.go("/designs"),
-                onAbout: () => context.go("/about"),
-                onTestimonials: () {},
-                onBlog: () {},
-                onContact: () => context.go("/contact"),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 24 : 100,
+                vertical: 60,
               ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 24 : 100,
-                  vertical: 60,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ───────── HERO ─────────
-                    BlocBuilder<AppBootstrapBloc, AppBootstrapState>(
-                      builder: (context, state) {
-                        if (state.status == AppBootstrapStatus.loading) {
-                          return const AdaptiveShimmer(
-                            layout: ShimmerLayout.hero,
-                          );
-                        }
-
-                        if (state.status == AppBootstrapStatus.failure) {
-                          return Center(
-                            child: ElevatedButton(
-                              onPressed:
-                                  () => context.read<AppBootstrapBloc>().add(
-                                    RetryAppBootstrap(),
-                                  ),
-                              child: const Text("Retry"),
-                            ),
-                          );
-                        }
-
-                        final hero = state.data!.heroes.firstWhere(
-                          (h) => h.key == 'blog' && h.isActive,
-                          orElse: () => state.data!.heroes.first,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ───────── HERO ─────────
+                  BlocBuilder<BlogBloc, BlogState>(
+                    builder: (context, state) {
+                      if (state.detailStatus == BlogStatus.initial) {
+                        return const AdaptiveShimmer(
+                          layout: ShimmerLayout.hero,
                         );
+                      }
 
-                        return HeroSection(
-                          title: hero.headingText,
-                          subtitle: hero.subHeadingText,
-                          imagePath: resolveAssetUrl(hero.assetUrl),
-                          featuredText: hero.gradientText,
-                          showGradient: false,
-                          isOverlayMode: false,
-                          contentAlignment:
-                              hero.isContentLeft
-                                  ? HeroContentAlignment.left
-                                  : hero.isContentRight
-                                  ? HeroContentAlignment.right
-                                  : HeroContentAlignment.center,
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 100),
-
-                    // ───────── CATEGORY FILTER ─────────
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Browse Topics",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                      if (state.detailStatus == BlogStatus.failure) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed:
+                                () => context.read<AppBootstrapBloc>().add(
+                                  RetryAppBootstrap(),
+                                ),
+                            child: const Text("Retry"),
                           ),
+                        );
+                      }
+
+                      final hero = heros!.heroes.firstWhere(
+                        (h) => h.key == 'blog' && h.isActive,
+                        orElse: () => heros.heroes.first,
+                      );
+
+                      return HeroSection(
+                        title: hero.headingText,
+                        subtitle: hero.subHeadingText,
+                        imagePath: resolveAssetUrl(hero.assetUrl),
+                        featuredText: hero.gradientText,
+                        showGradient: false,
+                        isOverlayMode: false,
+                        contentAlignment:
+                            hero.isContentLeft
+                                ? HeroContentAlignment.left
+                                : hero.isContentRight
+                                ? HeroContentAlignment.right
+                                : HeroContentAlignment.center,
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 100),
+
+                  // ───────── CATEGORY FILTER ─────────
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Browse Topics",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
                         ),
-                        if (!isMobile) _buildCategoryFilters(context),
-                      ],
-                    ),
-
-                    if (isMobile) ...[
-                      const SizedBox(height: 20),
-                      _buildCategoryFilters(context),
+                      ),
+                      if (!isMobile) _buildCategoryFilters(context),
                     ],
+                  ),
 
-                    const SizedBox(height: 60),
-                    const Divider(color: Colors.white10),
+                  if (isMobile) ...[
+                    const SizedBox(height: 20),
+                    _buildCategoryFilters(context),
+                  ],
 
-                    const SizedBox(height: 60),
+                  const SizedBox(height: 60),
+                  const Divider(color: Colors.white10),
 
-                    // ───────── BLOG GRID ─────────
-                    BlocBuilder<BlogBloc, BlogState>(
-                      builder: (context, state) {
-                        if (state.listStatus == BlogStatus.loading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
+                  const SizedBox(height: 60),
 
-                        if (state.listStatus == BlogStatus.failure) {
-                          return _EmptyState(
-                            title: "Failed to load blogs",
-                            subtitle: state.errorMessage ?? "Try again later",
-                          );
-                        }
+                  // ───────── BLOG GRID ─────────
+                  BlocBuilder<BlogBloc, BlogState>(
+                    builder: (context, state) {
+                      if (state.listStatus == BlogStatus.loading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                        if (state.blogs.isEmpty) {
-                          return const _EmptyState(
-                            title: "No blogs found",
-                            subtitle: "We’ll be publishing fresh content soon.",
-                          );
-                        }
+                      if (state.listStatus == BlogStatus.failure) {
+                        return _EmptyState(
+                          title: "Failed to load blogs",
+                          subtitle: state.errorMessage ?? "Try again later",
+                        );
+                      }
 
-                        return Column(
-                          children: [
-                            GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: state.blogs.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: _getCrossAxisCount(width),
-                                    crossAxisSpacing: 35,
-                                    mainAxisSpacing: 50,
-                                    childAspectRatio: _getAspectRatio(
-                                      width,
-                                      isMobile,
-                                      isTablet,
-                                    ),
+                      if (state.blogs.isEmpty) {
+                        return const _EmptyState(
+                          title: "No blogs found",
+                          subtitle: "We’ll be publishing fresh content soon.",
+                        );
+                      }
+
+                      return Column(
+                        children: [
+                          GridView.builder(
+                            addSemanticIndexes: true,
+                            addRepaintBoundaries: true,
+                            addAutomaticKeepAlives: true,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: state.blogs.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: _getCrossAxisCount(width),
+                                  crossAxisSpacing: 35,
+                                  mainAxisSpacing: 50,
+                                  childAspectRatio: _getAspectRatio(
+                                    width,
+                                    isMobile,
+                                    isTablet,
                                   ),
-                              itemBuilder: (_, index) {
-                                final blog = state.blogs[index];
-                                return BlogCard(
+                                ),
+                            itemBuilder: (_, index) {
+                              final blog = state.blogs[index];
+                              return RepaintBoundary(
+                                child: BlogCard(
                                   blog: blog,
                                   onTap:
-                                      () => context.go(
+                                      () => context.push(
                                         '/blog/${blog.id}',
                                         extra: blog,
                                       ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
+                          ),
 
-                            if (state.hasMore) ...[
-                              const SizedBox(height: 60),
-                              ElevatedButton(
-                                onPressed:
-                                    () => context.read<BlogBloc>().add(
-                                      FetchBlogs(
-                                        page: state.page + 1,
-                                        categoryId:
-                                            selectedCategory == "All"
-                                                ? null
-                                                : selectedCategory,
-                                        loadMore: true,
-                                      ),
+                          if (state.hasMore) ...[
+                            const SizedBox(height: 60),
+                            ElevatedButton(
+                              autofocus: true,
+                              onPressed:
+                                  () => context.read<BlogBloc>().add(
+                                    FetchBlogs(
+                                      page: state.page + 1,
+                                      categoryId:
+                                          selectedCategory == "All"
+                                              ? null
+                                              : selectedCategory,
+                                      loadMore: true,
                                     ),
-                                child: const Text("Load More"),
-                              ),
-                            ],
+                                  ),
+                              child: const Text("Load More"),
+                            ),
                           ],
-                        );
-                      },
-                    ),
+                        ],
+                      );
+                    },
+                  ),
 
-                    const SizedBox(height: 80),
-                  ],
-                ),
+                  const SizedBox(height: 80),
+                ],
               ),
-              const ContactSection(),
-              const FooterSection(),
-            ],
-          ),
+            ),
+            const ContactSection(),
+            const FooterSection(),
+          ],
         ),
       ),
     );

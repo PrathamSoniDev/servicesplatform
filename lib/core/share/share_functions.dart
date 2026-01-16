@@ -18,29 +18,50 @@ class ShareFunctions {
     bool downloadFallbackEnabled = true,
     bool mailToFallbackEnabled = true,
     List<CupertinoActivityType>? excludedCupertinoActivities,
+
+    // Control behavior
+    bool shareAsPureLink = false, // 🔑 IMPORTANT
   }) async {
     assert(
       url.startsWith('http'),
       'URL must be a valid absolute HTTP/HTTPS URL',
     );
 
-    final textContent = '''
-$title
+    /// ─────────────────────────────────────────────
+    /// MODE 1: PURE LINK (NO TEXT)
+    /// ─────────────────────────────────────────────
+    if (shareAsPureLink) {
+      await SharePlus.instance.share(
+        ShareParams(
+          uri: Uri.parse(url),
+          subject: subject ?? title,
+          sharePositionOrigin: sharePositionOrigin,
+          downloadFallbackEnabled: downloadFallbackEnabled,
+          mailToFallbackEnabled: mailToFallbackEnabled,
+          excludedCupertinoActivities: excludedCupertinoActivities,
+        ),
+      );
+      return;
+    }
 
-$description
-
-$url
-''';
+    /// ─────────────────────────────────────────────
+    /// MODE 2: TEXT SHARE (RECOMMENDED)
+    /// ─────────────────────────────────────────────
+    final textContent = [
+      title,
+      if (description.isNotEmpty) '',
+      if (description.isNotEmpty) description,
+      '',
+      url,
+    ].join('\n');
 
     await SharePlus.instance.share(
       ShareParams(
-        // Core content
         title: title,
         subject: subject ?? title,
         text: textContent,
-        uri: Uri.parse(url),
 
-        // Rich preview (supported platforms only)
+        // Rich preview (platform dependent)
         previewThumbnail: previewThumbnail,
 
         // File sharing (optional)
@@ -54,7 +75,7 @@ $url
         downloadFallbackEnabled: downloadFallbackEnabled,
         mailToFallbackEnabled: mailToFallbackEnabled,
 
-        // iOS-specific exclusions
+        // iOS exclusions
         excludedCupertinoActivities: excludedCupertinoActivities,
       ),
     );

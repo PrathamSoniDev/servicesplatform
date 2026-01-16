@@ -17,11 +17,11 @@ class DesignsState extends Equatable {
   final String searchQuery;
 
   final DesignsStatus detailStatus;
-  final DesignItem? selectedDesign;
+  late DesignItem? selectedDesign;
 
   final String? errorMessage;
 
-  const DesignsState({
+  DesignsState({
     this.listStatus = DesignsStatus.initial,
     this.allDesigns = const [],
     this.categories = const [],
