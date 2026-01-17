@@ -219,7 +219,7 @@ class _DesignsSectionState extends State<DesignsSection> {
   }
 
   /// High-end Detail Overlay
-  void _showDesignDetail(BuildContext context, DesignItem item) {
+  void showDesignDetail(BuildContext context, DesignItem item) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,

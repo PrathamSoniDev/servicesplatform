@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final contactKey = GlobalKey();
   late final List<GlobalKey> _sectionKeys;
   late final HeroRepository _heroRepository;
-  bool _isAutoScrolling = false;
+  bool isAutoScrolling = false;
   final ValueNotifier<int> _sectionIndex = ValueNotifier(0);
 
   @override
@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final ctx = _sectionKeys[index].currentContext;
     if (ctx == null) return;
 
-    _isAutoScrolling = true;
+    isAutoScrolling = true;
 
     await Scrollable.ensureVisible(
       ctx,
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Delay allows scroll to settle
     Future.delayed(const Duration(milliseconds: 200), () {
-      _isAutoScrolling = false;
+      isAutoScrolling = false;
     });
   }
 

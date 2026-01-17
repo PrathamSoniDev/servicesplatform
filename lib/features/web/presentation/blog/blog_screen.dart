@@ -530,6 +530,7 @@ class _BlogScreenState extends State<BlogScreen> {
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
     final heros = context.watch<AppBootstrapBloc>().state.data;
+    // ignore: unused_local_variable
     final bootStrap = context.watch<AppBootstrapBloc>().state.data?.profile;
     return Scaffold(
       backgroundColor: const Color(0xFF080808),

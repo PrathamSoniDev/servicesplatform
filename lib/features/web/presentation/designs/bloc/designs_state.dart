@@ -5,6 +5,7 @@ import '../../../../../models/design_item_models.dart';
 
 enum DesignsStatus { initial, loading, success, failure }
 
+// ignore: must_be_immutable
 class DesignsState extends Equatable {
   final DesignsStatus listStatus;
   final List<DesignItem> designs;
