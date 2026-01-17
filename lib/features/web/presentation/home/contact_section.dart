@@ -317,9 +317,11 @@
 //   }
 // }
 
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/widgets/designer_picker_bottomsheet.dart';
+import 'package:servicesplatform/features/web/widgets/professional_role_selector_tab.dart';
+import 'package:servicesplatform/models/design_item_models.dart';
 import '../../widgets/button.dart';
 
 class ContactSection extends StatefulWidget {
@@ -336,8 +338,9 @@ class _ContactSectionState extends State<ContactSection> {
   final _messageController = TextEditingController();
 
   // ─── STATE NOTIFIERS ───
-  final ValueNotifier<String> _selectedRoleNotifier = ValueNotifier("Client");
+  final ValueNotifier<String> _selectedRoleNotifier = ValueNotifier("Founder");
   final ValueNotifier<String> _selectedOptionNotifier = ValueNotifier("I want a custom design");
+  final ValueNotifier<DesignItem?> _selectedDesignNotifier = ValueNotifier<DesignItem?>(null);
 
   @override
   void dispose() {
@@ -346,12 +349,50 @@ class _ContactSectionState extends State<ContactSection> {
     _messageController.dispose();
     _selectedRoleNotifier.dispose();
     _selectedOptionNotifier.dispose();
+    _selectedDesignNotifier.dispose();
     super.dispose();
+  }
+
+  Future<void> _openDesignPicker(BuildContext context) async {
+    final result = await showGeneralDialog<dynamic>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "DesignPicker",
+      barrierColor: Colors.black.withOpacity(0.7),
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, anim1, anim2) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1100, maxHeight: 800),
+            child: const Material(
+              color: Colors.transparent,
+              child: DesignPickerBottomSheet(),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15 * anim1.value, sigmaY: 15 * anim1.value),
+          child: FadeTransition(
+            opacity: anim1,
+            child: ScaleTransition(
+              scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+              child: child,
+            ),
+          ),
+        );
+      },
+    );
+
+    if (result != null && result is DesignItem) {
+      _selectedDesignNotifier.value = result;
+      _selectedOptionNotifier.value = "Do you have any liked design?";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery for a more fluid responsive experience
     final Size size = MediaQuery.of(context).size;
     final bool isDesktop = size.width > 950;
     final double horizontalPadding = size.width * (isDesktop ? 0.08 : 0.05);
@@ -366,137 +407,20 @@ class _ContactSectionState extends State<ContactSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─── MODERN HEADER ───
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 650),
-                  child: Column(
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Colors.white, Color(0xFF9E9E9E)],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ).createShader(bounds),
-                        child: const Text(
-                          "Get in Touch",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -2.5,
-                            height: 1.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Ready to start your project? Fill out the form below and we'll get back to you within 24 hours.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
+              _buildHeader(),
               const SizedBox(height: 60),
-
-              // ─── 1. ROLE SELECTOR ───
               const _SectionLabel(label: "I AM A..."),
               const SizedBox(height: 12),
-              _buildProfessionalRoleSelector(),
+              
+              ProfessionalRoleSelector(
+                controller: _selectedRoleNotifier, 
+                roles: const ["Founder", "Product Designer", "Developer", "Other"],
+              ),
               
               const SizedBox(height: 40),
-
-              // ─── 2. THE GRID FORM ───
-              if (isDesktop)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _SectionLabel(label: "YOUR NAME"),
-                          const SizedBox(height: 8),
-                          _buildGlassField("Full Name", "Enter your name", _nameController),
-                          const SizedBox(height: 32),
-                          const _SectionLabel(label: "PROJECT STATUS"),
-                          const SizedBox(height: 8),
-                          _buildRadioOption("Do you have any liked design?"),
-                          _buildRadioOption("Do you have your own design?"),
-                          _buildRadioOption("I want a custom design"),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 40),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _SectionLabel(label: "YOUR E-MAIL"),
-                          const SizedBox(height: 8),
-                          _buildGlassField("Email Address", "Enter your mail", _emailController),
-                          const SizedBox(height: 32),
-                          const _SectionLabel(label: "MESSAGE *"),
-                          const SizedBox(height: 8),
-                          _buildGlassField(
-                            "Message",
-                            "Tell us about your project",
-                            _messageController,
-                            maxLines: 7,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              else
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _SectionLabel(label: "YOUR NAME"),
-                    const SizedBox(height: 8),
-                    _buildGlassField("Full Name", "Enter your name", _nameController),
-                    const SizedBox(height: 24),
-                    const _SectionLabel(label: "YOUR E-MAIL"),
-                    const SizedBox(height: 8),
-                    _buildGlassField("Email Address", "Enter your mail", _emailController),
-                    const SizedBox(height: 24),
-                    const _SectionLabel(label: "PROJECT STATUS"),
-                    const SizedBox(height: 4),
-                    _buildRadioOption("Do you have any liked design?"),
-                    _buildRadioOption("Do you have your own design?"),
-                    _buildRadioOption("I want a custom design"),
-                    const SizedBox(height: 24),
-                    const _SectionLabel(label: "MESSAGE *"),
-                    const SizedBox(height: 8),
-                    _buildGlassField("Message", "Tell us about your project", _messageController, maxLines: 5),
-                  ],
-                ),
-
+              _buildFormGrid(isDesktop),
               const SizedBox(height: 60),
-
-              // ─── 3. SUBMIT ACTION ───
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: AppButton(
-                    text: "Submit",
-                    enableGlow: true,
-                    onPressed: () {
-                      // Handle Submission Logic
-                    },
-                  ),
-                ),
-              ),
+              _buildSubmitAction(),
             ],
           ),
         ),
@@ -504,52 +428,93 @@ class _ContactSectionState extends State<ContactSection> {
     );
   }
 
-  // ─── WIDGET BUILDERS ───
-
-  Widget _buildProfessionalRoleSelector() {
-    final roles = ["Client", "Designer", "Developer", "Founder"];
-    return ValueListenableBuilder<String>(
-      valueListenable: _selectedRoleNotifier,
-      builder: (context, selected, _) {
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: roles.map((role) {
-            final isSelected = selected == role;
-            return GestureDetector(
-              onTap: () => _selectedRoleNotifier.value = role,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF8E2DE2) : Colors.white.withOpacity(0.04),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF8E2DE2) : Colors.white.withOpacity(0.1),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  role,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white60,
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  ),
+  Widget _buildHeader() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 650),
+        child: Column(
+          children: [
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Colors.white, Color(0xFF9E9E9E)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ).createShader(bounds),
+              child: const Text(
+                "Get in Touch",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 52,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -2.5,
+                  color: Colors.white,
                 ),
               ),
-            );
-          }).toList(),
-        );
-      },
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Ready to start your project? Fill out the form below.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildGlassField(String label, String hint, TextEditingController controller, {int maxLines = 1}) {
-    return _AnimatedInputField(
-      controller: controller,
-      hint: hint,
-      maxLines: maxLines,
+  Widget _buildFormGrid(bool isDesktop) {
+    if (isDesktop) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _buildLeftColumn()),
+          const SizedBox(width: 40),
+          Expanded(child: _buildRightColumn(7)),
+        ],
+      );
+    }
+    return Column(
+      children: [
+        _buildLeftColumn(),
+        const SizedBox(height: 24),
+        _buildRightColumn(5),
+      ],
+    );
+  }
+
+  Widget _buildLeftColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionLabel(label: "YOUR NAME"),
+        const SizedBox(height: 8),
+        _buildField("Full Name", "Enter your name", _nameController),
+        const SizedBox(height: 32),
+        const _SectionLabel(label: "PROJECT STATUS"),
+        const SizedBox(height: 8),
+        _buildRadioOption("Do you have any liked design?"),
+        _buildRadioOption("Do you have your own design?"),
+        _buildRadioOption("I want a custom design"),
+      ],
+    );
+  }
+
+  Widget _buildRightColumn(int lines) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionLabel(label: "YOUR E-MAIL"),
+        const SizedBox(height: 8),
+        _buildField("Email Address", "Enter your mail", _emailController),
+        const SizedBox(height: 32),
+        const _SectionLabel(label: "MESSAGE *"),
+        const SizedBox(height: 8),
+        _buildField("Message", "Tell us about your project", _messageController, maxLines: lines),
+      ],
     );
   }
 
@@ -557,10 +522,14 @@ class _ContactSectionState extends State<ContactSection> {
     return ValueListenableBuilder<String>(
       valueListenable: _selectedOptionNotifier,
       builder: (context, selected, _) {
-        final isSelected = selected == title;
+        final bool isSelected = selected == title;
         return InkWell(
-          onTap: () => _selectedOptionNotifier.value = title,
-          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+            _selectedOptionNotifier.value = title;
+            if (title == "Do you have any liked design?") {
+              _openDesignPicker(context);
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
@@ -578,12 +547,25 @@ class _ContactSectionState extends State<ContactSection> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white54,
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                Expanded(
+                  child: ValueListenableBuilder<DesignItem?>(
+                    valueListenable: _selectedDesignNotifier,
+                    builder: (context, design, _) {
+                      String label = title;
+                      if (title == "Do you have any liked design?" && design != null) {
+                        label = "Selected: ${design.title}";
+                      }
+                      return Text(
+                        label,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.white54,
+                          fontSize: 14,
+                          fontWeight: (title == "Do you have any liked design?" && design != null) 
+                            ? FontWeight.bold 
+                            : FontWeight.normal,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -593,7 +575,34 @@ class _ContactSectionState extends State<ContactSection> {
       },
     );
   }
+
+  Widget _buildField(String label, String hint, TextEditingController controller, {int maxLines = 1}) {
+    return _AnimatedInputField(
+      controller: controller,
+      hint: hint,
+      maxLines: maxLines,
+    );
+  }
+
+  Widget _buildSubmitAction() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: AppButton(
+          text: "Submit",
+          enableGlow: true,
+          onPressed: () {
+             debugPrint("Name: ${_nameController.text}");
+             debugPrint("Role: ${_selectedRoleNotifier.value}");
+             debugPrint("Option: ${_selectedOptionNotifier.value}");
+          },
+        ),
+      ),
+    );
+  }
 }
+
+// ─── SHARED INTERNAL WIDGETS ───
 
 class _AnimatedInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -603,53 +612,64 @@ class _AnimatedInputField extends StatefulWidget {
   const _AnimatedInputField({
     required this.controller,
     required this.hint,
-    required this.maxLines,
+    this.maxLines = 1,
   });
 
   @override
   State<_AnimatedInputField> createState() => _AnimatedInputFieldState();
 }
 
-
 class _AnimatedInputFieldState extends State<_AnimatedInputField> {
+  final FocusNode _focusNode = FocusNode();
   bool _isFocused = false;
 
   @override
-  Widget build(BuildContext context) {
-    // Define the light grey color used for focus
-    final Color focusGrey = Colors.white.withOpacity(0.4);
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        // Slightly brighten background on focus
-        color: Colors.white.withOpacity(_isFocused ? 0.05 : 0.02),
+        // Becomes slightly lighter on focus
+        color: _isFocused ? Colors.white.withOpacity(0.06) : Colors.white.withOpacity(0.02),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          // CHANGED: Use focusGrey instead of Purple when _isFocused is true
-          color: _isFocused ? focusGrey : Colors.white.withOpacity(0.1),
+          // Transitions from dark/transparent to Light Grey
+          color: _isFocused ? Colors.white.withOpacity(0.5) : Colors.white.withOpacity(0.1),
           width: 1,
         ),
       ),
-      child: Focus(
-        onFocusChange: (focus) => setState(() => _isFocused = focus),
-        child: TextField(
-          controller: widget.controller,
-          maxLines: widget.maxLines,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
-          // CHANGED: Cursor color now matches the light grey theme
-          cursorColor: focusGrey, 
-          decoration: InputDecoration(
-            hintText: widget.hint,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
-            contentPadding: const EdgeInsets.all(18),
-            border: InputBorder.none,
-          ),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: _focusNode,
+        maxLines: widget.maxLines,
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+        cursorColor: Colors.white,
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
+          contentPadding: const EdgeInsets.all(18),
+          border: InputBorder.none,
         ),
       ),
     );
   }
 }
+
 class _SectionLabel extends StatelessWidget {
   final String label;
   const _SectionLabel({required this.label});
@@ -658,16 +678,12 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // This CustomPaint creates the line that tapers to a point
-        CustomPaint(
-          size: const Size(28, 4), // Width is 28, height is 4
-          painter: _TaperedDashPainter(),
-        ),
+        CustomPaint(size: const Size(28, 4), painter: _TaperedDashPainter()),
         const SizedBox(width: 10),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.4), 
+            color: Colors.white.withOpacity(0.4),
             fontSize: 12,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
@@ -684,15 +700,13 @@ class _TaperedDashPainter extends CustomPainter {
     final Paint paint = Paint()
       ..shader = const LinearGradient(
         colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
       ).createShader(Offset.zero & size)
       ..style = PaintingStyle.fill;
 
     final Path path = Path()
-      ..moveTo(0, 0) // Start top-left
-      ..lineTo(0, size.height) // Draw to bottom-left
-      ..lineTo(size.width, size.height / 2) // Taper to a point at middle-right
+      ..moveTo(0, 0)
+      ..lineTo(0, size.height)
+      ..lineTo(size.width, size.height / 2)
       ..close();
 
     canvas.drawPath(path, paint);
@@ -701,4 +715,3 @@ class _TaperedDashPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-  
