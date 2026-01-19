@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
+import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/features/web/widgets/blog_card.dart';
 import 'package:servicesplatform/features/web/widgets/design_lux_card.dart';
 import 'package:servicesplatform/features/web/widgets/prodile_tab_bar.dart';
@@ -8,6 +9,9 @@ import 'package:servicesplatform/features/web/widgets/top_nav_bar.dart';
 import 'package:servicesplatform/models/blog_model.dart';
 import 'package:servicesplatform/models/design_item_models.dart';
 import 'package:servicesplatform/models/profile_model.dart';
+
+import '../designs/bloc/designs_bloc.dart';
+import '../designs/bloc/designs_event.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,8 +23,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   int selectedTabIndex = 0;
   final List<String> tabs = ["Likes", "Shared", "Recent View"];
-
-  late final ProfileModel profile;
   late final DesignItem dummyDesign;
   late final BlogModel dummyBlog;
 
@@ -30,17 +32,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _initializeDummyData();
   }
 
-  void _initializeDummyData() {
-    profile = ProfileModel(
-      userId: "u_101",
-      name: "John Doe",
-      role: "Senior Product Designer",
-      profileImg:
-          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300",
-      likedDesigns: List.generate(8, (i) => "design_$i"),
-      recentDesigns: List.generate(6, (i) => "view_$i"),
-    );
+  String toSlug(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
+        .replaceAll(RegExp(r'^-|-$'), '');
+  }
 
+  void _initializeDummyData() {
     dummyDesign = DesignItem(
       id: "d1",
       title: "Luxury App UI",
@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     dummyBlog = BlogModel(
-      id: "b1",
+      id: "b12345",
       title: "The Future of Flutter Web",
       shortDescription: "Exploring the new CanvasKit rendering engine.",
       placeholderImage:
@@ -73,25 +73,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 950;
     final horizontalPadding = screenWidth > 1200 ? screenWidth * 0.12 : 30.0;
     final crossAxisCount = screenWidth > 1100 ? 3 : (screenWidth > 750 ? 2 : 1);
-
-    return Scaffold(
+    final ProfileModel? profile =
+        context.watch<AppBootstrapBloc>().state.data!.profile;
+    return
+    // ───────── UI (UNCHANGED) ─────────
+    Scaffold(
       backgroundColor: const Color(0xFF020202),
       body: Column(
         children: [
-          /// TOP NAV BAR
           TopNavBar(
             activeIndex: 6,
-            onHome: () => context.go('/'),
-            onDesigns: () => context.go('/designs'),
-            onAbout: () => context.go('/about'),
-            onTestimonials: () => context.go('/reviews'),
-            onBlog: () => context.go('/blog'),
-            onContact: () => context.go('/contact'),
+            onHome: () => context.push('/'),
+            onDesigns: () => context.push('/designs'),
+            onAbout: () => context.push('/about'),
+            onTestimonials: () => context.push('/reviews'),
+            onBlog: () => context.push('/blog'),
+            onContact: () => context.push('/contact'),
           ),
 
           Expanded(
@@ -103,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     vertical: 50,
                   ),
                   sliver: SliverToBoxAdapter(
-                    child: _buildProfileHeader(isDesktop),
+                    child: _buildProfileHeader(profile!, isDesktop),
                   ),
                 ),
 
@@ -131,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     horizontal: horizontalPadding,
                     vertical: 30,
                   ),
-                  sliver: _buildTabContent(crossAxisCount),
+                  sliver: _buildTabContent(profile, crossAxisCount),
                 ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -145,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // ================= TAB CONTENT =================
 
-  Widget _buildTabContent(int crossAxisCount) {
+  Widget _buildTabContent(ProfileModel profile, int crossAxisCount) {
     String designTitle = "";
     String designSub = "";
     String blogTitle = "";
@@ -174,6 +177,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         designCount = 4;
         blogCount = 2;
         break;
+      case 2:
+        designTitle = "RECENT ACTIVITY";
+        designSub =
+            "A chronological view of design patterns and concepts recently explored.";
+        blogTitle = "READING HISTORY";
+        blogSub =
+            "Technical deep-dives and editorial content visited in your latest sessions.";
+        designCount = profile.recentDesigns.length;
+        blogCount = 5;
+        break;
       default: // Recent View
         designTitle = "RECENT ACTIVITY";
         designSub =
@@ -188,15 +201,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SliverMainAxisGroup(
       slivers: [
         _buildSectionHeader(designTitle, designSub, designCount),
-        _buildDesignGrid(crossAxisCount, 6),
+        _buildDesignGrid(profile, crossAxisCount, designCount),
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
         _buildSectionHeader(blogTitle, blogSub, blogCount),
-        _buildBlogGrid(crossAxisCount, 2),
+        _buildBlogGrid(crossAxisCount, 1),
       ],
     );
   }
 
-  Widget _buildDesignGrid(int crossAxisCount, int count) {
+  Widget _buildDesignGrid(ProfileModel profile, int crossAxisCount, int count) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
@@ -204,37 +217,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisSpacing: 25,
         childAspectRatio: 0.85,
       ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => DesignLuxuryCard(
-          item: dummyDesign,
-          onTap: () {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                transitionDuration: const Duration(milliseconds: 350),
-                barrierDismissible: true,
-                barrierColor: Colors.black.withOpacity(0.8),
-                pageBuilder:
-                    (_, __, ___) => DesignDetailOverlay(data: dummyDesign),
-                transitionsBuilder: (_, animation, __, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(
-                      scale: Tween<double>(begin: 0.98, end: 1.0).animate(
-                        CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
-                      child: child,
-                    ),
-                  );
-                },
-              ),
-            );
-          },
-        ),
-        childCount: count,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item =
+            selectedTabIndex == 0
+                ? profile.likedDesigns[index]
+                : selectedTabIndex == 2
+                ? profile.recentDesigns[index]
+                : profile.recentDesigns[index];
+        debugPrint("🔹 Profile Design Item: ${item.categoryName}");
+        return RepaintBoundary(
+          child: DesignLuxuryCard(
+            item: item,
+            tag: item.categoryName!,
+            onTap: () {
+              final slug = toSlug(item.title ?? item.id);
+              context.push(
+                '/design/$slug',
+                extra: item, // pass full model
+              );
+
+              context.read<DesignsBloc>().add(IncrementDesignView(item.id));
+              // Navigator.of(context).push(
+              //   PageRouteBuilder(
+              //     transitionDuration: const Duration(milliseconds: 350),
+              //     barrierDismissible: true,
+              //     barrierColor: Colors.black.withValues(alpha: .8),
+              //     pageBuilder:
+              //         (_, __, ___) => DesignDetailOverlay(data: dummyDesign),
+              //     transitionsBuilder: (_, animation, __, child) {
+              //       return FadeTransition(
+              //         opacity: animation,
+              //         child: ScaleTransition(
+              //           scale: Tween<double>(begin: 0.98, end: 1.0).animate(
+              //             CurvedAnimation(
+              //               parent: animation,
+              //               curve: Curves.easeOut,
+              //             ),
+              //           ),
+              //           child: child,
+              //         ),
+              //       );
+              //     },
+              //   ),
+              // );
+            },
+          ),
+        );
+      }, childCount: count),
     );
   }
 
@@ -258,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // ================= HEADER =================
 
-  Widget _buildProfileHeader(bool isDesktop) {
+  Widget _buildProfileHeader(ProfileModel profile, bool isDesktop) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -286,7 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             if (isDesktop) ...[
               const SizedBox(width: 30),
-              _buildProfileInfo(CrossAxisAlignment.start),
+              _buildProfileInfo(profile, CrossAxisAlignment.start),
             ],
           ],
         ),
@@ -310,12 +339,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileInfo(CrossAxisAlignment align) {
+  Widget _buildProfileInfo(ProfileModel profile, CrossAxisAlignment align) {
     return Column(
       crossAxisAlignment: align,
       children: [
         Text(
-          profile.name ?? "",
+          profile.email ?? "abc",
           style: const TextStyle(
             color: Colors.white,
             fontSize: 42,
@@ -328,7 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           profile.role?.toUpperCase() ?? "",
           style: TextStyle(
-            color: Colors.blueAccent.withOpacity(0.8),
+            color: Colors.blueAccent.withValues(alpha: .8),
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
             fontSize: 13,
@@ -398,10 +427,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.1),
+                    color: Colors.blueAccent.withValues(alpha: .1),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: Colors.blueAccent.withOpacity(0.3),
+                      color: Colors.blueAccent.withValues(alpha: .3),
                       width: 0.5,
                     ),
                   ),
@@ -422,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.white.withOpacity(0.15),
+                          Colors.white.withValues(alpha: .15),
                           Colors.transparent,
                         ],
                       ),

@@ -38,7 +38,7 @@ class AppBootstrapBloc extends Bloc<AppBootstrapEvent, AppBootstrapState> {
     if (state.data == null) return;
 
     try {
-      final profile = await repository.fetchUserProfile();
+      final profile = await repository.fetchUserProfile(state.data!.category);
 
       emit(state.copyWith(data: state.data!.copyWith(profile: profile)));
     } catch (e) {

@@ -1,3 +1,5 @@
+import 'package:servicesplatform/models/design_item_models.dart';
+
 class ProfileModel {
   final String? userId;
   final String? name;
@@ -5,11 +7,11 @@ class ProfileModel {
   final String? profileImg;
   final String? role;
 
-  final List<String> likedDesigns;
-  final List<String> recentDesigns;
+  final List<DesignItem> likedDesigns;
+  final List<DesignItem> recentDesigns;
   final List<String> preferences;
-  final List<String> suggestDesigns;
-  final List<String> buyDesigns;
+  final List<DesignItem> suggestDesigns;
+  final List<DesignItem> buyDesigns;
 
   ProfileModel({
     this.userId,
@@ -25,22 +27,46 @@ class ProfileModel {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    List<DesignItem> parseDesignList(dynamic data) {
+      if (data is! List) return const [];
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(DesignItem.fromJson)
+          .toList();
+    }
+
     return ProfileModel(
-      userId: json['userId']?.toString(),
+      userId: json['userId']?.toString() ?? json['_id']?.toString(),
       name: json['name']?.toString(),
       email: json['email']?.toString(),
       profileImg: json['profile_img']?.toString(),
       role: json['role']?.toString(),
 
-      likedDesigns: List<String>.from(json['likedDesigns'] ?? const []),
-
-      recentDesigns: List<String>.from(json['recentViewed'] ?? const []),
+      likedDesigns: parseDesignList(json['likedDesigns']),
+      recentDesigns: parseDesignList(json['recentViewed']),
+      suggestDesigns: parseDesignList(json['suggestDesigns']),
+      buyDesigns: parseDesignList(json['buyDesigns']),
 
       preferences: List<String>.from(json['preferences'] ?? const []),
-
-      suggestDesigns: List<String>.from(json['suggestDesigns'] ?? const []),
-
-      buyDesigns: List<String>.from(json['buyDesigns'] ?? const []),
+    );
+  }
+  ProfileModel copyWith({
+    List<DesignItem>? likedDesigns,
+    List<DesignItem>? recentDesigns,
+    List<DesignItem>? suggestDesigns,
+    List<DesignItem>? buyDesigns,
+  }) {
+    return ProfileModel(
+      userId: userId,
+      name: name,
+      email: email,
+      profileImg: profileImg,
+      role: role,
+      preferences: preferences,
+      likedDesigns: likedDesigns ?? this.likedDesigns,
+      recentDesigns: recentDesigns ?? this.recentDesigns,
+      suggestDesigns: suggestDesigns ?? this.suggestDesigns,
+      buyDesigns: buyDesigns ?? this.buyDesigns,
     );
   }
 }

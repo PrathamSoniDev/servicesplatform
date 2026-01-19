@@ -36,6 +36,7 @@ class DesignDetailOverlay extends StatelessWidget {
     final isMobile = size.width < 600;
     final designBloc = context.read<DesignsBloc>();
     final appBootStrap = context.watch<AppBootstrapBloc>().state.data?.profile;
+    final authBloc = context.read<AuthBloc>();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
@@ -102,7 +103,7 @@ class DesignDetailOverlay extends StatelessWidget {
                     if (appBootStrap != null &&
                         !appBootStrap.likedDesigns.contains(data.id)) {
                       designBloc.add(ToggleDesignLike(data.id));
-
+                      authBloc.add(ProfileLikedDesign(designId: data.id));
                       return;
                     } else if (appBootStrap == null) {
                       showDialog(

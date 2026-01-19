@@ -47,3 +47,21 @@ final class AuthProfileFetched extends AuthEvent {
 final class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+final class ProfileRecentViewedDesign extends AuthEvent {
+  final String designId;
+
+  const ProfileRecentViewedDesign({required this.designId});
+
+  @override
+  List<Object?> get props => [designId];
+}
+
+final class ProfileLikedDesign extends AuthEvent {
+  final String designId;
+
+  const ProfileLikedDesign({required this.designId});
+
+  @override
+  List<Object?> get props => [designId];
+}

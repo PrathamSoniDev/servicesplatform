@@ -189,6 +189,7 @@ import 'package:servicesplatform/core/bootstrap/bloc/app_bootstrap_bloc.dart';
 import 'package:servicesplatform/features/web/presentation/designs/design_overlay_screen.dart';
 
 import '../../../../models/design_item_models.dart';
+import '../../../auth/auth_bloc.dart';
 import '../../widgets/button.dart';
 import '../../widgets/design_lux_card.dart';
 import '../designs/bloc/designs_bloc.dart';
@@ -249,6 +250,7 @@ class _DesignsSectionState extends State<DesignsSection> {
     final bool isDesktop = MediaQuery.of(context).size.width > 1024;
     final double sidePadding = isDesktop ? 88 : 24;
     final designsList = context.watch<AppBootstrapBloc>().state.data?.designs;
+    final appBootstrapState = context.watch<AppBootstrapBloc>().state;
     return Stack(
       children: [
         Positioned.fill(
@@ -297,6 +299,9 @@ class _DesignsSectionState extends State<DesignsSection> {
 
                     // ✅ Success Grid
                     return GridView.builder(
+                      addAutomaticKeepAlives: true,
+                      addRepaintBoundaries: true,
+                      addSemanticIndexes: true,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: designs.length,
@@ -352,7 +357,7 @@ class _DesignsSectionState extends State<DesignsSection> {
                                       debugPrint(
                                         "Navigating to design detail: $slug",
                                       );
-                                      context.go(
+                                      context.push(
                                         '/design/$slug',
                                         extra: item, // pass full model
                                       );
@@ -360,6 +365,15 @@ class _DesignsSectionState extends State<DesignsSection> {
                                       context.read<DesignsBloc>().add(
                                         IncrementDesignView(item.id),
                                       );
+                                      if (appBootstrapState.data?.profile !=
+                                          null) {
+                                        debugPrint("Logging recent view");
+                                        context.read<AuthBloc>().add(
+                                          ProfileRecentViewedDesign(
+                                            designId: item.id,
+                                          ),
+                                        );
+                                      }
                                     },
                                   ),
                                 ),

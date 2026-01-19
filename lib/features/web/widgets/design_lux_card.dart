@@ -46,7 +46,7 @@ class _DesignLuxuryCardState extends State<DesignLuxuryCard> {
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.easeOutCubic,
                       child: CachedNetworkImage(
-                        imageUrl: widget.item.bannerImage ?? "",
+                        imageUrl: widget.item.bannerImage!,
                         fit: BoxFit.cover,
                         placeholder:
                             (_, _) =>
@@ -77,7 +77,7 @@ class _DesignLuxuryCardState extends State<DesignLuxuryCard> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        widget.item.categoryName!,
+                        widget.tag,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,

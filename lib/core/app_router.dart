@@ -56,11 +56,59 @@ class AppRouter {
       GoRoute(path: designs, builder: (_, __) => const DesignScreen()),
 
       // ✅ DESIGN OVERLAY ROUTE
+      // GoRoute(
+      //   path: '/design/:slug',
+      //   parentNavigatorKey: rootNavigatorKey,
+      //   pageBuilder: (context, state) {
+      //     final design = state.extra as DesignItem?;
+      //
+      //     return CustomTransitionPage(
+      //       key: state.pageKey,
+      //       opaque: false,
+      //       barrierDismissible: true,
+      //       barrierColor: Colors.black.withValues(alpha: .85),
+      //       transitionDuration: const Duration(milliseconds: 450),
+      //       child: DesignDetailOverlay(data: design!),
+      //       transitionsBuilder: (_, animation, __, child) {
+      //         return FadeTransition(
+      //           opacity: animation,
+      //           child: SlideTransition(
+      //             position: Tween<Offset>(
+      //               begin: const Offset(0, 0.08),
+      //               end: Offset.zero,
+      //             ).animate(
+      //               CurvedAnimation(
+      //                 parent: animation,
+      //                 curve: Curves.easeOutCubic,
+      //               ),
+      //             ),
+      //             child: child,
+      //           ),
+      //         );
+      //       },
+      //     );
+      //   },
+      // ),
       GoRoute(
         path: '/design/:slug',
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) {
           final design = state.extra as DesignItem?;
+
+          if (design == null) {
+            // 🔐 Hard safety fallback
+            return const MaterialPage(
+              child: Scaffold(
+                backgroundColor: Colors.black,
+                body: Center(
+                  child: Text(
+                    'Design not found',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            );
+          }
 
           return CustomTransitionPage(
             key: state.pageKey,
@@ -68,7 +116,7 @@ class AppRouter {
             barrierDismissible: true,
             barrierColor: Colors.black.withValues(alpha: .85),
             transitionDuration: const Duration(milliseconds: 450),
-            child: DesignDetailOverlay(data: design!),
+            child: DesignDetailOverlay(data: design),
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(
                 opacity: animation,

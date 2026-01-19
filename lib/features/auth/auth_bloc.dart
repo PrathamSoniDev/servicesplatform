@@ -19,6 +19,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onCheckAuth);
     on<AuthLogoutRequested>(_onLogout);
     on<AuthProfileFetched>(_onProfileFetched);
+    on<ProfileRecentViewedDesign>(_addProfileRecentViewedDesign);
+    on<ProfileLikedDesign>(_addProfileLikedDesign);
   }
 
   /// 🔐 LOGIN
@@ -35,7 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(state.copyWith(status: AuthStatus.authenticated, user: user));
-      add(const AuthProfileFetched());
+      // add(const AuthProfileFetched());
     } catch (e) {
       emit(
         state.copyWith(status: AuthStatus.failure, errorMessage: e.toString()),
@@ -102,6 +104,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(state.copyWith(errorMessage: e.toString()));
     }
+  }
+
+  Future<void> _addProfileRecentViewedDesign(
+    ProfileRecentViewedDesign event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state.profile == null) return;
+    await _authRepository.addRecentView(event.designId);
+  }
+
+  Future<void> _addProfileLikedDesign(
+    ProfileLikedDesign event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state.profile == null) return;
+    await _authRepository.likeDesign(event.designId);
   }
 
   /// 🚪 LOGOUT

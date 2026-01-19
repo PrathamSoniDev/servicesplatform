@@ -170,7 +170,7 @@ class _TopNavBarState extends State<TopNavBar> {
                             alignment: Alignment.centerRight,
                             child: InkWell(
                               onTap: () {
-                                context.go("/profile");
+                                context.push("/profile");
                               },
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
