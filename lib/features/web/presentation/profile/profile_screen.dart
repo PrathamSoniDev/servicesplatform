@@ -22,7 +22,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int selectedTabIndex = 0;
-  final List<String> tabs = ["Likes", "Shared", "Recent View"];
+  final List<String> tabs = ["Likes", "Shared", "Recent View", "Buy"];
 
   String toSlug(String text) {
     return text
