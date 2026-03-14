@@ -1,9 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme_provider.dart';
-import '../../../core/theme/theme_parser.dart';
-
 enum AppButtonType { solid, outline, glass }
 
 class AppButton extends StatefulWidget {
@@ -11,14 +8,21 @@ class AppButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final AppButtonType type;
 
-  /// ✅ Main color (will pull from Theme if not provided)
+  /// 🎨 Customization
   final Color color;
   final Color textColor;
+  final Gradient? gradient;
+
+  /// 📐 Layout
   final EdgeInsets padding;
   final double borderRadius;
   final double borderWidth;
+
+  /// ⚙️ State
   final bool isLoading;
   final bool isDisabled;
+
+  /// ✨ Effects
   final bool enableGlow;
   final bool enableBlur;
 
@@ -27,13 +31,22 @@ class AppButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.type = AppButtonType.solid,
-    this.color = const Color(0xFF8E2DE2), // Fallback to Primary Purple
+
+    /// Default design
+    this.color = const Color(0xFF00FFA3),
     this.textColor = Colors.white,
-    this.padding = const EdgeInsets.symmetric(horizontal: 36, vertical: 18),
+    this.gradient,
+
+    /// Layout
+    this.padding = const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
     this.borderRadius = 30,
-    this.borderWidth = 1.8,
+    this.borderWidth = 1.5,
+
+    /// States
     this.isLoading = false,
     this.isDisabled = false,
+
+    /// Effects
     this.enableGlow = false,
     this.enableBlur = false,
   });
@@ -50,28 +63,14 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔑 Theme Integration
-    final tokens = AppThemeProvider.of(context);
-    final buttonToken = tokens.colors['buttonPrimary'];
-    
-    final Gradient? themeGradient = ThemeParser.parseGradientToken(buttonToken);
-    final Color themeColor = ThemeParser.parseColorToken(buttonToken);
-
-    // ✅ LOGIC UPDATE: Use passed color if themeColor is transparent/null
-    final Color effectiveColor = widget.isDisabled
-        ? Colors.grey
-        : (themeColor == Colors.transparent || themeColor == const Color(0x00000000))
-            ? widget.color
-            : themeColor;
-
-    Widget buttonChild = _buildContent(context);
+    Widget buttonContent = _buildContent();
 
     if (widget.type == AppButtonType.glass && widget.enableBlur) {
-      buttonChild = ClipRRect(
+      buttonContent = ClipRRect(
         borderRadius: BorderRadius.circular(widget.borderRadius),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-          child: buttonChild,
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: buttonContent,
         ),
       );
     }
@@ -83,73 +82,85 @@ class _AppButtonState extends State<AppButton> {
       child: GestureDetector(
         onTap: _canPress ? widget.onPressed : null,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: widget.padding,
           decoration: BoxDecoration(
-            // ✅ Gradient handles Theme automatically
-            gradient: widget.type == AppButtonType.solid ? themeGradient : null,
-
-            // ✅ Color uses our new effectiveColor logic
-            color: themeGradient == null ? _backgroundColor(effectiveColor) : null,
-
+            gradient: widget.gradient,
+            color: widget.gradient == null ? _backgroundColor() : null,
             borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: _border(effectiveColor),
-            boxShadow: _boxShadow(effectiveColor),
+            border: _border(),
+            boxShadow: _shadow(),
           ),
-          child: buttonChild,
+          child: buttonContent,
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent() {
     if (widget.isLoading) {
       return const SizedBox(
         width: 18,
         height: 18,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
       );
     }
 
     return Text(
       widget.text,
-      textAlign: TextAlign.center,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: widget.textColor,
-            fontWeight: FontWeight.bold, // Made bolder for better visibility
-          ),
+      style: TextStyle(
+        color: widget.textColor,
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        letterSpacing: .4,
+      ),
     );
   }
 
-  Color _backgroundColor(Color color) {
+  Color _backgroundColor() {
     switch (widget.type) {
       case AppButtonType.solid:
-        // Using withOpacity for backward compatibility if withValues isn't available
-        return _isHovering ? color.withOpacity(0.85) : color;
+        return _isHovering
+            ? widget.color.withOpacity(.85)
+            : widget.color;
+
       case AppButtonType.outline:
         return Colors.transparent;
+
       case AppButtonType.glass:
-        return Colors.black.withOpacity(0.25);
+        return Colors.black.withOpacity(.25);
     }
   }
 
-  Border? _border(Color color) {
+  Border? _border() {
     if (widget.type == AppButtonType.outline) {
-      return Border.all(color: color, width: widget.borderWidth);
+      return Border.all(
+        color: widget.color,
+        width: widget.borderWidth,
+      );
     }
+
     if (widget.type == AppButtonType.glass) {
-      return Border.all(color: Colors.white.withOpacity(0.25), width: 1);
+      return Border.all(
+        color: Colors.white.withOpacity(.25),
+      );
     }
+
     return null;
   }
 
-  List<BoxShadow>? _boxShadow(Color color) {
-    if (!widget.enableGlow || widget.type == AppButtonType.outline) return null;
+  List<BoxShadow>? _shadow() {
+    if (!widget.enableGlow || widget.type == AppButtonType.outline) {
+      return null;
+    }
 
     return [
       BoxShadow(
-        color: color.withOpacity(0.3),
-        blurRadius: _isHovering ? 20 : 12,
+        color: widget.color.withOpacity(.35),
+        blurRadius: _isHovering ? 26 : 14,
         spreadRadius: 1,
       ),
     ];

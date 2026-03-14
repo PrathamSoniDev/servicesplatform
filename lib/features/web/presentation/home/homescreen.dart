@@ -1,232 +1,155 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/core/app_router.dart';
-import 'package:servicesplatform/features/web/presentation/home/testimonials_section.dart';
-import 'package:servicesplatform/features/web/widgets/button.dart';
 
-import '../../../../core/hero/hero_mapper.dart';
-import '../../../../core/hero/hero_model.dart';
-import '../../../../services/hero_repository.dart';
-import '../../widgets/top_nav_bar.dart';
-import '../common/footer_section.dart';
-import 'about_section.dart';
-import 'blog_section.dart';
-import 'contact_section.dart';
-import 'designs_section.dart';
-import 'hero_section.dart';
+import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
+import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/product_screem.dart';
+import 'package:servicesplatform/features/web/presentation/home/about_us_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class Homescreen extends StatefulWidget {
+  const Homescreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<Homescreen> createState() => _HomescreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
-  late String currentRoute;
-  // Section keys
-  final heroKey = GlobalKey();
-  final designsKey = GlobalKey();
-  final aboutKey = GlobalKey();
-  final testimonialsKey = GlobalKey();
-  final blogKey = GlobalKey();
-  final contactKey = GlobalKey();
-  late final List<GlobalKey> _sectionKeys;
-  late final HeroRepository _heroRepository;
-  bool isAutoScrolling = false;
-  final ValueNotifier<int> _sectionIndex = ValueNotifier(0);
+class _HomescreenState extends State<Homescreen> {
+  final PageController _pageController = PageController();
+
+  double _currentPage = 0.0;
+  bool _isAnimating = false;
 
   @override
   void initState() {
     super.initState();
-
-    _heroRepository = HeroRepository();
-    // _heroRepository.refreshHeroes();
-    _sectionKeys = [
-      heroKey,
-      designsKey,
-      aboutKey,
-      testimonialsKey,
-      blogKey,
-      contactKey,
-    ];
-
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _sectionIndex.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    currentRoute = GoRouterState.of(context).uri.toString();
-    super.didChangeDependencies();
-  }
-
-  // ───────────────── SCROLL SPY ─────────────────
-  void _onScroll() {
-    for (int i = 0; i < _sectionKeys.length; i++) {
-      final ctx = _sectionKeys[i].currentContext;
-      if (ctx == null) continue;
-
-      final box = ctx.findRenderObject() as RenderBox;
-      final position = box.localToGlobal(Offset.zero).dy;
-
-      if (position <= 120 && position + box.size.height > 120) {
-        if (_sectionIndex.value != i) {
-          _sectionIndex.value = i; // ✅ NO REBUILD
-        }
-        break;
+    _pageController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _currentPage = _pageController.page ?? 0.0;
+        });
       }
-    }
+    });
   }
 
-  // ───────────────── SCROLL TO SECTION ─────────────────
-  void scrollToSection(int index) async {
-    final ctx = _sectionKeys[index].currentContext;
-    if (ctx == null) return;
+  void _safeScroll(int index, int total) {
+    if (index < 0 || index >= total || _isAnimating) return;
 
-    isAutoScrolling = true;
+    setState(() => _isAnimating = true);
 
-    await Scrollable.ensureVisible(
-      ctx,
-      duration: const Duration(milliseconds: 700),
-      curve: Curves.easeInOutCubic,
-    );
-
-    // Delay allows scroll to settle
-    Future.delayed(const Duration(milliseconds: 200), () {
-      isAutoScrolling = false;
+    _pageController
+        .animateToPage(
+      index,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutQuart,
+    )
+        .then((_) {
+      if (mounted) setState(() => _isAnimating = false);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> sections = [
+
+      /// HERO
+      HeroSection(
+        key: const ValueKey('hero'),
+
+        // ✅ NEW CALLBACKS ADDED
+        onHomeTap: () => _safeScroll(0, 5),
+        onAboutTap: () => _safeScroll(1, 5),
+        onProductTap: () => _safeScroll(2, 5),
+        onBlogTap: () => _safeScroll(3, 5),
+        onContactTap: () => _safeScroll(4, 5),
+      ),
+
+      AboutUsScreen(key: const ValueKey('about')),
+      ProductScreen(key: const ValueKey('product')),
+      BlogScreen(key: const ValueKey('blog')),
+      ContactScreen(key: const ValueKey('contact')),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // ───────── CONTENT ─────────
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                const SizedBox(height: 72), // space for navbar
-                // Container(
-                //   key: heroKey,
-                //   child: HeroSection(
-                //     title: "Your Digital Journey", // Main text
-                //     gradientText:
-                //         "Starts Here", // Text that will have the gradient
-                //     showGradient: true, // Turn on gradient for Home
-                //     subtitle: "Unlock bespoke web & app services.",
-                //     imagePath: "assets/gif/jelly.gif",
-                //     isOverlayMode: true,
-                //     contentAlignment: HeroContentAlignment.center,
-                //     customButtons: [
-                //       const AppButton(text: "View Designs", onPressed: null),
-                //       AppButton(
-                //         text: "Book Us",
-                //         type: AppButtonType.outline,
-                //         onPressed: () {
-                //           context.push(AppRouter.contact);
-                //         },
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                Container(
-                  key: heroKey,
-                  child: FutureBuilder<List<HeroModel>>(
-                    future: _heroRepository.getHeroes(),
-                    builder: (context, snapshot) {
-                      // ⏳ Loading (Shimmer / Placeholder)
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return HeroSection(title: "", isLoading: true);
-                      }
+      body: Listener(
+        onPointerSignal: (pointerSignal) {
+          if (pointerSignal is PointerScrollEvent && !_isAnimating) {
+            if (pointerSignal.scrollDelta.dy > 10) {
+              _safeScroll(_currentPage.round() + 1, sections.length);
+            } else if (pointerSignal.scrollDelta.dy < -10) {
+              _safeScroll(_currentPage.round() - 1, sections.length);
+            }
+          }
+        },
+        child: GestureDetector(
+          onVerticalDragUpdate: (details) {
+            if (_isAnimating) return;
 
-                      // ❌ Error or empty
-                      if (snapshot.hasError ||
-                          !snapshot.hasData ||
-                          snapshot.data!.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      // ✅ Pick HOME hero
-                      final hero = snapshot.data!.firstWhere(
-                        (h) => h.key == 'home' && h.isActive,
-                        orElse: () => snapshot.data!.first,
-                      );
-                      debugPrint("Debugging Asset Url : ${hero.assetUrl}");
-                      return HeroSection(
-                        title: hero.headingText,
-                        subtitle: hero.subHeadingText,
-                        imagePath: resolveAssetUrl(hero.assetUrl),
-                        gradientText: hero.gradientText,
-                        showGradient: hero.gradientText != null,
-
-                        isOverlayMode: true,
-                        contentAlignment:
-                            hero.isContentLeft
-                                ? HeroContentAlignment.left
-                                : hero.isContentRight
-                                ? HeroContentAlignment.right
-                                : HeroContentAlignment.center,
-
-                        customButtons: [
-                          AppButton(
-                            text: hero.primaryButtonText ?? "View Designs",
-                            onPressed:
-                                () => context.push(
-                                  hero.ctaPrimary ?? AppRouter.blog,
-                                ),
-                          ),
-
-                          AppButton(
-                            text: "Book Us",
-                            type: AppButtonType.outline,
-                            onPressed: () => context.push(AppRouter.contact),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-
-                Container(key: designsKey, child: const DesignsSection()),
-                Container(key: aboutKey, child: const AboutSection()),
-                Container(
-                  key: testimonialsKey,
-                  child: const TestimonialSection(),
-                ),
-                Container(key: blogKey, child: const BlogSection()),
-                Container(key: contactKey, child: const ContactSection()),
-                const FooterSection(),
-              ],
-            ),
-          ),
-
-          // ───────── NAVBAR ─────────
-          ValueListenableBuilder<int>(
-            valueListenable: _sectionIndex,
-            builder: (_, index, __) {
-              return TopNavBar(
-                activeIndex: index,
-                onHome: () => scrollToSection(0),
-                onDesigns: () => scrollToSection(1),
-                onAbout: () => scrollToSection(2),
-                onTestimonials: () => scrollToSection(3),
-                onBlog: () => scrollToSection(4),
-                onContact: () => scrollToSection(5),
+            if (details.delta.dy < -5) {
+              _safeScroll(_currentPage.round() + 1, sections.length);
+            } else if (details.delta.dy > 5) {
+              _safeScroll(_currentPage.round() - 1, sections.length);
+            }
+          },
+          child: PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            itemCount: sections.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              double relativePosition = index - _currentPage;
+              return ScrollRevealItem(
+                position: relativePosition,
+                child: sections[index],
               );
             },
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ScrollRevealItem remains unchanged
+class ScrollRevealItem extends StatelessWidget {
+  final Widget child;
+  final double position;
+
+  const ScrollRevealItem({super.key, required this.child, required this.position});
+
+  @override
+  Widget build(BuildContext context) {
+    double scale = 1.0;
+    double opacity = 1.0;
+
+    if (position < 0 && position > -1) {
+      scale = 1.0 + (position * 0.12);
+      opacity = 1.0 + position;
+    }
+
+    return Opacity(
+      opacity: opacity.clamp(0.0, 1.0),
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..scale(scale.clamp(0.85, 1.0)),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox(
+              height: constraints.maxHeight,
+              width: constraints.maxWidth,
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: child,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
