@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
-import 'package:servicesplatform/features/web/widgets/about_us_card.dart';
 
 class AboutUsScreen extends StatefulWidget {
   const AboutUsScreen({super.key});
@@ -10,162 +10,319 @@ class AboutUsScreen extends StatefulWidget {
   State<AboutUsScreen> createState() => _AboutUsScreenState();
 }
 
-class _AboutUsScreenState extends State<AboutUsScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _AboutUsScreenState extends State<AboutUsScreen> {
+
+  final PageController _pageController = PageController(viewportFraction: 0.85);
+  Timer? _timer;
+
+  /// 🔴 Reduced to 3 cards
+  final List<Map<String, String>> steps = [
+    {
+      "title": "Product Discovery",
+      "desc":
+      "We collaborate with clients to understand goals and define the right digital solution."
+    },
+    {
+      "title": "Design & Architecture",
+      "desc":
+      "Our team designs modern UI/UX and scalable architecture for long-term growth."
+    },
+    {
+      "title": "Development",
+      "desc":
+      "We build high-performance web apps and mobile apps using modern technologies."
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    );
-    _controller.forward();
+
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_pageController.hasClients) {
+
+        int next = _pageController.page!.round() + 1;
+
+        if (next >= steps.length) next = 0;
+
+        _pageController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final double padding = Responsive.pagePadding(context);
-    final bool isMobile = Responsive.isMobile(context);
 
-    return Container(
-      width: double.infinity,
-      // Off-white background for the section
-      color: const Color(0xFFF8F9FA), 
-      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 100),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: isMobile 
-              ? Column(
-                  children: [
-                    _buildRightSection(context, true),
-                    const SizedBox(height: 60),
-                    _buildLeftSection(context),
-                  ],
-                ) 
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(flex: 5, child: _buildLeftSection(context)),
-                    const SizedBox(width: 80),
-                    Expanded(flex: 5, child: _buildRightSection(context, false)),
-                  ],
-                ),
+    final padding = Responsive.pagePadding(context);
+    final isMobile = Responsive.isMobile(context);
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height,
+      child: Container(
+        width: double.infinity,
+        color: const Color(0xFFF8F9FA),
+        padding: EdgeInsets.symmetric(
+          horizontal: padding,
+          vertical: isMobile ? 40 : 55,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1150),
+            child: isMobile
+                ? _buildMobileLayout()
+                : _buildDesktopLayout(),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildLeftSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  /// DESKTOP
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        FadeTransition(
-          opacity: CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.4)),
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: "AI Changing\n",
-                  style: TextStyle(
-                    color: AppTheme.primaryGreen,
-                    fontWeight: FontWeight.bold,
-                    fontSize: Responsive.isMobile(context) ? 32 : 48,
-                  ),
-                ),
-                TextSpan(
-                  text: "Software Development",
-                  style: TextStyle(
-                    // Dark text for off-white background
-                    color: const Color(0xFF1A1A1A), 
-                    fontWeight: FontWeight.bold,
-                    fontSize: Responsive.isMobile(context) ? 32 : 48,
-                  ),
-                ),
-              ],
-            ),
-          ),
+
+        Expanded(
+          flex: 5,
+          child: _buildHeroText(false),
         ),
-        const SizedBox(height: 40),
-        _buildAnimatedItem(context, "GenAI advances daily.", "AI's ability to write code is evolving at a dizzying pace.", true, 0.2),
-        _buildAnimatedItem(context, "Integrated Ecosystems.", "Artificial intelligence is seamlessly merged into modern cloud development.", false, 0.4),
-        _buildAnimatedItem(context, "Creative Freedom.", "Developers focus on architecture while AI handles the mundane syntax.", false, 0.6),
+
+        const SizedBox(width: 60),
+
+        Expanded(
+          flex: 5,
+          child: _buildTimelineDesktop(),
+        ),
       ],
     );
   }
 
-  Widget _buildRightSection(BuildContext context, bool isMobile) {
-    return Center(
-      child: SizedBox(
-        height: 520,
-        width: 450,
-        child: Stack(
-          children: [
-            FadeTransition(
-              opacity: CurvedAnimation(parent: _controller, curve: const Interval(0.1, 0.6)),
-              child: Container(
-                width: 380,
-                height: 450,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  // Subtle border for light mode
-                  border: Border.all(color: Colors.black.withOpacity(0.05)), 
-                  image: const DecorationImage(
-                    image: NetworkImage("https://images.unsplash.com/photo-1522071820081-009f0129c71c"),
-                    fit: BoxFit.cover,
-                  ),
+  /// MOBILE
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+
+        _buildHeroText(true),
+
+        const SizedBox(height: 28),
+
+        SizedBox(
+          height: 160,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: steps.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: _HoverCard(
+                  child: _buildCard(steps[index]),
                 ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// HERO TEXT
+  Widget _buildHeroText(bool isMobile) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 500),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryGreen.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              "About Our Company",
+              style: TextStyle(
+                color: AppTheme.primaryGreen,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
             ),
-            Positioned(
-              right: isMobile ? 20 : 0,
-              bottom: 20,
-              child: AboutUsGlassCard(isMobile: isMobile, controller: _controller),
-            )
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 18),
+
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: isMobile ? 30 : 42,
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+                color: const Color(0xFF111827),
+              ),
+              children: [
+                const TextSpan(text: "Building Digital\nProducts That\n"),
+                TextSpan(
+                  text: "Drive Innovation",
+                  style: TextStyle(color: AppTheme.primaryGreen),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          const Text(
+            "We build high-quality digital products including mobile apps, "
+            "web platforms, and scalable enterprise solutions. "
+            "Our team helps businesses transform ideas into modern "
+            "technology products with exceptional user experiences.",
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.6,
+              color: Color(0xFF4B5563),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAnimatedItem(BuildContext context, String title, String desc, bool active, double start) {
-    return FadeTransition(
-      opacity: CurvedAnimation(parent: _controller, curve: Interval(start, start + 0.3)),
-      child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-          CurvedAnimation(parent: _controller, curve: Interval(start, start + 0.3, curve: Curves.easeOut)),
+  /// DESKTOP TIMELINE
+  Widget _buildTimelineDesktop() {
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(steps.length, (index) {
+
+        final bool left = index % 2 == 0;
+
+        return Row(
+          children: [
+
+            if (left) _HoverCard(child: _buildCard(steps[index])),
+
+            const Spacer(),
+
+            Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryGreen,
+                shape: BoxShape.circle,
+              ),
+            ),
+
+            const Spacer(),
+
+            if (!left) _HoverCard(child: _buildCard(steps[index])),
+          ],
+        );
+      }),
+    );
+  }
+
+  /// CARD
+  Widget _buildCard(Map step) {
+    return Container(
+      width: 240,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primaryGreen.withOpacity(0.12),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title, 
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: active ? AppTheme.primaryGreen : Colors.black.withOpacity(0.2),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                desc, 
-                style: TextStyle(
-                  fontSize: 16,
-                  color: active ? Colors.black54 : Colors.black.withOpacity(0.1),
-                ),
-              ),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryGreen.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.auto_awesome,
+              color: AppTheme.primaryGreen,
+              size: 16,
+            ),
           ),
-        ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            step["title"]!,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF111827),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            step["desc"]!,
+            style: const TextStyle(
+              fontSize: 12.5,
+              height: 1.5,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// HOVER EFFECT
+class _HoverCard extends StatefulWidget {
+  final Widget child;
+
+  const _HoverCard({required this.child});
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+
+  bool hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        transform: Matrix4.identity()..translate(0, hover ? -6 : 0),
+        child: widget.child,
       ),
     );
   }

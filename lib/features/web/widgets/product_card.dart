@@ -1,90 +1,122 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
+import 'package:servicesplatform/features/web/utils/responsive.dart';
 
-class OrbitingCard extends StatelessWidget {
-  final int index;
-  final double scrollValue;
-  final bool isPrimary;
+class ProductCard extends StatefulWidget {
+  final bool isDeveloper;
 
-  const OrbitingCard({
+  const ProductCard({
     super.key,
-    required this.index,
-    required this.scrollValue,
-    required this.isPrimary,
+    required this.isDeveloper,
   });
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+
+  bool isHover = false;
+
+  @override
   Widget build(BuildContext context) {
-    // Math for Orbit:
-    // We want the active card at PI (left side of the circle)
-    // The inactive card moves to the top/bottom (imaginary area)
-    
-    double angleOffset = (index == 0) ? 0 : 1; // Card difference
-    double currentAngle = (scrollValue - angleOffset) * (pi / 2) + pi;
-    
-    double radius = 300.0; // Half of the 600 container
-    double x = cos(currentAngle) * radius;
-    double y = sin(currentAngle) * radius;
 
-    // Scale and Opacity based on proximity to the "Active Zone" (left side)
-    double distanceFromActive = (x + radius).abs() / radius; 
-    double scale = (1.2 - distanceFromActive).clamp(0.7, 1.0);
-    double opacity = (1.2 - distanceFromActive).clamp(0.0, 1.0);
+    final isMobile = Responsive.isMobile(context);
 
-    return Transform.translate(
-      offset: Offset(x, y),
-      child: Transform.scale(
-        scale: scale,
-        child: Opacity(
-          opacity: opacity,
-          child: Container(
-            width: 260, // Smaller width
-            height: 380, // Vertically long
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161616),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(-10, 10),
-                )
-              ],
+    return MouseRegion(
+      onEnter: (_) {
+        if (!isMobile) setState(() => isHover = true);
+      },
+      onExit: (_) {
+        if (!isMobile) setState(() => isHover = false);
+      },
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        width: isMobile ? double.infinity : 360,
+
+        padding: const EdgeInsets.all(28),
+
+        decoration: BoxDecoration(
+          color: const Color(0xFF0E1B18),
+          borderRadius: BorderRadius.circular(20),
+
+          boxShadow: [
+            if (isHover)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 25,
+                offset: const Offset(0, 14),
+              )
+          ],
+        ),
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+
+          children: [
+
+            /// TITLE
+            Text(
+              widget.isDeveloper
+                  ? "For Developers"
+                  : "For Businesses",
+
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  isPrimary ? Icons.bolt : Icons.rocket_launch,
-                  color: AppTheme.primaryGreen,
-                  size: 28,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  isPrimary ? "FOR\nDEVS" : "FOR\nBIZ",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    height: 1,
-                  ),
-                ),
-                const Spacer(),
-                const Text(
-                  "Explore details",
-                  style: TextStyle(color: Colors.white30, fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 2,
-                  width: 40,
-                  color: AppTheme.primaryGreen,
-                )
-              ],
+
+            const SizedBox(height: 12),
+
+            /// DESCRIPTION
+            Text(
+              widget.isDeveloper
+                  ? "Improve coding skills and prepare for modern tech interviews."
+                  : "Hire and scale high-quality engineering teams.",
+
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            /// BUTTON
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+
+              decoration: BoxDecoration(
+                color: widget.isDeveloper
+                    ? AppTheme.primaryGreen
+                    : Colors.white10,
+
+                borderRadius: BorderRadius.circular(10),
+              ),
+
+              alignment: Alignment.center,
+
+              child: Text(
+                widget.isDeveloper
+                    ? "Explore"
+                    : "Contact Sales",
+
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: widget.isDeveloper
+                      ? Colors.black
+                      : Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

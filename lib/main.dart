@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:seo_renderer/seo_renderer.dart';
 import 'core/app_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  runApp(
+    RobotDetector(
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -15,14 +21,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Devnex Services',
 
-      // Basic theme
       theme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.black,
       ),
 
-      // Router
       routerConfig: AppRouter.router,
     );
   }

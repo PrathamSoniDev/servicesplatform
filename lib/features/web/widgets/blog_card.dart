@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/responsive.dart';
 
 class BlogCard extends StatefulWidget {
   const BlogCard({super.key});
@@ -12,102 +13,91 @@ class _BlogCardState extends State<BlogCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (_) {
+        if (!isMobile) setState(() => _isHovered = true);
+      },
+      onExit: (_) {
+        if (!isMobile) setState(() => _isHovered = false);
+      },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.identity()..scale(_isHovered ? 1.03 : 1.0),
+        duration: const Duration(milliseconds: 300),
+        transform: Matrix4.identity()
+          ..scale(_isHovered && !isMobile ? 1.02 : 1),
+
         decoration: BoxDecoration(
-          // Dark Gradient for the "Sparkling" look
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF1A1A1A), // Off Black
-              _isHovered ? const Color(0xFF0D0D0D) : const Color(0xFF121212),
+              const Color(0xFF1A1A1A),
+              const Color(0xFF111111),
             ],
           ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: _isHovered 
-                ? const Color(0xFF00FFA3).withOpacity(0.5) 
-                : Colors.white.withOpacity(0.05),
-            width: 1,
-          ),
-          boxShadow: [
-            if (_isHovered)
-              BoxShadow(
-                color: const Color(0xFF00FFA3).withOpacity(0.15),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              )
-          ],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// IMAGE AREA WITH OVERLAY
+
+            /// IMAGE
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
               child: Container(
-                height: 200,
+                height: isMobile ? 120 : 180,   // 🔥 reduced height
                 color: Colors.black,
-                child: Stack(
-                  children: [
-                    // Placeholder for image
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Center(
-                      child: Icon(Icons.auto_awesome, color: Color(0xFF00FFA3), size: 40),
-                    ),
-                  ],
+                child: const Center(
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: Color(0xFF00FFA3),
+                    size: 32,
+                  ),
                 ),
               ),
             ),
 
             /// CONTENT
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(isMobile ? 16 : 22), // smaller padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   Text(
                     "AI DEVELOPMENT",
                     style: TextStyle(
                       color: const Color(0xFF00FFA3),
-                      fontSize: 12,
+                      fontSize: isMobile ? 10 : 12,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
+                      letterSpacing: 1.1,
                     ),
                   ),
-                  const SizedBox(height: 12),
+
+                  const SizedBox(height: 6),
+
                   Text(
                     "How AI is Transforming Development",
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: isMobile ? 16 : 19,
                       fontWeight: FontWeight.bold,
                       height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 12),
+
+                  const SizedBox(height: 6),
+
                   Text(
                     "Explore the new era of software engineering powered by GenAI.",
+                    maxLines: 2,                 // 🔥 prevents tall cards
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.6),
-                      fontSize: 15,
-                      height: 1.5,
+                      fontSize: isMobile ? 12.5 : 14,
+                      height: 1.4,
                     ),
                   ),
                 ],
