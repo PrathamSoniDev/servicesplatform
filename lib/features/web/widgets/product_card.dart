@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/features/web/utils/app_theme.dart';
-import 'package:servicesplatform/features/web/utils/responsive.dart';
 
 class ProductCard extends StatefulWidget {
   final bool isDeveloper;
+  final VoidCallback onTap;
 
   const ProductCard({
     super.key,
     required this.isDeveloper,
+    required this.onTap,
   });
 
   @override
@@ -16,107 +16,91 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
 
-  bool isHover = false;
+  bool hover = false;
 
   @override
   Widget build(BuildContext context) {
 
-    final isMobile = Responsive.isMobile(context);
+    return GestureDetector(
+      onTap: widget.onTap,
 
-    return MouseRegion(
-      onEnter: (_) {
-        if (!isMobile) setState(() => isHover = true);
-      },
-      onExit: (_) {
-        if (!isMobile) setState(() => isHover = false);
-      },
+      child: Hero(
+        tag: widget.isDeveloper ? "dev_prod" : "biz_prod",
 
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => hover = true),
+          onExit: (_) => setState(() => hover = false),
 
-        width: isMobile ? double.infinity : 360,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
 
-        padding: const EdgeInsets.all(28),
+            width: 320,
+            padding: const EdgeInsets.all(28),
 
-        decoration: BoxDecoration(
-          color: const Color(0xFF0E1B18),
-          borderRadius: BorderRadius.circular(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(24),
 
-          boxShadow: [
-            if (isHover)
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 25,
-                offset: const Offset(0, 14),
-              )
-          ],
-        ),
+              border: Border.all(color: Colors.white10),
 
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [
-
-            /// TITLE
-            Text(
-              widget.isDeveloper
-                  ? "For Developers"
-                  : "For Businesses",
-
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
+              boxShadow: [
+                if (hover)
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.4),
+                    blurRadius: 25,
+                    offset: const Offset(0, 12),
+                  )
+              ],
             ),
 
-            const SizedBox(height: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
 
-            /// DESCRIPTION
-            Text(
-              widget.isDeveloper
-                  ? "Improve coding skills and prepare for modern tech interviews."
-                  : "Hire and scale high-quality engineering teams.",
-
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// BUTTON
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-
-              decoration: BoxDecoration(
-                color: widget.isDeveloper
-                    ? AppTheme.primaryGreen
-                    : Colors.white10,
-
-                borderRadius: BorderRadius.circular(10),
-              ),
-
-              alignment: Alignment.center,
-
-              child: Text(
-                widget.isDeveloper
-                    ? "Explore"
-                    : "Contact Sales",
-
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: widget.isDeveloper
-                      ? Colors.black
-                      : Colors.white,
+                Icon(
+                  widget.isDeveloper
+                      ? Icons.terminal
+                      : Icons.business_center,
+                  color: const Color(0xFF27AE60),
+                  size: 40,
                 ),
-              ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  widget.isDeveloper
+                      ? "Developer Platform"
+                      : "Business Platform",
+
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  "Explore powerful tools designed to help engineers grow and companies hire better.",
+                  style: TextStyle(
+                    color: Colors.white60,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                const Text(
+                  "View Details →",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
