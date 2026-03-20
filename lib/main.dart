@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Devnex Services',
+      title: 'Sell Tech IND. Productions',
 
       theme: ThemeData(
         brightness: Brightness.dark,
