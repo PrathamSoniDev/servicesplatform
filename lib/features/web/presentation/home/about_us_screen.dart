@@ -11,27 +11,27 @@ class AboutUsScreen extends StatefulWidget {
 }
 
 class _AboutUsScreenState extends State<AboutUsScreen> {
+  final PageController _pageController =
+      PageController(viewportFraction: 0.85);
 
-  final PageController _pageController = PageController(viewportFraction: 0.85);
   Timer? _timer;
-
   int currentIndex = 0;
 
   final List<Map<String, String>> steps = [
     {
       "title": "Product Discovery",
       "desc":
-      "We collaborate with clients to understand goals and define the right digital solution."
+          "We collaborate with clients to understand goals and define the right digital solution."
     },
     {
       "title": "Design & Architecture",
       "desc":
-      "Our team designs modern UI/UX and scalable architecture for long-term growth."
+          "Our team designs modern UI/UX and scalable architecture for long-term growth."
     },
     {
       "title": "Development",
       "desc":
-      "We build high-performance web apps and mobile apps using modern technologies."
+          "We build high-performance web apps and mobile apps using modern technologies."
     },
   ];
 
@@ -62,7 +62,6 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final padding = Responsive.pagePadding(context);
     final isMobile = Responsive.isMobile(context);
 
@@ -70,7 +69,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
       height: MediaQuery.of(context).size.height,
       child: Container(
         width: double.infinity,
-        color: const Color(0xFFF7F8FA),
+
+        /// ✅ THEME
+        color: AppTheme.bgSoftGrey,
 
         padding: EdgeInsets.symmetric(
           horizontal: padding,
@@ -80,8 +81,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1150),
             child: isMobile
-                ? _buildMobileLayout()
-                : _buildDesktopLayout(),
+                ? _buildMobileLayout(context)
+                : _buildDesktopLayout(context),
           ),
         ),
       ),
@@ -89,26 +90,24 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   }
 
   /// DESKTOP
-  Widget _buildDesktopLayout() {
+  Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(flex: 5, child: _buildHeroText(false)),
+        Expanded(flex: 5, child: _buildHeroText(context, false)),
         const SizedBox(width: 60),
-        Expanded(flex: 5, child: _buildTimelineDesktop()),
+        Expanded(flex: 5, child: _buildTimelineDesktop(context)),
       ],
     );
   }
 
-  /// 🔥 MOBILE WITH ARROWS
-  Widget _buildMobileLayout() {
+  /// MOBILE
+  Widget _buildMobileLayout(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-
-        _buildHeroText(true),
-
+        _buildHeroText(context, true),
         const SizedBox(height: 28),
 
         SizedBox(
@@ -123,7 +122,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: _HoverCard(
-                  child: _buildCard(steps[index]),
+                  child: _buildCard(context, steps[index]),
                 ),
               );
             },
@@ -132,12 +131,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
         const SizedBox(height: 16),
 
-        /// 🔥 ARROWS
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
-            /// LEFT BUTTON
             _navButton(
               icon: Icons.chevron_left,
               onTap: () {
@@ -151,10 +147,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 );
               },
             ),
-
             const SizedBox(width: 20),
-
-            /// RIGHT BUTTON
             _navButton(
               icon: Icons.chevron_right,
               onTap: () {
@@ -174,7 +167,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
     );
   }
 
-  /// NAV BUTTON UI
+  /// NAV BUTTON
   Widget _navButton({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
@@ -182,7 +175,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardLight,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
@@ -192,32 +185,30 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
             )
           ],
         ),
-        child: Icon(icon, size: 20, color: Colors.black87),
+        child: const Icon(Icons.chevron_left, size: 20, color: Colors.black87),
       ),
     );
   }
 
   /// HERO TEXT
-  Widget _buildHeroText(bool isMobile) {
+  Widget _buildHeroText(BuildContext context, bool isMobile) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 500),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
               color: AppTheme.primaryGreen.withOpacity(0.12),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
               "About Our Company",
-              style: TextStyle(
-                color: AppTheme.primaryGreen,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppTheme.primaryGreen,
+                  ),
             ),
           ),
 
@@ -229,7 +220,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 fontSize: isMobile ? 30 : 42,
                 fontWeight: FontWeight.w800,
                 height: 1.15,
-                color: const Color(0xFF111827),
+                color: AppTheme.textBlack,
               ),
               children: [
                 const TextSpan(text: "Building Digital\nProducts That\n"),
@@ -243,22 +234,20 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
           const SizedBox(height: 16),
 
-          const Text(
-            "We build high-quality digital products including mobile apps, "
-            "web platforms, and scalable enterprise solutions.",
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Color(0xFF4B5563),
-            ),
+          Text(
+            "We build high-quality digital products including mobile apps, web platforms, and scalable enterprise solutions.",
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontSize: 14,
+                  color: AppTheme.textGrey,
+                ),
           ),
         ],
       ),
     );
   }
 
-  /// DESKTOP TIMELINE
-  Widget _buildTimelineDesktop() {
+  /// TIMELINE
+  Widget _buildTimelineDesktop(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(steps.length, (index) {
@@ -266,18 +255,18 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
         return Row(
           children: [
-            if (left) _HoverCard(child: _buildCard(steps[index])),
+            if (left) _HoverCard(child: _buildCard(context, steps[index])),
             const Spacer(),
             Container(
               width: 9,
               height: 9,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppTheme.primaryGreen,
                 shape: BoxShape.circle,
               ),
             ),
             const Spacer(),
-            if (!left) _HoverCard(child: _buildCard(steps[index])),
+            if (!left) _HoverCard(child: _buildCard(context, steps[index])),
           ],
         );
       }),
@@ -285,12 +274,12 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   }
 
   /// CARD
-  Widget _buildCard(Map step) {
+  Widget _buildCard(BuildContext context, Map step) {
     return Container(
       width: 240,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black.withOpacity(0.08)),
         boxShadow: [
@@ -312,29 +301,30 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               color: AppTheme.primaryGreen.withOpacity(0.12),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.auto_awesome, color: AppTheme.primaryGreen, size: 16),
+            child: const Icon(Icons.auto_awesome,
+                color: AppTheme.primaryGreen, size: 16),
           ),
 
           const SizedBox(height: 10),
 
           Text(
             step["title"]!,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF111827),
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textBlack,
+                ),
           ),
 
           const SizedBox(height: 4),
 
           Text(
             step["desc"]!,
-            style: const TextStyle(
-              fontSize: 12.5,
-              height: 1.5,
-              color: Color(0xFF6B7280),
-            ),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  color: AppTheme.textGrey,
+                ),
           ),
         ],
       ),
@@ -342,7 +332,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   }
 }
 
-/// HOVER EFFECT
+/// HOVER EFFECT (UNCHANGED)
 class _HoverCard extends StatefulWidget {
   final Widget child;
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/app_theme.dart';
+import 'package:servicesplatform/features/web/utils/responsive.dart';
 
 class ProductCard extends StatefulWidget {
   final bool isDeveloper;
@@ -15,41 +17,58 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
-
   bool hover = false;
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    /// ✅ Dynamic colors
+    final cardColor =
+        isDark ? AppTheme.darkCard : AppTheme.cardLight;
+
+    final borderColor =
+        isDark ? AppTheme.borderColor : AppTheme.borderLight;
+
+    final titleColor =
+        isDark ? AppTheme.textPrimary : AppTheme.textBlack;
+
+    final descColor =
+        isDark ? AppTheme.textSecondary : AppTheme.textGrey;
 
     return GestureDetector(
       onTap: widget.onTap,
-
       child: Hero(
         tag: widget.isDeveloper ? "dev_prod" : "biz_prod",
-
         child: MouseRegion(
-          onEnter: (_) => setState(() => hover = true),
-          onExit: (_) => setState(() => hover = false),
-
+          onEnter: (_) {
+            if (!isMobile) setState(() => hover = true);
+          },
+          onExit: (_) {
+            if (!isMobile) setState(() => hover = false);
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
 
-            width: 320,
-            padding: const EdgeInsets.all(28),
+            width: isMobile ? 260 : 320,
+            padding: EdgeInsets.all(isMobile ? 20 : 28),
 
             decoration: BoxDecoration(
-              color: const Color(0xFF111111),
+              color: cardColor,
               borderRadius: BorderRadius.circular(24),
-
-              border: Border.all(color: Colors.white10),
-
+              border: Border.all(
+                color: hover
+                    ? AppTheme.primaryGreen.withOpacity(0.4)
+                    : borderColor,
+              ),
               boxShadow: [
-                if (hover)
+                if (hover && !isMobile)
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withOpacity(0.25),
                     blurRadius: 25,
                     offset: const Offset(0, 12),
-                  )
+                  ),
               ],
             ),
 
@@ -61,42 +80,53 @@ class _ProductCardState extends State<ProductCard> {
                   widget.isDeveloper
                       ? Icons.terminal
                       : Icons.business_center,
-                  color: const Color(0xFF27AE60),
-                  size: 40,
+                  color: AppTheme.primaryGreen,
+                  size: isMobile ? 32 : 40,
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: isMobile ? 16 : 24),
 
                 Text(
                   widget.isDeveloper
                       ? "Developer Platform"
                       : "Business Platform",
-
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
+                  style: TextStyle(
+                    color: titleColor,
+                    fontSize: isMobile ? 18 : 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
-                const Text(
+                Text(
                   "Explore powerful tools designed to help engineers grow and companies hire better.",
                   style: TextStyle(
-                    color: Colors.white60,
+                    color: descColor,
                     height: 1.5,
+                    fontSize: isMobile ? 13 : 14,
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: isMobile ? 18 : 24),
 
-                const Text(
-                  "View Details →",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      "View Details",
+                      style: TextStyle(
+                        color: titleColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isMobile ? 13 : 14,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.arrow_forward,
+                      size: isMobile ? 16 : 18,
+                      color: titleColor,
+                    )
+                  ],
                 )
               ],
             ),

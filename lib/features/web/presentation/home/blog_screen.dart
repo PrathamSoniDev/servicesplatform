@@ -41,7 +41,10 @@ class BlogScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: AppTheme.bgOffWhite,
-      padding: EdgeInsets.symmetric(horizontal: padding, vertical: isMobile ? 40 : 80),
+      padding: EdgeInsets.symmetric(
+        horizontal: padding,
+        vertical: isMobile ? 40 : 80,
+      ),
       child: Column(
         children: [
           _buildHeader(context),
@@ -59,33 +62,43 @@ class BlogScreen extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Column(
       children: [
-        Text("INSIGHTS & INNOVATIONS", 
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold)),
+        Text(
+          "INSIGHTS & INNOVATIONS",
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppTheme.primaryGreen,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
         const SizedBox(height: 12),
-        Text("Latest from our Blog",
+        Text(
+          "Latest from our Blog",
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-            color: AppTheme.textBlack,
-            fontSize: Responsive.isMobile(context) ? 32 : 48,
-            fontWeight: FontWeight.w900,
-          )),
+                color: AppTheme.textBlack,
+                fontSize: Responsive.isMobile(context) ? 32 : 48,
+                fontWeight: FontWeight.w900,
+              ),
+        ),
       ],
     );
   }
 
   Widget _buildDesktopGrid(BuildContext context) {
     return Wrap(
-      spacing: 30, runSpacing: 30,
+      spacing: 30,
+      runSpacing: 30,
       alignment: WrapAlignment.center,
-      children: featuredBlogs.map((blog) => SizedBox(
-        width: 360,
-        child: BlogCard(
-          title: blog.title,
-          category: blog.category,
-          onTap: () => openBlogDetail(context, blog),
-          customHeight: 400,
-        ),
-      )).toList(),
+      children: featuredBlogs.map((blog) {
+        return SizedBox(
+          width: 360,
+          child: BlogCard(
+            title: blog.title,
+            category: blog.category,
+            onTap: () => openBlogDetail(context, blog),
+            customHeight: 400,
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -98,10 +111,13 @@ class BlogScreen extends StatelessWidget {
         final blog = featuredBlogs[index];
         return Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: SizedBox(width: 300, child: BlogCard(
-            title: blog.title, 
-            category: blog.category, 
-            onTap: () => openBlogDetail(context, blog))
+          child: SizedBox(
+            width: 300,
+            child: BlogCard(
+              title: blog.title,
+              category: blog.category,
+              onTap: () => openBlogDetail(context, blog),
+            ),
           ),
         );
       },
@@ -110,19 +126,35 @@ class BlogScreen extends StatelessWidget {
 
   Widget _viewMoreButton(BuildContext context) {
     return OutlinedButton(
-      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AllBlogsScreen())),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AllBlogsScreen()),
+      ),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppTheme.textBlack,
         side: const BorderSide(color: AppTheme.borderLight, width: 1.5),
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("View All Articles", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(width: 12),
-          Icon(Icons.arrow_forward_rounded, color: AppTheme.primaryGreen, size: 22),
+          Text(
+            "View All Articles",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textBlack,
+                ),
+          ),
+          const SizedBox(width: 12),
+          const Icon(
+            Icons.arrow_forward_rounded,
+            color: AppTheme.primaryGreen,
+            size: 22,
+          ),
         ],
       ),
     );

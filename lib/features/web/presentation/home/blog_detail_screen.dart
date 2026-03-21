@@ -22,23 +22,26 @@ class BlogDetailScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // 1. BLUR OVERLAY
+
+          /// BLUR OVERLAY
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: Container(color: AppTheme.darkBackground.withOpacity(0.5)),
+              child: Container(
+                color: AppTheme.darkBackground.withOpacity(0.5),
+              ),
             ),
           ),
 
-          // 2. MAIN SCROLLABLE PANEL
+          /// MAIN PANEL
           Center(
             child: Container(
               width: isMobile ? size.width * 0.95 : 1100,
               height: isMobile ? size.height * 0.9 : 850,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: AppTheme.bgOffWhite, 
+                color: AppTheme.bgOffWhite,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -50,13 +53,15 @@ class BlogDetailScreen extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // CONTENT AREA
+
+                  /// CONTENT
                   SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- TOP HERO IMAGE ---
+
+                        /// HERO IMAGE
                         Container(
                           width: double.infinity,
                           height: isMobile ? 300 : 500,
@@ -64,14 +69,14 @@ class BlogDetailScreen extends StatelessWidget {
                           child: Hero(
                             tag: title,
                             child: Icon(
-                              Icons.article_outlined, 
-                              size: isMobile ? 80 : 120, 
-                              color: AppTheme.primaryGreen.withOpacity(0.5)
+                              Icons.article_outlined,
+                              size: isMobile ? 80 : 120,
+                              color: AppTheme.primaryGreen.withOpacity(0.5),
                             ),
                           ),
                         ),
 
-                        // --- ARTICLE BODY ---
+                        /// BODY
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: isMobile ? 24 : 100,
@@ -80,7 +85,8 @@ class BlogDetailScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Category Label
+
+                              /// CATEGORY
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
@@ -90,81 +96,101 @@ class BlogDetailScreen extends StatelessWidget {
                                 child: Text(
                                   category.toUpperCase(),
                                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: AppTheme.primaryGreen,
-                                  ),
+                                        color: AppTheme.primaryGreen,
+                                      ),
                                 ),
                               ),
+
                               const SizedBox(height: 24),
-                              
-                              // Headline
+
+                              /// TITLE
                               Text(
                                 title,
                                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                  color: AppTheme.textBlack,
-                                  fontSize: isMobile ? 32 : 48, 
-                                  height: 1.1,
-                                ),
+                                      color: AppTheme.textBlack,
+                                      fontSize: isMobile ? 32 : 48,
+                                      height: 1.1,
+                                    ),
                               ),
+
                               const SizedBox(height: 24),
 
-                              // Author Meta
+                              /// AUTHOR
                               Row(
                                 children: [
                                   CircleAvatar(
-                                    radius: 18, 
-                                    backgroundColor: AppTheme.borderLight, 
-                                    child: Icon(Icons.person, size: 20, color: AppTheme.textGrey)
+                                    radius: 18,
+                                    backgroundColor: AppTheme.borderLight,
+                                    child: Icon(
+                                      Icons.person,
+                                      size: 20,
+                                      color: AppTheme.textGrey,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "By Editorial Team", 
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textBlack)
+                                        "By Editorial Team",
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: AppTheme.textBlack,
+                                            ),
                                       ),
                                       Text(
-                                        "March 19, 2026 • 5 min read", 
-                                        style: TextStyle(color: AppTheme.textGrey, fontSize: 12)
+                                        "March 19, 2026 • 5 min read",
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              fontSize: 12,
+                                              color: AppTheme.textGrey,
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
+
                               const SizedBox(height: 48),
 
-                              // Rich Text Content
+                              /// CONTENT TEXT
                               Text(
                                 "The landscape of software development is shifting beneath our feet. As AI becomes an integral part of the IDE, the role of a developer is moving from 'writer' to 'architect'.\n\n"
                                 "In this deep dive, we explore how GenAI tools are not just completing lines of code, but are actually helping engineers conceptualize complex system architectures faster than ever before.",
                                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppTheme.textGrey.withOpacity(0.9),
-                                  fontFamily: 'Georgia', 
-                                ),
+                                      color: AppTheme.textGrey.withOpacity(0.9),
+                                      fontFamily: 'Georgia',
+                                    ),
                               ),
+
                               const SizedBox(height: 40),
 
-                              // Showcase Infographic / Image
+                              /// INFOGRAPHIC
                               Container(
                                 height: 400,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.03), 
+                                  color: Colors.black.withOpacity(0.03),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(color: AppTheme.borderLight),
                                 ),
-                                child: Icon(Icons.auto_graph_rounded, size: 80, color: AppTheme.textGrey.withOpacity(0.2)),
+                                child: Icon(
+                                  Icons.auto_graph_rounded,
+                                  size: 80,
+                                  color: AppTheme.textGrey.withOpacity(0.2),
+                                ),
                               ),
+
                               const SizedBox(height: 40),
 
                               Text(
                                 "This transition requires a new set of skills. It's no longer just about knowing the syntax of a language; it's about knowing how to prompt, how to audit AI-generated code, and how to maintain security standards in an automated world.",
                                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppTheme.textGrey.withOpacity(0.9),
-                                  fontFamily: 'Georgia',
-                                ),
+                                      color: AppTheme.textGrey.withOpacity(0.9),
+                                      fontFamily: 'Georgia',
+                                    ),
                               ),
-                              
+
                               const SizedBox(height: 150),
                             ],
                           ),
@@ -173,7 +199,7 @@ class BlogDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // 3. STICKY ACTION BAR (Glassmorphism)
+                  /// BOTTOM BAR
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -199,15 +225,22 @@ class BlogDetailScreen extends StatelessWidget {
                             color: Colors.black.withOpacity(0.05),
                             child: Row(
                               children: [
-                                if (!isMobile) 
+                                if (!isMobile)
                                   Text(
-                                    "Did you find this insightful?", 
-                                    style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textBlack)
+                                    "Did you find this insightful?",
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppTheme.textBlack,
+                                        ),
                                   ),
                                 const Spacer(),
                                 IconButton(
-                                  onPressed: () {}, 
-                                  icon: Icon(Icons.ios_share, size: 20, color: AppTheme.textBlack)
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.ios_share,
+                                    size: 20,
+                                    color: AppTheme.textBlack,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 ElevatedButton(
@@ -216,10 +249,18 @@ class BlogDetailScreen extends StatelessWidget {
                                     backgroundColor: AppTheme.darkBackground,
                                     foregroundColor: AppTheme.bgOffWhite,
                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                     elevation: 0,
                                   ),
-                                  child: const Text("JOIN NEWSLETTER", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  child: const Text(
+                                    "JOIN NEWSLETTER",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -229,15 +270,19 @@ class BlogDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // 4. FLOATING CLOSE BUTTON
+                  /// CLOSE BUTTON
                   Positioned(
                     top: 24,
                     right: 24,
                     child: InkWell(
                       onTap: () => Navigator.pop(context),
                       child: CircleAvatar(
-                        backgroundColor: AppTheme.borderLight, 
-                        child: Icon(Icons.close, color: AppTheme.textBlack, size: 18)
+                        backgroundColor: AppTheme.borderLight,
+                        child: Icon(
+                          Icons.close,
+                          color: AppTheme.textBlack,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),

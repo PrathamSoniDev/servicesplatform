@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/app_theme.dart';
 
 class AboutUsGlassCard extends StatelessWidget {
   final bool isMobile;
@@ -12,6 +13,20 @@ class AboutUsGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final cardColor =
+        isDark ? AppTheme.darkCard : AppTheme.cardLight;
+
+    final borderColor =
+        isDark ? AppTheme.borderColor : AppTheme.borderLight;
+
+    final titleColor =
+        isDark ? AppTheme.textPrimary : AppTheme.textBlack;
+
+    final subTextColor =
+        isDark ? AppTheme.textSecondary : AppTheme.textGrey;
+
     final Animation<Offset> slide = Tween<Offset>(
       begin: const Offset(0.2, 0.1),
       end: Offset.zero,
@@ -32,28 +47,19 @@ class AboutUsGlassCard extends StatelessWidget {
           padding: const EdgeInsets.all(24),
 
           decoration: BoxDecoration(
-            /// 🔥 PURE WHITE (MAX CONTRAST)
-            color: Colors.white,
-
+            color: cardColor,
             borderRadius: BorderRadius.circular(24),
 
-            /// 🔥 STRONGER BORDER (VISIBLE EDGE)
-            border: Border.all(
-              color: Colors.black.withOpacity(0.08),
-            ),
+            border: Border.all(color: borderColor),
 
-            /// 🔥 LAYERED SHADOW (THIS IS THE KEY 🔥)
             boxShadow: [
-              /// soft big shadow
               BoxShadow(
-                color: Colors.black.withOpacity(0.10),
+                color: Colors.black.withOpacity(isDark ? 0.4 : 0.10),
                 blurRadius: 40,
                 offset: const Offset(0, 20),
               ),
-
-              /// tight shadow for edge definition
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -64,21 +70,35 @@ class AboutUsGlassCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(),
+              _buildHeader(titleColor, subTextColor),
               const SizedBox(height: 25),
 
-              _buildSectionTitle("Certifications"),
-              const Row(
+              _buildSectionTitle("Certifications", titleColor),
+
+              Row(
                 children: [
-                  Expanded(child: _MiniProgressCard(title: "ML Engineer", progress: 0.8)),
-                  SizedBox(width: 12),
-                  Expanded(child: _MiniProgressCard(title: "Data Scientist", progress: 0.4)),
+                  Expanded(
+                    child: _MiniProgressCard(
+                      title: "ML Engineer",
+                      progress: 0.8,
+                      isDark: isDark,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _MiniProgressCard(
+                      title: "Data Scientist",
+                      progress: 0.4,
+                      isDark: isDark,
+                    ),
+                  ),
                 ],
               ),
 
               const SizedBox(height: 25),
 
-              _buildSectionTitle("Badges"),
+              _buildSectionTitle("Badges", titleColor),
+
               const Row(
                 children: [
                   _HexBadge(label: "PyTorch", icon: Icons.bolt),
@@ -93,14 +113,15 @@ class AboutUsGlassCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return const Row(
+  Widget _buildHeader(Color titleColor, Color subTextColor) {
+    return Row(
       children: [
-        CircleAvatar(
+        const CircleAvatar(
           radius: 22,
-          backgroundImage: NetworkImage("https://randomuser.me/api/portraits/women/44.jpg"),
+          backgroundImage: NetworkImage(
+              "https://randomuser.me/api/portraits/women/44.jpg"),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -109,14 +130,14 @@ class AboutUsGlassCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Color(0xFF111827),
+                color: titleColor,
               ),
             ),
             Text(
               "ML Engineer",
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF6B7280),
+                color: subTextColor,
               ),
             ),
           ],
@@ -125,13 +146,13 @@ class AboutUsGlassCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String text) {
+  Widget _buildSectionTitle(String text, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         text,
-        style: const TextStyle(
-          color: Color(0xFF111827),
+        style: TextStyle(
+          color: color,
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
@@ -140,13 +161,16 @@ class AboutUsGlassCard extends StatelessWidget {
   }
 }
 
+/// MINI CARD
 class _MiniProgressCard extends StatelessWidget {
   final String title;
   final double progress;
+  final bool isDark;
 
   const _MiniProgressCard({
     required this.title,
     required this.progress,
+    required this.isDark,
   });
 
   @override
@@ -154,7 +178,9 @@ class _MiniProgressCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: isDark
+            ? AppTheme.surfaceGrey
+            : AppTheme.bgSoftGrey,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -162,8 +188,8 @@ class _MiniProgressCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF6B7280),
+            style: TextStyle(
+              color: AppTheme.textSecondary,
               fontSize: 9,
             ),
             maxLines: 1,
@@ -172,7 +198,7 @@ class _MiniProgressCard extends StatelessWidget {
           LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.black12,
-            color: const Color(0xFF00E676),
+            color: AppTheme.primaryGreen,
             minHeight: 2,
           ),
         ],
@@ -181,6 +207,7 @@ class _MiniProgressCard extends StatelessWidget {
   }
 }
 
+/// BADGE
 class _HexBadge extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -197,13 +224,13 @@ class _HexBadge extends StatelessWidget {
         Container(
           width: 40,
           height: 45,
-          decoration: const ShapeDecoration(
-            color: Color(0xFFE5E7EB),
-            shape: _HexagonBorder(),
+          decoration: ShapeDecoration(
+            color: AppTheme.bgSoftGrey,
+            shape: const _HexagonBorder(),
           ),
           child: Icon(
             icon,
-            color: Color(0xFF00E676),
+            color: AppTheme.primaryGreen,
             size: 18,
           ),
         ),
@@ -211,7 +238,7 @@ class _HexBadge extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF6B7280),
+            color: AppTheme.textGrey,
             fontSize: 9,
           ),
         ),
@@ -220,6 +247,7 @@ class _HexBadge extends StatelessWidget {
   }
 }
 
+/// HEX SHAPE
 class _HexagonBorder extends ShapeBorder {
   const _HexagonBorder();
 

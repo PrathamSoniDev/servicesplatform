@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/widgets/button.dart';
 import 'package:servicesplatform/features/web/widgets/custom_app_bar.dart';
 
 class HeroSection extends StatelessWidget {
-
-  // ✅ NEW CALLBACKS
   final VoidCallback onHomeTap;
   final VoidCallback onAboutTap;
   final VoidCallback onProductTap;
   final VoidCallback onBlogTap;
   final VoidCallback onContactTap;
 
-  // ✅ UPDATED CONSTRUCTOR
   const HeroSection({
     super.key,
     required this.onHomeTap,
@@ -32,14 +30,16 @@ class HeroSection extends StatelessWidget {
 
     return Stack(
       children: [
-
         Container(
           width: double.infinity,
           constraints: BoxConstraints(
             minHeight: size.height,
             maxHeight: size.height,
           ),
-          color: Colors.black,
+
+          /// ✅ THEME
+          color: AppTheme.darkBackground,
+
           padding: EdgeInsets.symmetric(
             horizontal: isMobile ? 20 : 60,
             vertical: size.height * 0.05,
@@ -56,7 +56,7 @@ class HeroSection extends StatelessWidget {
                   Text(
                     "The future\nof development",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
                       fontSize: titleSize,
                       height: 1.0,
                       color: Colors.white.withOpacity(.35),
@@ -75,49 +75,59 @@ class HeroSection extends StatelessWidget {
                       children: [
                         Text(
                           "is",
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
                             fontSize: titleSize,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(width: 15),
+
                         Icon(
                           Icons.fingerprint,
                           size: isMobile ? 60 : 110,
-                          color: const Color(0xFF00FFA3),
+
+                          /// ✅ THEME COLOR
+                          color: AppTheme.neonGreen,
+
                           shadows: [
                             Shadow(
-                              color: const Color(0xFF00FFA3).withOpacity(.35),
+                              color: AppTheme.neonGreen.withOpacity(.35),
                               blurRadius: 25,
                             ),
                           ],
                         ),
+
                         const SizedBox(width: 15),
+
                         Text(
                           "human +",
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
                             fontSize: titleSize,
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+
                         const SizedBox(width: 15),
+
                         Icon(
                           Icons.auto_awesome,
-                          color: const Color(0xFF00FFA3),
+                          color: AppTheme.neonGreen,
                           size: isMobile ? 50 : 90,
                           shadows: [
                             Shadow(
-                              color: const Color(0xFF00FFA3).withOpacity(.7),
+                              color: AppTheme.neonGreen.withOpacity(.7),
                               blurRadius: 30,
                             ),
                           ],
                         ),
+
                         const SizedBox(width: 15),
+
                         Text(
                           "AI",
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
                             fontSize: titleSize,
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
@@ -135,7 +145,7 @@ class HeroSection extends StatelessWidget {
                     child: Text(
                       "We help you map the skills you need, track the skills you have, and close your gaps to thrive in a GenAI world.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontSize: subTitleSize,
                         color: Colors.white.withOpacity(.6),
                         height: 1.5,
@@ -151,8 +161,11 @@ class HeroSection extends StatelessWidget {
                     text: "Contact Us",
                     onPressed: () {},
                     type: AppButtonType.outline,
+
+                    /// ✅ THEME COLORS
                     color: Colors.white,
                     textColor: Colors.white,
+
                     borderRadius: 10,
                     borderWidth: 1.5,
                     enableGlow: false,
@@ -169,7 +182,7 @@ class HeroSection extends StatelessWidget {
           ),
         ),
 
-        /// ✅ STICKY APP BAR
+        /// APP BAR
         CustomAppBar(
           onHomeTap: onHomeTap,
           onAboutTap: onAboutTap,
@@ -177,7 +190,6 @@ class HeroSection extends StatelessWidget {
           onBlogTap: onBlogTap,
           onContactTap: onContactTap,
         ),
-
       ],
     );
   }

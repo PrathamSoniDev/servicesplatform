@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/widgets/product_card.dart';
+import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'product_detail_screen.dart';
 
 class ProductScreen extends StatelessWidget {
@@ -24,52 +26,94 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
       width: double.infinity,
-      // Off-white background (very light grey/blue tint for a modern look)
-      color: const Color(0xFFF8F9FB), 
+
+      /// ✅ ALWAYS WHITE BACKGROUND
+      color: AppTheme.bgOffWhite, // or Colors.white
+
       padding: const EdgeInsets.symmetric(vertical: 100),
       child: Column(
         children: [
-          const Text(
-            "Choose Your Adventure",
-            style: TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1D1D1F), // Dark charcoal/black text
-              letterSpacing: -1,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "We build elite tech teams for companies\nand enhance developer skills.",
+
+          /// ✅ TITLE (always dark text)
+          Text(
+            "Powering Developers & Businesses",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.black54, // Soft grey text
-              fontSize: 18,
-              height: 1.5,
+            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  fontSize: isMobile ? 28 : 48,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -1,
+                  color: AppTheme.textBlack,
+                ),
+          ),
+
+          const SizedBox(height: 16),
+
+          /// ✅ SUBTITLE
+          Text(
+            "Whether you're a developer looking to level up your skills\nor a company building high-performance teams — we've got you covered.",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontSize: isMobile ? 14 : 18,
+                  height: 1.6,
+                  color: AppTheme.textGrey,
+                ),
+          ),
+
+          const SizedBox(height: 60),
+
+          /// ✅ MOBILE → Horizontal Scroll
+          if (isMobile)
+            SizedBox(
+              height: 260,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  ProductCard(
+                    isDeveloper: true,
+                    onTap: () => openProduct(context, true),
+                  ),
+                  const SizedBox(width: 16),
+
+                  ProductCard(
+                    isDeveloper: false,
+                    onTap: () => openProduct(context, false),
+                  ),
+                  const SizedBox(width: 16),
+
+                  ProductCard(
+                    isDeveloper: true,
+                    onTap: () => openProduct(context, true),
+                  ),
+                ],
+              ),
+            )
+
+          /// ✅ WEB / TABLET → Grid Layout
+          else
+            Wrap(
+              spacing: 40,
+              runSpacing: 40,
+              alignment: WrapAlignment.center,
+              children: [
+                ProductCard(
+                  isDeveloper: true,
+                  onTap: () => openProduct(context, true),
+                ),
+                ProductCard(
+                  isDeveloper: false,
+                  onTap: () => openProduct(context, false),
+                ),
+                ProductCard(
+                  isDeveloper: true,
+                  onTap: () => openProduct(context, true),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 80),
-          Wrap(
-            spacing: 40,
-            runSpacing: 40,
-            alignment: WrapAlignment.center,
-            children: [
-              ProductCard(
-                isDeveloper: true,
-                onTap: () => openProduct(context, true),
-              ),
-              ProductCard(
-                isDeveloper: false,
-                onTap: () => openProduct(context, false),
-              ),
-              ProductCard(
-                isDeveloper: true,
-                onTap: () => openProduct(context, true),
-              ),
-            ],
-          ),
         ],
       ),
     );

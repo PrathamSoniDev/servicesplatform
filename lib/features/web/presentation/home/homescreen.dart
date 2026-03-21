@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/utils/app_theme.dart';
 
 import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
@@ -56,7 +57,6 @@ class _HomescreenState extends State<Homescreen> {
       HeroSection(
         key: const ValueKey('hero'),
 
-        // ✅ NEW CALLBACKS ADDED
         onHomeTap: () => _safeScroll(0, 5),
         onAboutTap: () => _safeScroll(1, 5),
         onProductTap: () => _safeScroll(2, 5),
@@ -71,7 +71,9 @@ class _HomescreenState extends State<Homescreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      /// ✅ USING THEME INSTEAD OF HARDCODE
+      backgroundColor: AppTheme.darkBackground,
+
       body: Listener(
         onPointerSignal: (pointerSignal) {
           if (pointerSignal is PointerScrollEvent && !_isAnimating) {
@@ -111,12 +113,16 @@ class _HomescreenState extends State<Homescreen> {
   }
 }
 
-/// ScrollRevealItem remains unchanged
+/// unchanged
 class ScrollRevealItem extends StatelessWidget {
   final Widget child;
   final double position;
 
-  const ScrollRevealItem({super.key, required this.child, required this.position});
+  const ScrollRevealItem({
+    super.key,
+    required this.child,
+    required this.position,
+  });
 
   @override
   Widget build(BuildContext context) {
