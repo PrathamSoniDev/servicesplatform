@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/widgets/blog_card.dart';
-import 'blog_detail_screen.dart';
 
 class AllBlogsScreen extends StatelessWidget {
   const AllBlogsScreen({super.key});
 
+  /// ✅ FIXED → USE PUSH (NOT GO)
   void openBlog(BuildContext context, String title, String category) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        barrierDismissible: true,
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (context, animation, _) => FadeTransition(
-          opacity: animation,
-          child: BlogDetailScreen(title: title, category: category),
-        ),
-      ),
+    final slug = title.toLowerCase().replaceAll(' ', '-');
+
+    context.push(
+      '/blog/detail/$slug?category=${Uri.encodeComponent(category)}',
     );
   }
 
@@ -34,13 +29,14 @@ class AllBlogsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
 
+        /// ✅ BACK BUTTON (NOW WORKS)
         leading: IconButton(
+          onPressed: () => context.pop(),
           icon: const Icon(
-            Icons.arrow_back_ios_new,
+            Icons.arrow_back_ios_new_rounded,
             color: Colors.white,
             size: 18,
           ),
-          onPressed: () => Navigator.pop(context),
         ),
 
         title: Text(

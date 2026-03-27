@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
-
 import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
@@ -17,7 +16,6 @@ class Homescreen extends StatefulWidget {
 
 class _HomescreenState extends State<Homescreen> {
   final PageController _pageController = PageController();
-
   double _currentPage = 0.0;
   bool _isAnimating = false;
 
@@ -52,28 +50,22 @@ class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> sections = [
-
-      /// HERO
       HeroSection(
         key: const ValueKey('hero'),
-
         onHomeTap: () => _safeScroll(0, 5),
         onAboutTap: () => _safeScroll(1, 5),
         onProductTap: () => _safeScroll(2, 5),
         onBlogTap: () => _safeScroll(3, 5),
         onContactTap: () => _safeScroll(4, 5),
       ),
-
-      AboutUsScreen(key: const ValueKey('about')),
-      ProductScreen(key: const ValueKey('product')),
-      BlogScreen(key: const ValueKey('blog')),
-      ContactScreen(key: const ValueKey('contact')),
+      const AboutUsScreen(key: ValueKey('about')),
+      const ProductScreen(key: ValueKey('product')),
+      const BlogScreen(key: ValueKey('blog')),
+      const ContactScreen(key: ValueKey('contact')),
     ];
 
     return Scaffold(
-      /// ✅ USING THEME INSTEAD OF HARDCODE
       backgroundColor: AppTheme.darkBackground,
-
       body: Listener(
         onPointerSignal: (pointerSignal) {
           if (pointerSignal is PointerScrollEvent && !_isAnimating) {
@@ -87,7 +79,6 @@ class _HomescreenState extends State<Homescreen> {
         child: GestureDetector(
           onVerticalDragUpdate: (details) {
             if (_isAnimating) return;
-
             if (details.delta.dy < -5) {
               _safeScroll(_currentPage.round() + 1, sections.length);
             } else if (details.delta.dy > 5) {
@@ -113,7 +104,6 @@ class _HomescreenState extends State<Homescreen> {
   }
 }
 
-/// unchanged
 class ScrollRevealItem extends StatelessWidget {
   final Widget child;
   final double position;
@@ -141,21 +131,8 @@ class ScrollRevealItem extends StatelessWidget {
         transform: Matrix4.identity()
           ..setEntry(3, 2, 0.001)
           ..scale(scale.clamp(0.85, 1.0)),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SizedBox(
-              height: constraints.maxHeight,
-              width: constraints.maxWidth,
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: child,
-                ),
-              ),
-            );
-          },
-        ),
+        // Fixed: Removed SizedBox.expand to let SingleChildScrollView in child work better
+        child: child,
       ),
     );
   }

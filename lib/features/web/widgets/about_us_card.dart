@@ -13,19 +13,23 @@ class AboutUsGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final cardColor =
-        isDark ? AppTheme.darkCard : AppTheme.cardLight;
+    final cardColor = isDark ? AppTheme.darkCard : AppTheme.cardLight;
+    final borderColor = isDark ? AppTheme.borderColor : AppTheme.borderLight;
+    final titleColor = isDark ? AppTheme.textPrimary : AppTheme.textBlack;
+    final subTextColor = isDark ? AppTheme.textSecondary : AppTheme.textGrey;
 
-    final borderColor =
-        isDark ? AppTheme.borderColor : AppTheme.borderLight;
-
-    final titleColor =
-        isDark ? AppTheme.textPrimary : AppTheme.textBlack;
-
-    final subTextColor =
-        isDark ? AppTheme.textSecondary : AppTheme.textGrey;
+    /// 🔥 DYNAMIC WIDTH (NO FIXED WIDTH)
+    double cardWidth;
+    if (size.width < 400) {
+      cardWidth = size.width * 0.9;
+    } else if (size.width < 900) {
+      cardWidth = 320;
+    } else {
+      cardWidth = 360;
+    }
 
     final Animation<Offset> slide = Tween<Offset>(
       begin: const Offset(0.2, 0.1),
@@ -42,71 +46,99 @@ class AboutUsGlassCard extends StatelessWidget {
       ),
       child: SlideTransition(
         position: slide,
-        child: Container(
-          width: isMobile ? 280 : 360,
-          padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: cardWidth,
+              minWidth: 260,
+            ),
+            padding: EdgeInsets.all(size.width < 400 ? 16 : 24),
 
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(24),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.4 : 0.10),
+                  blurRadius: 40,
+                  offset: const Offset(0, 20),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
 
-            border: Border.all(color: borderColor),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(titleColor, subTextColor),
+                const SizedBox(height: 20),
 
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.4 : 0.10),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+                _buildSectionTitle("Certifications", titleColor),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(titleColor, subTextColor),
-              const SizedBox(height: 25),
+                /// 🔥 RESPONSIVE ROW (NO OVERFLOW)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth < 280) {
+                      return Column(
+                        children: [
+                          _MiniProgressCard(
+                            title: "ML Engineer",
+                            progress: 0.8,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: 10),
+                          _MiniProgressCard(
+                            title: "Data Scientist",
+                            progress: 0.4,
+                            isDark: isDark,
+                          ),
+                        ],
+                      );
+                    }
 
-              _buildSectionTitle("Certifications", titleColor),
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _MiniProgressCard(
+                            title: "ML Engineer",
+                            progress: 0.8,
+                            isDark: isDark,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _MiniProgressCard(
+                            title: "Data Scientist",
+                            progress: 0.4,
+                            isDark: isDark,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: _MiniProgressCard(
-                      title: "ML Engineer",
-                      progress: 0.8,
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _MiniProgressCard(
-                      title: "Data Scientist",
-                      progress: 0.4,
-                      isDark: isDark,
-                    ),
-                  ),
-                ],
-              ),
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 25),
+                _buildSectionTitle("Badges", titleColor),
 
-              _buildSectionTitle("Badges", titleColor),
-
-              const Row(
-                children: [
-                  _HexBadge(label: "PyTorch", icon: Icons.bolt),
-                  SizedBox(width: 20),
-                  _HexBadge(label: "Python", icon: Icons.terminal),
-                ],
-              )
-            ],
+                /// 🔥 WRAP (AUTO BREAK LINE)
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 10,
+                  children: const [
+                    _HexBadge(label: "PyTorch", icon: Icons.bolt),
+                    _HexBadge(label: "Python", icon: Icons.terminal),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -117,30 +149,38 @@ class AboutUsGlassCard extends StatelessWidget {
     return Row(
       children: [
         const CircleAvatar(
-          radius: 22,
-          backgroundImage: NetworkImage(
-              "https://randomuser.me/api/portraits/women/44.jpg"),
+          radius: 20,
+          backgroundImage:
+              NetworkImage("https://randomuser.me/api/portraits/women/44.jpg"),
         ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Ada",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: titleColor,
+        const SizedBox(width: 10),
+
+        /// 🔥 TEXT SAFE (NO OVERFLOW)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Ada",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: titleColor,
+                ),
               ),
-            ),
-            Text(
-              "ML Engineer",
-              style: TextStyle(
-                fontSize: 12,
-                color: subTextColor,
+              Text(
+                "ML Engineer",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: subTextColor,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         )
       ],
     );
@@ -148,7 +188,7 @@ class AboutUsGlassCard extends StatelessWidget {
 
   Widget _buildSectionTitle(String text, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         text,
         style: TextStyle(
@@ -178,9 +218,7 @@ class _MiniProgressCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppTheme.surfaceGrey
-            : AppTheme.bgSoftGrey,
+        color: isDark ? AppTheme.surfaceGrey : AppTheme.bgSoftGrey,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -188,18 +226,19 @@ class _MiniProgressCard extends StatelessWidget {
         children: [
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: AppTheme.textSecondary,
-              fontSize: 9,
+              fontSize: 10,
             ),
-            maxLines: 1,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.black12,
             color: AppTheme.primaryGreen,
-            minHeight: 2,
+            minHeight: 3,
           ),
         ],
       ),
@@ -255,10 +294,6 @@ class _HexagonBorder extends ShapeBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
-      getOuterPath(rect);
-
-  @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
       ..moveTo(rect.width * 0.5, 0)
@@ -275,4 +310,8 @@ class _HexagonBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) => this;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      getOuterPath(rect);
 }

@@ -11,46 +11,54 @@ class AboutUsScreen extends StatefulWidget {
 }
 
 class _AboutUsScreenState extends State<AboutUsScreen> {
-  final PageController _pageController =
-      PageController(viewportFraction: 0.85);
-
+  final PageController _pageController = PageController(viewportFraction: 0.85);
   Timer? _timer;
   int currentIndex = 0;
 
   final List<Map<String, String>> steps = [
     {
       "title": "Product Discovery",
-      "desc":
-          "We collaborate with clients to understand goals and define the right digital solution."
+      "desc": "We collaborate with clients to understand goals and define the right digital solution."
     },
     {
       "title": "Design & Architecture",
-      "desc":
-          "Our team designs modern UI/UX and scalable architecture for long-term growth."
+      "desc": "Our team designs modern UI/UX and scalable architecture for long-term growth."
     },
     {
       "title": "Development",
-      "desc":
-          "We build high-performance web apps and mobile apps using modern technologies."
+      "desc": "We build high-performance web apps and mobile apps using modern technologies."
     },
   ];
 
   @override
   void initState() {
     super.initState();
+    _startAutoScroll();
+  }
 
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+  void _startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (_pageController.hasClients) {
         int next = currentIndex + 1;
-        if (next >= steps.length) next = 0;
-
-        _pageController.animateToPage(
-          next,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
+        if (next >= steps.length) {
+          _pageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutQuart,
+          );
+        } else {
+          _animateToPage(next);
+        }
       }
     });
+  }
+
+  void _animateToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutQuart,
+    );
   }
 
   @override
@@ -62,269 +70,258 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final padding = Responsive.pagePadding(context);
     final isMobile = Responsive.isMobile(context);
 
-    return SizedBox(
-      height: MediaQuery.of(context).size.height,
-      child: Container(
-        width: double.infinity,
-
-        /// ✅ THEME
-        color: AppTheme.bgSoftGrey,
-
-        padding: EdgeInsets.symmetric(
-          horizontal: padding,
-          vertical: isMobile ? 40 : 55,
-        ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1150),
-            child: isMobile
-                ? _buildMobileLayout(context)
-                : _buildDesktopLayout(context),
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: AppTheme.bgSoftGrey,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: Responsive.maxContentWidth(context),
+            maxHeight: MediaQuery.of(context).size.height, // Hard constraint to screen height
           ),
+          child: isMobile ? _buildMobileLayout(context) : _buildDesktopLayout(context),
         ),
       ),
     );
   }
 
-  /// DESKTOP
+  /// DESKTOP LAYOUT
   Widget _buildDesktopLayout(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(flex: 5, child: _buildHeroText(context, false)),
-        const SizedBox(width: 60),
-        Expanded(flex: 5, child: _buildTimelineDesktop(context)),
-      ],
-    );
-  }
-
-  /// MOBILE
-  Widget _buildMobileLayout(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildHeroText(context, true),
-        const SizedBox(height: 28),
-
-        SizedBox(
-          height: 160,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: steps.length,
-            onPageChanged: (index) {
-              setState(() => currentIndex = index);
-            },
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: _HoverCard(
-                  child: _buildCard(context, steps[index]),
-                ),
-              );
-            },
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Responsive.pagePadding(context)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 5, 
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: _buildHeroText(context, false),
+            ),
           ),
-        ),
-
-        const SizedBox(height: 16),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _navButton(
-              icon: Icons.chevron_left,
-              onTap: () {
-                int prev = currentIndex - 1;
-                if (prev < 0) prev = steps.length - 1;
-
-                _pageController.animateToPage(
-                  prev,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                );
-              },
-            ),
-            const SizedBox(width: 20),
-            _navButton(
-              icon: Icons.chevron_right,
-              onTap: () {
-                int next = currentIndex + 1;
-                if (next >= steps.length) next = 0;
-
-                _pageController.animateToPage(
-                  next,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
-                );
-              },
-            ),
-          ],
-        ),
-      ],
+          const SizedBox(width: 40),
+          Expanded(
+            flex: 6, 
+            child: _buildTimelineDesktop(context),
+          ),
+        ],
+      ),
     );
   }
 
-  /// NAV BUTTON
-  Widget _navButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: AppTheme.cardLight,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
+  /// MOBILE LAYOUT
+  Widget _buildMobileLayout(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            const Spacer(flex: 2),
+            // Hero section wrapped in Flexible to handle height constraints
+            Flexible(
+              flex: 8,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: Responsive.pagePadding(context)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _buildHeroText(context, true),
+                ),
+              ),
+            ),
+            const Spacer(flex: 1),
+            
+            // Auto-Scrolling Card Carousel
+            SizedBox(
+              height: constraints.maxHeight * 0.35, // Dynamic height relative to screen
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: steps.length,
+                onPageChanged: (index) => setState(() => currentIndex = index),
+                itemBuilder: (context, index) {
+                  return AnimatedScale(
+                    scale: currentIndex == index ? 1.0 : 0.9,
+                    duration: const Duration(milliseconds: 400),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 400),
+                      opacity: currentIndex == index ? 1.0 : 0.6,
+                      child: Center(
+                        child: _buildCard(context, steps[index], isMobile: true),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // Animated Dots Indicator
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(steps.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  height: 6,
+                  width: currentIndex == index ? 20 : 6,
+                  decoration: BoxDecoration(
+                    color: currentIndex == index ? AppTheme.primaryGreen : AppTheme.textGrey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                );
+              }),
+            ),
+            const Spacer(flex: 2),
           ],
-        ),
-        child: const Icon(Icons.chevron_left, size: 20, color: Colors.black87),
-      ),
+        );
+      }
     );
   }
 
   /// HERO TEXT
   Widget _buildHeroText(BuildContext context, bool isMobile) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 500),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryGreen.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              "About Our Company",
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppTheme.primaryGreen,
-                  ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryGreen.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Text(
+            "About Our Company",
+            style: TextStyle(
+              color: AppTheme.primaryGreen,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
             ),
           ),
-
-          const SizedBox(height: 18),
-
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontSize: isMobile ? 30 : 42,
-                fontWeight: FontWeight.w800,
-                height: 1.15,
-                color: AppTheme.textBlack,
+        ),
+        const SizedBox(height: 16),
+        RichText(
+          textAlign: isMobile ? TextAlign.center : TextAlign.start,
+          text: TextSpan(
+            style: TextStyle(
+              fontSize: isMobile ? 32 : 48,
+              fontWeight: FontWeight.w900,
+              height: 1.1,
+              color: AppTheme.textBlack,
+            ),
+            children: [
+              const TextSpan(text: "Building Digital\nProducts That\n"),
+              TextSpan(
+                text: "Drive Innovation",
+                style: TextStyle(color: AppTheme.primaryGreen),
               ),
-              children: [
-                const TextSpan(text: "Building Digital\nProducts That\n"),
-                TextSpan(
-                  text: "Drive Innovation",
-                  style: TextStyle(color: AppTheme.primaryGreen),
-                ),
-              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 450),
+          child: Text(
+            "We build high-quality digital products including mobile apps, web platforms, and scalable enterprise solutions.",
+            textAlign: isMobile ? TextAlign.center : TextAlign.start,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: AppTheme.textGrey,
             ),
           ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            "We build high-quality digital products including mobile apps, web platforms, and scalable enterprise solutions.",
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontSize: 14,
-                  color: AppTheme.textGrey,
-                ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  /// TIMELINE
+  /// TIMELINE DESKTOP
   Widget _buildTimelineDesktop(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(steps.length, (index) {
-        final bool left = index % 2 == 0;
+        final bool isLeft = index % 2 == 0;
+        return Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                if (isLeft) Expanded(child: _HoverCard(child: _buildCard(context, steps[index]))) else const Spacer(),
+                
+                // Vertical Connector Dot
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryGreen, 
+                    shape: BoxShape.circle,
+                  ),
+                ),
 
-        return Row(
-          children: [
-            if (left) _HoverCard(child: _buildCard(context, steps[index])),
-            const Spacer(),
-            Container(
-              width: 9,
-              height: 9,
-              decoration: const BoxDecoration(
-                color: AppTheme.primaryGreen,
-                shape: BoxShape.circle,
-              ),
+                if (!isLeft) Expanded(child: _HoverCard(child: _buildCard(context, steps[index]))) else const Spacer(),
+              ],
             ),
-            const Spacer(),
-            if (!left) _HoverCard(child: _buildCard(context, steps[index])),
-          ],
+          ),
         );
       }),
     );
   }
 
-  /// CARD
-  Widget _buildCard(BuildContext context, Map step) {
+  /// UNIVERSAL CARD
+  Widget _buildCard(BuildContext context, Map step, {bool isMobile = false}) {
     return Container(
-      width: 240,
+      constraints: const BoxConstraints(maxWidth: 300, maxHeight: 180),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.cardLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.10),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           )
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-
           Container(
-            width: 32,
-            height: 32,
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppTheme.primaryGreen.withOpacity(0.12),
+              color: AppTheme.primaryGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.auto_awesome,
-                color: AppTheme.primaryGreen, size: 16),
+            child: const Icon(Icons.auto_awesome, color: AppTheme.primaryGreen, size: 18),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             step["title"]!,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textBlack,
-                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w800, 
+              fontSize: 16, 
+              color: AppTheme.textBlack,
+            ),
           ),
-
           const SizedBox(height: 4),
-
-          Text(
-            step["desc"]!,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontSize: 12.5,
-                  height: 1.5,
-                  color: AppTheme.textGrey,
-                ),
+          Flexible(
+            child: Text(
+              step["desc"]!,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13, 
+                color: AppTheme.textGrey, 
+                height: 1.3,
+              ),
+            ),
           ),
         ],
       ),
@@ -332,10 +329,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   }
 }
 
-/// HOVER EFFECT (UNCHANGED)
 class _HoverCard extends StatefulWidget {
   final Widget child;
-
   const _HoverCard({required this.child});
 
   @override
@@ -344,15 +339,15 @@ class _HoverCard extends StatefulWidget {
 
 class _HoverCardState extends State<_HoverCard> {
   bool hover = false;
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        transform: Matrix4.identity()..translate(0, hover ? -6 : 0),
+        duration: const Duration(milliseconds: 250),
+        transform: Matrix4.identity()..translate(0, hover ? -8 : 0),
+        alignment: Alignment.center,
         child: widget.child,
       ),
     );

@@ -25,49 +25,60 @@ class HeroSection extends StatelessWidget {
     final isMobile = Responsive.isMobile(context);
     final size = MediaQuery.of(context).size;
 
-    final double titleSize = isMobile ? 38 : (size.width * 0.06).clamp(60, 88);
-    final double subTitleSize = isMobile ? 15 : 19;
+    /// ✅ NEW: detect small desktop / tablet
+    final isSmallDesktop = size.width < 1100 && !isMobile;
+
+    /// ✅ FIXED FONT SCALING
+    final double titleSize = isMobile
+        ? 34
+        : isSmallDesktop
+            ? 48
+            : (size.width * 0.06).clamp(60, 88);
+
+    final double subTitleSize = isMobile ? 14 : (isSmallDesktop ? 16 : 19);
+
+    /// ✅ IMPORTANT: AppBar height space
+    const double appBarHeight = 80;
 
     return Stack(
       children: [
         Container(
           width: double.infinity,
-          constraints: BoxConstraints(
-            minHeight: size.height,
-            maxHeight: size.height,
-          ),
+          height: size.height,
 
-          /// ✅ THEME
           color: AppTheme.darkBackground,
 
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 20 : 60,
-            vertical: size.height * 0.05,
+          /// ✅ FIX: Added top padding to avoid collision
+          padding: EdgeInsets.only(
+            top: appBarHeight + 20,
+            left: isMobile ? 20 : 60,
+            right: isMobile ? 20 : 60,
+            bottom: 20,
           ),
+
           child: Center(
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-
+                  
                   /// TOP HEADING
                   Text(
                     "The future\nof development",
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontSize: titleSize,
-                      height: 1.0,
-                      color: Colors.white.withOpacity(.35),
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -1.0,
-                    ),
+                          fontSize: titleSize,
+                          height: 1.0,
+                          color: Colors.white.withOpacity(.35),
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -1.0,
+                        ),
                   ),
 
                   const SizedBox(height: 15),
 
-                  /// SECOND LINE
+                  /// SECOND LINE (Responsive Safe)
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Row(
@@ -76,20 +87,17 @@ class HeroSection extends StatelessWidget {
                         Text(
                           "is",
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontSize: titleSize,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                                fontSize: titleSize,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 10),
 
                         Icon(
                           Icons.fingerprint,
-                          size: isMobile ? 60 : 110,
-
-                          /// ✅ THEME COLOR
+                          size: isMobile ? 50 : (isSmallDesktop ? 70 : 110),
                           color: AppTheme.neonGreen,
-
                           shadows: [
                             Shadow(
                               color: AppTheme.neonGreen.withOpacity(.35),
@@ -98,23 +106,23 @@ class HeroSection extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 10),
 
                         Text(
                           "human +",
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontSize: titleSize,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
+                                fontSize: titleSize,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
 
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 10),
 
                         Icon(
                           Icons.auto_awesome,
                           color: AppTheme.neonGreen,
-                          size: isMobile ? 50 : 90,
+                          size: isMobile ? 40 : (isSmallDesktop ? 60 : 90),
                           shadows: [
                             Shadow(
                               color: AppTheme.neonGreen.withOpacity(.7),
@@ -123,49 +131,46 @@ class HeroSection extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 10),
 
                         Text(
                           "AI",
                           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontSize: titleSize,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
+                                fontSize: titleSize,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 25),
 
                   /// SUBTITLE
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: isMobile ? 400 : 650),
+                    constraints: BoxConstraints(
+                        maxWidth: isMobile ? 400 : (isSmallDesktop ? 500 : 650)),
                     child: Text(
                       "We help you map the skills you need, track the skills you have, and close your gaps to thrive in a GenAI world.",
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: subTitleSize,
-                        color: Colors.white.withOpacity(.6),
-                        height: 1.5,
-                        letterSpacing: .3,
-                      ),
+                            fontSize: subTitleSize,
+                            color: Colors.white.withOpacity(.6),
+                            height: 1.5,
+                          ),
                     ),
                   ),
 
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 40),
 
                   /// CTA BUTTON
                   AppButton(
                     text: "Contact Us",
                     onPressed: () {},
                     type: AppButtonType.outline,
-
-                    /// ✅ THEME COLORS
                     color: Colors.white,
                     textColor: Colors.white,
-
                     borderRadius: 10,
                     borderWidth: 1.5,
                     enableGlow: false,
@@ -175,14 +180,14 @@ class HeroSection extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: size.height * 0.05),
+                  SizedBox(height: size.height * 0.03),
                 ],
               ),
             ),
           ),
         ),
 
-        /// APP BAR
+        /// APP BAR (ON TOP)
         CustomAppBar(
           onHomeTap: onHomeTap,
           onAboutTap: onAboutTap,
