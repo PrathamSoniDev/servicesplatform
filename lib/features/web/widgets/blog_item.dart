@@ -145,7 +145,7 @@ class BlogScreen extends StatelessWidget {
             child: BlogCard(
               title: blog.title,
               category: blog.category,
-              onTap: () => openBlogDetail(context, blog), customHeight: null,
+              onTap: () => openBlogDetail(context, blog), customHeight: 400,
             ),
           ),
         );

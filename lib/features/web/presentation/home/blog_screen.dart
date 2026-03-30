@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/widgets/blog_card.dart';
@@ -17,8 +18,13 @@ class BlogScreen extends StatefulWidget {
   State<BlogScreen> createState() => _BlogScreenState();
 }
 
-class _BlogScreenState extends State<BlogScreen> {
+class _BlogScreenState extends State<BlogScreen>
+    with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+
+  late final AnimationController _entranceCtrl;
+  late final Animation<double> _fadeAnim;
+  late final Animation<Offset> _slideAnim;
 
   static final List<BlogItem> featuredBlogs = [
     BlogItem(title: "How AI is Transforming Development", category: "AI Development"),
@@ -29,212 +35,380 @@ class _BlogScreenState extends State<BlogScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _entranceCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnim = CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(
+        CurvedAnimation(parent: _entranceCtrl, curve: Curves.easeOutCubic));
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _entranceCtrl.forward());
+  }
+
+  @override
   void dispose() {
+    _entranceCtrl.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _scroll(bool isLeft, double constraintsWidth) {
-    // Dynamically calculate scroll based on 80% of current viewport width
-    double scrollAmount = constraintsWidth * 0.8;
+    final double scrollAmount = constraintsWidth * 0.8;
     _scrollController.animateTo(
       isLeft
-          ? (_scrollController.offset - scrollAmount).clamp(0, _scrollController.position.maxScrollExtent)
-          : (_scrollController.offset + scrollAmount).clamp(0, _scrollController.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 500),
+          ? (_scrollController.offset - scrollAmount)
+              .clamp(0, _scrollController.position.maxScrollExtent)
+          : (_scrollController.offset + scrollAmount)
+              .clamp(0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 480),
       curve: Curves.easeInOutCubic,
     );
   }
 
-  void openBlogDetail(BuildContext context, BlogItem blog) {
+  void _openBlogDetail(BuildContext context, BlogItem blog) {
     final slug = blog.title.toLowerCase().replaceAll(' ', '-');
     context.go(
-      '/blog/detail/$slug?category=${Uri.encodeComponent(blog.category)}',
-    );
+        '/blog/detail/$slug?category=${Uri.encodeComponent(blog.category)}');
   }
 
   @override
   Widget build(BuildContext context) {
-    final padding = Responsive.pagePadding(context);
     final isMobile = Responsive.isMobile(context);
+    final screenW = MediaQuery.of(context).size.width;
+    final hPadding = Responsive.pagePadding(context);
 
     return Container(
       width: double.infinity,
       height: double.infinity,
       color: AppTheme.bgOffWhite,
-      padding: EdgeInsets.symmetric(horizontal: padding),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
+      child: FadeTransition(
+        opacity: _fadeAnim,
+        child: SlideTransition(
+          position: _slideAnim,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              SizedBox(height: isMobile ? 24 : 44),
 
-              // Header - FittedBox prevents text overflow on very narrow screens
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: _buildHeader(context),
+              // ── HEADER ────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: hPadding),
+                child: _BlogHeader(isMobile: isMobile, screenW: screenW),
               ),
 
-              const Spacer(flex: 1),
+              SizedBox(height: isMobile ? 24 : 36),
 
-              // Horizontal Scroll Area
-              Flexible(
-                flex: 10,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _buildHorizontalScroll(context, constraints.maxWidth),
+              // ── CARD SCROLL AREA ──────────────────────────────────
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final maxW = constraints.maxWidth;
+                    final maxH = constraints.maxHeight;
 
-                    // Left Arrow
-                    Positioned(
-                      left: 0,
-                      child: _buildArrowButton(
-                        Icons.arrow_back_ios_new_rounded,
-                        () => _scroll(true, constraints.maxWidth),
-                        isMobile,
-                      ),
-                    ),
+                    final double cardW = isMobile
+                        ? (screenW < 300 ? screenW * 0.88 : maxW * 0.78)
+                        : (screenW > 1200 ? 360.0 : 320.0);
 
-                    // Right Arrow
-                    Positioned(
-                      right: 0,
-                      child: _buildArrowButton(
-                        Icons.arrow_forward_ios_rounded,
-                        () => _scroll(false, constraints.maxWidth),
-                        isMobile,
-                      ),
-                    ),
-                  ],
+                    final double cardH = maxH.clamp(180.0, 520.0);
+                    final double arrowPad = isMobile ? 10.0 : 14.0;
+                    final double arrowIcon = isMobile ? 16.0 : 20.0;
+
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Card list
+                        ListView.builder(
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 40 : 60,
+                            vertical: 10,
+                          ),
+                          itemCount: featuredBlogs.length,
+                          itemBuilder: (ctx, i) {
+                            final blog = featuredBlogs[i];
+                            final slug = blog.title
+                                .toLowerCase()
+                                .replaceAll(' ', '-');
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                  right: isMobile ? 16 : 24),
+                              child: Center(
+                                child: SizedBox(
+                                  width: cardW,
+                                  height: cardH - 20,
+                                  child: SeoLink(
+                                    url: '/blog/detail/$slug?category=${Uri.encodeComponent(blog.category)}',
+                                    text: blog.title,
+                                    child: BlogCard(
+                                      title: blog.title,
+                                      category: blog.category,
+                                      onTap: () => _openBlogDetail(ctx, blog), customHeight: 400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        // ── ARROWS ────────────────────────────────────
+                        Positioned(
+                          left: 8,
+                          child: _ScrollArrow(
+                            icon: Icons.arrow_back_ios_new_rounded,
+                            onTap: () => _scroll(true, maxW),
+                            padding: arrowPad,
+                            iconSize: arrowIcon,
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          child: _ScrollArrow(
+                            icon: Icons.arrow_forward_ios_rounded,
+                            onTap: () => _scroll(false, maxW),
+                            padding: arrowPad,
+                            iconSize: arrowIcon,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
 
-              const Spacer(flex: 1),
+              SizedBox(height: isMobile ? 20 : 32),
 
-              // View More Button
-              Padding(
-                padding: const EdgeInsets.only(bottom: 40),
-                child: _viewMoreButton(context),
+              // ── VIEW MORE BUTTON ──────────────────────────────────
+              Center(
+                child: SeoLink(
+                  url: '/blog/all',
+                  text: 'View All Articles',
+                  child: _ViewMoreButton(
+                    onTap: () {
+                      final loc = GoRouterState.of(context).uri.toString();
+                      if (loc != '/blog/all') context.go('/blog/all');
+                    },
+                    screenW: screenW,
+                  ),
+                ),
               ),
+
+              SizedBox(height: isMobile ? 24 : 44),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+// ── Header ────────────────────────────────────────────────────────────────────
+
+class _BlogHeader extends StatelessWidget {
+  final bool isMobile;
+  final double screenW;
+  const _BlogHeader({required this.isMobile, required this.screenW});
+
+  @override
+  Widget build(BuildContext context) {
+    final titleSize = screenW < 360 ? 22.0 : (isMobile ? 26.0 : 44.0);
+    final labelSize = screenW < 360 ? 9.0 : 12.0;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          "INSIGHTS & INNOVATIONS",
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppTheme.primaryGreen,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+                width: 32,
+                height: 1,
+                color: AppTheme.primaryGreen.withOpacity(0.3)),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryGreen.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: AppTheme.primaryGreen.withOpacity(0.25)),
               ),
+              child: SeoText(
+                "INSIGHTS & INNOVATIONS",
+                style: TextStyle(
+                  color: AppTheme.primaryGreen,
+                  fontWeight: FontWeight.w800,
+                  fontSize: labelSize,
+                  letterSpacing: 1.6,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+                width: 32,
+                height: 1,
+                color: AppTheme.primaryGreen.withOpacity(0.3)),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          "Latest from our Blog",
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: AppTheme.textBlack,
-                fontSize: Responsive.isMobile(context) ? 28 : 44,
-                fontWeight: FontWeight.w900,
-              ),
+        SizedBox(height: isMobile ? 12 : 18),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: SeoHeading(
+            "Latest from our Blog",
+            align: TextAlign.center,
+            style: TextStyle(
+              color: AppTheme.textBlack,
+              fontSize: titleSize,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.8,
+              height: 1.1,
+            ),
+          ),
+        ),
+        SizedBox(height: isMobile ? 8 : 12),
+        SeoText(
+          "Explore ideas, trends and deep dives from our team.",
+          align: TextAlign.center,
+          maxLines: 2,
+          style: TextStyle(
+            color: AppTheme.textGrey,
+            fontSize: screenW < 360 ? 12.0 : (isMobile ? 13.0 : 16.0),
+            height: 1.5,
+          ),
+        ),
+        SizedBox(height: isMobile ? 10 : 14),
+        Container(
+          width: 44,
+          height: 3,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryGreen,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildHorizontalScroll(BuildContext context, double maxWidth) {
-    final isMobile = Responsive.isMobile(context);
-    // Dynamic width per card: Mobile takes most of screen, Desktop shows multiple
-    final cardWidth = isMobile ? maxWidth * 0.75 : 360.0;
+// ── View More Button ──────────────────────────────────────────────────────────
 
-    return ListView.builder(
-      controller: _scrollController,
-      scrollDirection: Axis.horizontal,
-      itemCount: featuredBlogs.length,
-      physics: const BouncingScrollPhysics(),
-      // Added padding so arrows don't sit directly on the first/last card
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-      itemBuilder: (context, index) {
-        final blog = featuredBlogs[index];
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 24),
-            child: SizedBox(
-              width: cardWidth,
-              // Constraint to ensure the card doesn't exceed its parent height
-              child: BlogCard(
-                title: blog.title,
-                category: blog.category,
-                onTap: () => openBlogDetail(context, blog),
-              ),
+class _ViewMoreButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final double screenW;
+  const _ViewMoreButton({required this.onTap, required this.screenW});
+
+  @override
+  State<_ViewMoreButton> createState() => _ViewMoreButtonState();
+}
+
+class _ViewMoreButtonState extends State<_ViewMoreButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.screenW < 360 ? 24 : 36,
+            vertical: widget.screenW < 360 ? 12 : 16,
+          ),
+          decoration: BoxDecoration(
+            color: _hovered ? AppTheme.primaryGreen : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _hovered ? AppTheme.primaryGreen : AppTheme.borderLight,
+              width: 1.5,
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildArrowButton(IconData icon, VoidCallback onPressed, bool isMobile) {
-    return Material(
-      color: Colors.white.withOpacity(0.95),
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: Container(
-          padding: EdgeInsets.all(isMobile ? 10 : 14),
-          child: Icon(
-            icon,
-            size: isMobile ? 16 : 20,
-            color: AppTheme.textBlack,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "View All Articles",
+                style: TextStyle(
+                  fontSize: widget.screenW < 360 ? 13 : 15,
+                  fontWeight: FontWeight.w700,
+                  color: _hovered ? Colors.white : AppTheme.textBlack,
+                ),
+              ),
+              const SizedBox(width: 10),
+              AnimatedSlide(
+                offset: _hovered ? const Offset(0.25, 0) : Offset.zero,
+                duration: const Duration(milliseconds: 220),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: _hovered ? Colors.white : AppTheme.primaryGreen,
+                  size: 18,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _viewMoreButton(BuildContext context) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: OutlinedButton(
-        onPressed: () {
-          final currentLocation = GoRouterState.of(context).uri.toString();
-          if (currentLocation == '/blog/all') return;
-          context.go('/blog/all');
-        },
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppTheme.textBlack,
-          side: const BorderSide(color: AppTheme.borderLight, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+// ── Scroll Arrow ──────────────────────────────────────────────────────────────
+
+class _ScrollArrow extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final double padding;
+  final double iconSize;
+  const _ScrollArrow({
+    required this.icon,
+    required this.onTap,
+    required this.padding,
+    required this.iconSize,
+  });
+
+  @override
+  State<_ScrollArrow> createState() => _ScrollArrowState();
+}
+
+class _ScrollArrowState extends State<_ScrollArrow> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(widget.padding),
+          decoration: BoxDecoration(
+            color: _hovered ? AppTheme.primaryGreen : AppTheme.cardLight,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: _hovered ? AppTheme.primaryGreen : AppTheme.borderLight,
+              width: 1.5,
+            ),
           ),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "View All Articles",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textBlack,
-              ),
-            ),
-            SizedBox(width: 12),
-            Icon(
-              Icons.arrow_forward_rounded,
-              color: AppTheme.primaryGreen,
-              size: 22,
-            ),
-          ],
+          child: Icon(
+            widget.icon,
+            size: widget.iconSize,
+            color: _hovered ? Colors.white : AppTheme.textBlack,
+          ),
         ),
       ),
     );

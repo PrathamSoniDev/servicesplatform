@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
 
@@ -22,171 +23,180 @@ class ProductDetailScreen extends StatelessWidget {
       Icons.auto_awesome_mosaic_rounded,
     ];
 
-    return Scaffold(
-      backgroundColor: AppTheme.darkBackground,
-
-      /// ✅ IMPROVED APP BAR
-      appBar: AppBar(
+    return SeoWrapper(
+      child: Scaffold(
         backgroundColor: AppTheme.darkBackground,
-        elevation: 0,
-        centerTitle: false,
-        leading: IconButton(
-          onPressed: () {
-            // ✅ Fix: If there's a history, go back. Otherwise, go to Home.
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/'); 
-            }
-          },
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-        ),
-        title: Text(
-          isDeveloper ? "Developer Platform" : "Business Platform",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: Responsive.scaleText(context, 18),
-            color: Colors.white,
+
+        /// ✅ APP BAR WITH SEO
+        appBar: AppBar(
+          backgroundColor: AppTheme.darkBackground,
+          elevation: 0,
+          centerTitle: false,
+          leading: IconButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          title: SeoHeader(
+            child: SeoHeading(
+              isDeveloper ? "Developer Platform" : "Business Platform",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: Responsive.scaleText(context, 18),
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
-      ),
 
-      /// ✅ BODY
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: Responsive.maxContentWidth(context),
-          ),
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        /// ✅ BODY SEO
+        body: SeoBody(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Responsive.maxContentWidth(context),
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                /// 🔥 HERO IMAGE STACK
-                ...productIcons.map((icon) {
-                  bool isFirst = icon == productIcons.first;
+                    /// HERO
+                    ...productIcons.map((icon) {
+                      bool isFirst = icon == productIcons.first;
 
-                  return Container(
-                    width: double.infinity,
-                    height: isMobile ? 300 : 500,
-                    margin: const EdgeInsets.only(bottom: 4),
-                    color: AppTheme.darkCard,
-                    child: Hero(
-                      tag: isFirst
-                          ? (isDeveloper ? 'dev_prod' : 'biz_prod')
-                          : 'gallery_${icon.hashCode}_${random.nextInt(100)}',
-                      child: Icon(
-                        icon,
-                        size: isMobile ? 100 : 180,
-                        color: isFirst
-                            ? AppTheme.primaryGreen
-                            : AppTheme.white10,
-                      ),
-                    ),
-                  );
-                }),
+                      return Container(
+                        width: double.infinity,
+                        height: isMobile ? 300 : 500,
+                        margin: const EdgeInsets.only(bottom: 4),
+                        color: AppTheme.darkCard,
+                        child: Hero(
+                          tag: isFirst
+                              ? (isDeveloper ? 'dev_prod' : 'biz_prod')
+                              : 'gallery_${icon.hashCode}_${random.nextInt(100)}',
+                          child: Icon(
+                            icon,
+                            size: isMobile ? 100 : 180,
+                            color: isFirst
+                                ? AppTheme.primaryGreen
+                                : AppTheme.white10,
+                          ),
+                        ),
+                      );
+                    }),
 
-                /// CONTENT SECTION
-                Padding(
-                  padding: Responsive.screenPadding(context),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    /// CONTENT
+                    Padding(
+                      padding: Responsive.screenPadding(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
 
-                      /// LABEL
-                      Text(
-                        "DEEP DIVE & SPECS",
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: AppTheme.primaryGreen,
-                              letterSpacing: 4,
-                              fontSize: Responsive.scaleText(context, 12),
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
+                          /// LABEL
+                          SeoText(
+                            "DEEP DIVE & SPECS",
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  color: AppTheme.primaryGreen,
+                                  letterSpacing: 4,
+                                  fontSize: Responsive.scaleText(context, 12),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
 
-                      const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                      /// TITLE
-                      Text(
-                        isDeveloper
-                            ? "Developer Hub Pro"
-                            : "Enterprise Business Suite",
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              color: Colors.white,
-                              fontSize: isMobile ? 32 : Responsive.scaleText(context, 54),
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -2,
-                            ),
-                      ),
+                          /// TITLE
+                          SeoHeading(
+                            isDeveloper
+                                ? "Developer Hub Pro"
+                                : "Enterprise Business Suite",
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontSize: isMobile ? 32 : Responsive.scaleText(context, 54),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -2,
+                                ),
+                          ),
 
-                      const SizedBox(height: 32),
+                          const SizedBox(height: 32),
 
-                      /// DESCRIPTION
-                      Text(
-                        "This project represents a paradigm shift in how users interact with digital ecosystems. "
-                        "By leveraging low-latency architecture and high-fidelity motion design, we've created "
-                        "a workspace that isn't just a tool—it's an extension of the professional's mind.",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppTheme.textWhite60,
-                              fontSize: isMobile ? 14 : Responsive.scaleText(context, 18),
-                              height: 1.8,
-                              fontWeight: FontWeight.w300,
-                            ),
-                      ),
+                          /// DESCRIPTION
+                          SeoText(
+                            "This project represents a paradigm shift in how users interact with digital ecosystems. "
+                            "By leveraging low-latency architecture and high-fidelity motion design, we've created "
+                            "a workspace that isn't just a tool—it's an extension of the professional's mind.",
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: AppTheme.textWhite60,
+                                  fontSize: isMobile ? 14 : Responsive.scaleText(context, 18),
+                                  height: 1.8,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                          ),
 
-                      const SizedBox(height: 80),
+                          const SizedBox(height: 80),
 
-                      /// FEATURES
-                      _buildFeature(
-                        context,
-                        "Next-Gen AI Integration",
-                        "Context-aware assistance built into every module.",
-                      ),
-                      _buildFeature(
-                        context,
-                        "Zero-Trust Architecture",
-                        "Security that scales with your global team.",
-                      ),
-                      _buildFeature(
-                        context,
-                        "Modular Design System",
-                        "Swap and adapt UI components in real-time.",
-                      ),
+                          /// FEATURES
+                          _buildFeature(
+                            context,
+                            "Next-Gen AI Integration",
+                            "Context-aware assistance built into every module.",
+                          ),
+                          _buildFeature(
+                            context,
+                            "Zero-Trust Architecture",
+                            "Security that scales with your global team.",
+                          ),
+                          _buildFeature(
+                            context,
+                            "Modular Design System",
+                            "Swap and adapt UI components in real-time.",
+                          ),
 
-                      const SizedBox(height: 100),
+                          const SizedBox(height: 100),
 
-                      /// CTA BUTTON
-                      Center(
-                        child: SizedBox(
-                          width: isMobile ? double.infinity : 300,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryGreen,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(vertical: 24),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: const Text(
-                              "CONFIGURE NOW",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.5,
+                          /// CTA
+                          Center(
+                            child: SizedBox(
+                              width: isMobile ? double.infinity : 300,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryGreen,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(vertical: 24),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "CONFIGURE NOW",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 100),
-                    ],
-                  ),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -204,7 +214,7 @@ class ProductDetailScreen extends StatelessWidget {
             children: [
               const Icon(Icons.circle, color: AppTheme.primaryGreen, size: 8),
               const SizedBox(width: 12),
-              Text(
+              SeoHeading(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.white,
@@ -217,7 +227,7 @@ class ProductDetailScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(left: 20),
-            child: Text(
+            child: SeoText(
               desc,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.textWhite54,

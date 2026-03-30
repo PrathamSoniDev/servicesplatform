@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:servicesplatform/features/web/presentation/home/all_product_screen.dart';
 
 /// SCREENS
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
 import 'package:servicesplatform/features/web/presentation/home/about_us_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/request_demo_scree.dart';
+
+/// ✅ ADD THIS
 
 /// PRODUCT
 import 'package:servicesplatform/features/web/presentation/home/product_screem.dart';
 import 'package:servicesplatform/features/web/presentation/home/product_detail_screen.dart';
-// 👉 (create if not present)
+import 'package:servicesplatform/features/web/presentation/home/all_product_screen.dart';
 
 /// BLOG
 import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
@@ -37,6 +39,9 @@ class AppRouter {
   static const String blog = '/blog';
   static const String blogAll = '/blog/all';
   static const String blogDetail = '/blog/detail/:title';
+
+  /// ✅ REQUEST DEMO
+  static const String requestDemo = '/request-demo';
 
   static const String contact = '/contact';
 
@@ -81,10 +86,10 @@ class AppRouter {
 
       /// PRODUCT DETAIL
       GoRoute(
-        path: productDetail,
+        path: '/product/detail/:type',
         name: 'productDetail',
         pageBuilder: (context, state) {
-          final type = state.pathParameters['type'];
+          final type = state.pathParameters['type'] ?? '';
 
           return CustomTransitionPage(
             key: state.pageKey,
@@ -102,23 +107,20 @@ class AppRouter {
       // ======================== BLOG ==============================
       // ============================================================
 
-      /// BLOG PREVIEW (HOME SECTION)
       GoRoute(
         path: blog,
         name: 'blog',
         builder: (context, state) => const BlogScreen(),
       ),
 
-      /// ALL BLOGS
       GoRoute(
         path: blogAll,
         name: 'allBlogs',
         builder: (context, state) => const AllBlogsScreen(),
       ),
 
-      /// BLOG DETAIL
       GoRoute(
-        path: blogDetail,
+        path: '/blog/detail/:title',
         name: 'blogDetail',
         pageBuilder: (context, state) {
           final rawTitle = state.pathParameters['title'] ?? '';
@@ -141,7 +143,28 @@ class AppRouter {
         },
       ),
 
-      /// ================= CONTACT =================
+      // ============================================================
+      // ================= REQUEST DEMO =============================
+      // ============================================================
+
+      GoRoute(
+        path: requestDemo,
+        name: 'requestDemo',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const RequestDemoScreen(),
+            transitionsBuilder: (context, animation, _, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          );
+        },
+      ),
+
+      // ============================================================
+      // ================= CONTACT =================
+      // ============================================================
+
       GoRoute(
         path: contact,
         name: 'contact',

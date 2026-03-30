@@ -6,10 +6,26 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    RobotDetector(
-      child: const MyApp(),
+    const SeoRoot( // ✅ move here
+      child: MyApp(),
     ),
   );
+}
+
+/// ===============================
+/// SEO ROOT WRAPPER (GLOBAL)
+/// ===============================
+class SeoRoot extends StatelessWidget {
+  final Widget child;
+
+  const SeoRoot({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return RobotDetector(
+      child: child,
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -19,7 +35,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Sell Tech IND. Productions',
+
+      /// 🔥 IMPORTANT FOR SEO
+      title: 'Sell Tech IND. Productions | Best Flutter Developer in India',
 
       theme: ThemeData(
         brightness: Brightness.dark,

@@ -2,7 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:seo_renderer/seo_renderer.dart';
 
 /// ===============================
-/// SEO HEADING
+/// SEO WRAPPER (IMPORTANT)
+/// ===============================
+class SeoWrapper extends StatelessWidget {
+  final Widget child;
+
+  const SeoWrapper({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return RobotDetector(
+      child: child,
+    );
+  }
+}
+
+/// ===============================
+/// SEO HEADER
+/// ===============================
+class SeoHeader extends StatelessWidget {
+  final Widget child;
+
+  const SeoHeader({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      header: true,
+      child: child,
+    );
+  }
+}
+
+/// ===============================
+/// SEO FOOTER
+/// ===============================
+class SeoFooter extends StatelessWidget {
+  final Widget child;
+
+  const SeoFooter({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      child: child,
+    );
+  }
+}
+
+/// ===============================
+/// SEO BODY WRAPPER
+/// ===============================
+class SeoBody extends StatelessWidget {
+  final Widget child;
+
+  const SeoBody({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      child: child,
+    );
+  }
+}
+
+/// ===============================
+/// SEO HEADING (UPDATED 🔥)
 /// ===============================
 class SeoHeading extends StatelessWidget {
   final String text;
@@ -22,7 +90,7 @@ class SeoHeading extends StatelessWidget {
       text: text,
       child: Text(
         text,
-        textAlign: align,
+        textAlign: align ?? TextAlign.start, // ✅ default added
         style: style,
       ),
     );
@@ -30,7 +98,7 @@ class SeoHeading extends StatelessWidget {
 }
 
 /// ===============================
-/// SEO TEXT
+/// SEO TEXT (UPDATED 🔥)
 /// ===============================
 class SeoText extends StatelessWidget {
   final String text;
@@ -52,8 +120,8 @@ class SeoText extends StatelessWidget {
       text: text,
       child: Text(
         text,
+        textAlign: align ?? TextAlign.start, // ✅ default added
         style: style,
-        textAlign: align,
         maxLines: maxLines,
       ),
     );
@@ -61,7 +129,7 @@ class SeoText extends StatelessWidget {
 }
 
 /// ===============================
-/// SEO NETWORK IMAGE
+/// SEO IMAGE
 /// ===============================
 class SeoImage extends StatelessWidget {
   final String src;
@@ -89,40 +157,7 @@ class SeoImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-      ),
-    );
-  }
-}
-
-/// ===============================
-/// SEO ASSET IMAGE
-/// ===============================
-class SeoAssetImage extends StatelessWidget {
-  final String assetPath;
-  final String alt;
-  final double? width;
-  final double? height;
-  final BoxFit fit;
-
-  const SeoAssetImage({
-    super.key,
-    required this.assetPath,
-    required this.alt,
-    this.width,
-    this.height,
-    this.fit = BoxFit.cover,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ImageRenderer(
-      src: assetPath,
-      alt: alt,
-      child: Image.asset(
-        assetPath,
-        width: width,
-        height: height,
-        fit: fit,
+        semanticLabel: alt,
       ),
     );
   }
@@ -133,11 +168,13 @@ class SeoAssetImage extends StatelessWidget {
 /// ===============================
 class SeoLink extends StatelessWidget {
   final String url;
+  final String text;
   final Widget child;
 
   const SeoLink({
     super.key,
     required this.url,
+    required this.text,
     required this.child,
   });
 
@@ -145,7 +182,7 @@ class SeoLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return LinkRenderer(
       href: url,
-      text: '',
+      text: text,
       child: child,
     );
   }
@@ -170,7 +207,7 @@ class SeoButtonLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return LinkRenderer(
       href: url,
-      text: '',
+      text: text,
       child: ElevatedButton(
         onPressed: onPressed,
         child: Text(text),

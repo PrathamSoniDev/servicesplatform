@@ -115,7 +115,7 @@ class AllBlogsScreen extends StatelessWidget {
       child: BlogCard(
         title: title,
         category: category,
-        onTap: () => openBlog(context, title, category),
+        onTap: () => openBlog(context, title, category), customHeight: 420,
       ),
     );
   }

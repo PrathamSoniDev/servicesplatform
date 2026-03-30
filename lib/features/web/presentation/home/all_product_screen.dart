@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 
 class AllProductScreen extends StatelessWidget {
   const AllProductScreen({super.key});
 
-  /// 👉 DUMMY DATA (replace later with API)
+  /// 👉 DUMMY DATA
   List<Map<String, String>> get products => [
         {
           'title': 'Developer Services',
@@ -32,7 +33,6 @@ class AllProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    /// 👉 Responsive columns
     int crossAxisCount = 2;
     if (width > 1200) {
       crossAxisCount = 4;
@@ -40,36 +40,48 @@ class AllProductScreen extends StatelessWidget {
       crossAxisCount = 3;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("All Products"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: GridView.builder(
-          itemCount: products.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 1.2,
+    return SeoWrapper(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const SeoHeader(
+            child: SeoHeading("All Products"),
           ),
-          itemBuilder: (context, index) {
-            final product = products[index];
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
+          ),
+        ),
 
-            return _ProductCard(
-              title: product['title']!,
-              desc: product['desc']!,
-              onTap: () {
-                context.go('/product/detail/${product['type']}');
+        body: SeoBody(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: GridView.builder(
+              itemCount: products.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 1.2,
+              ),
+              itemBuilder: (context, index) {
+                final product = products[index];
+
+                return _ProductCard(
+                  title: product['title']!,
+                  desc: product['desc']!,
+                  onTap: () {
+                    context.push('/product/detail/${product['type']}');
+                  },
+                );
               },
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
@@ -140,8 +152,8 @@ class _ProductCardState extends State<_ProductCard> {
 
               const SizedBox(height: 16),
 
-              /// TITLE
-              Text(
+              /// TITLE (SEO)
+              SeoHeading(
                 widget.title,
                 style: const TextStyle(
                   fontSize: 18,
@@ -151,8 +163,8 @@ class _ProductCardState extends State<_ProductCard> {
 
               const SizedBox(height: 8),
 
-              /// DESCRIPTION
-              Text(
+              /// DESCRIPTION (SEO)
+              SeoText(
                 widget.desc,
                 style: TextStyle(
                   color: Colors.grey[600],
