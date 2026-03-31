@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:seo_renderer/seo_renderer.dart';
 import 'core/app_router.dart';
-
+import 'package:flutter_web_plugins/url_strategy.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
+  usePathUrlStrategy();
   runApp(
     const SeoRoot( // ✅ move here
       child: MyApp(),
