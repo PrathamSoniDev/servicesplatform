@@ -39,48 +39,62 @@ class HeroSection extends StatelessWidget {
 
     return Stack(
       children: [
-        // ── BASE: near-black deep space ──────────────────────────
-        Positioned.fill(
-          child: ColoredBox(color: const Color(0xFF060810)),
+        // ── BASE ──────────────────────────────────────────────────
+        const Positioned.fill(
+          child: ColoredBox(color: Color(0xFF060810)),
         ),
 
         // ── LAYER 1: STARFIELD ────────────────────────────────────
-        Positioned.fill(
-          child: RepaintBoundary(child: const _StarfieldWidget()),
+        // RepaintBoundary isolates repaints to this layer only
+        const Positioned.fill(
+          child: RepaintBoundary(child: _StarfieldWidget()),
         ),
 
-        // ── LAYER 2: PLANET ARC GLOW ──────────────────────────────
-        Positioned.fill(
-          child: CustomPaint(painter: const _PlanetArcPainter()),
+        // ── LAYER 2: PLANET ARC GLOW (static — never repaints) ───
+        const Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _PlanetArcPainter(),
+              // isComplex=true → raster cache the heavy planet paint
+              isComplex: true,
+              willChange: false,
+            ),
+          ),
         ),
 
         // ── LAYER 3: ATMOSPHERIC HAZE ─────────────────────────────
-        Positioned.fill(
-          child: RepaintBoundary(child: const _AtmosphericHazeWidget()),
+        const Positioned.fill(
+          child: RepaintBoundary(child: _AtmosphericHazeWidget()),
         ),
 
         // ── LAYER 4: MOVING PARTICLES ─────────────────────────────
-        Positioned.fill(
-          child: RepaintBoundary(child: const _ParticlesWidget()),
+        const Positioned.fill(
+          child: RepaintBoundary(child: _ParticlesWidget()),
         ),
 
-        // ── LAYER 5: TOP VIGNETTE ─────────────────────────────────
-        Positioned.fill(
-          child: CustomPaint(painter: const _TopVignettePainter()),
+        // ── LAYER 5: TOP VIGNETTE (static — never repaints) ───────
+        const Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _TopVignettePainter(),
+              isComplex: true,
+              willChange: false,
+            ),
+          ),
         ),
 
         // ── HERO CONTENT ──────────────────────────────────────────
+        // Wrapped in RepaintBoundary so text never triggers bg repaint
         Positioned.fill(
-          child: Container(
-            padding: EdgeInsets.only(
-              top: appBarHeight + 20,
-              left: isMobile ? 20 : 60,
-              right: isMobile ? 20 : 60,
-              bottom: 20,
-            ),
-            child: Center(
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
+          child: RepaintBoundary(
+            child: Container(
+              padding: EdgeInsets.only(
+                top: appBarHeight + 20,
+                left: isMobile ? 20 : 60,
+                right: isMobile ? 20 : 60,
+                bottom: 20,
+              ),
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -196,13 +210,15 @@ class HeroSection extends StatelessWidget {
           ),
         ),
 
-        // ── APP BAR (ON TOP) ──────────────────────────────────────
-        CustomAppBar(
-          onHomeTap: onHomeTap,
-          onAboutTap: onAboutTap,
-          onProductTap: onProductTap,
-          onBlogTap: onBlogTap,
-          onContactTap: onContactTap,
+        // ── APP BAR ───────────────────────────────────────────────
+        RepaintBoundary(
+          child: CustomAppBar(
+            onHomeTap: onHomeTap,
+            onAboutTap: onAboutTap,
+            onProductTap: onProductTap,
+            onBlogTap: onBlogTap,
+            onContactTap: onContactTap,
+          ),
         ),
       ],
     );
@@ -210,7 +226,8 @@ class HeroSection extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LAYER 1 — Starfield (static dots, seed-deterministic)
+// LAYER 1 — Starfield
+// Single controller shared across build; painter only repaints its own layer
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _StarfieldWidget extends StatefulWidget {
@@ -222,12 +239,28 @@ class _StarfieldWidget extends StatefulWidget {
 class _StarfieldWidgetState extends State<_StarfieldWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
+
+  // Pre-build star data once at init — never rebuilt
+  static final List<List<double>> _stars = () {
+    final rng = math.Random(42);
+    return List.generate(
+      220,
+      (_) => [
+        rng.nextDouble(),
+        rng.nextDouble() * 0.75,
+        rng.nextDouble() * 1.4 + 0.3,
+        rng.nextDouble() * 2 * math.pi,
+      ],
+    );
+  }();
+
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 6))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
   }
 
   @override
@@ -237,33 +270,30 @@ class _StarfieldWidgetState extends State<_StarfieldWidget>
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) =>
-            CustomPaint(painter: _StarfieldPainter(t: _ctrl.value)),
-      );
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      // child: null — painter is cheap, no sub-tree to preserve
+      builder: (_, __) => CustomPaint(
+        painter: _StarfieldPainter(t: _ctrl.value, stars: _stars),
+      ),
+    );
+  }
 }
 
 class _StarfieldPainter extends CustomPainter {
   final double t;
-  const _StarfieldPainter({required this.t});
+  final List<List<double>> stars;
 
-  // Pre-generated star positions (x%, y%, size, twinkle phase)
-  static final List<List<double>> _stars = () {
-    final rng = math.Random(42);
-    return List.generate(220, (_) => [
-          rng.nextDouble(),
-          rng.nextDouble() * 0.75, // only upper 75% — planet covers bottom
-          rng.nextDouble() * 1.4 + 0.3,
-          rng.nextDouble() * 2 * math.pi,
-        ]);
-  }();
+  const _StarfieldPainter({required this.t, required this.stars});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    for (final s in _stars) {
-      final twinkle = 0.35 + 0.65 * math.sin(t * 2 * math.pi * 0.8 + s[3]);
+    final twBase = t * 2 * math.pi * 0.8;
+
+    for (final s in stars) {
+      final twinkle = 0.35 + 0.65 * math.sin(twBase + s[3]);
       paint.color = Color.fromRGBO(255, 255, 255, twinkle * 0.7);
       canvas.drawCircle(
         Offset(s[0] * size.width, s[1] * size.height),
@@ -278,8 +308,7 @@ class _StarfieldPainter extends CustomPainter {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LAYER 2 — Planet Arc Glow (static — the hero element)
-// A massive dark sphere rising from bottom with glowing blue atmospheric rim
+// LAYER 2 — Planet Arc Glow (static CustomPainter — raster cached)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _PlanetArcPainter extends CustomPainter {
@@ -289,31 +318,31 @@ class _PlanetArcPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final W = size.width;
     final H = size.height;
-
-    // Planet center sits well below the visible area so only the arc shows
     final cx = W * 0.5;
-    final cy = H * 1.18; // below bottom edge
-    final planetR = W * 0.72; // big radius so arc spans full width
+    final cy = H * 1.18;
+    final planetR = W * 0.72;
+    final planetCenter = Offset(cx, cy);
+    final planetRect = Rect.fromCircle(center: planetCenter, radius: planetR);
 
-    // ── Dark planet body fill ─────────────────────────────────
-    final bodyPaint = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(0, 0.6),
-        radius: 1.0,
-        colors: const [
-          Color(0xFF0D1525),
-          Color(0xFF080E1A),
-          Color(0xFF050A12),
-        ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: planetR));
+    // Dark planet body
+    canvas.drawCircle(
+      planetCenter,
+      planetR,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0, 0.6),
+          radius: 1.0,
+          colors: const [
+            Color(0xFF0D1525),
+            Color(0xFF080E1A),
+            Color(0xFF050A12),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ).createShader(planetRect),
+    );
 
-    canvas.drawCircle(Offset(cx, cy), planetR, bodyPaint);
-
-    // ── Atmospheric rim — wide teal/blue glow ─────────────────
-    // Painted as concentric arcs with decreasing opacity
-    final glowStops = [
-      // [extraRadius, alpha, blur-equivalent via strokeWidth]
+    // Atmospheric rim — batched into one loop, no allocation per frame
+    const glowStops = [
       [55.0, 0.03, 50.0],
       [28.0, 0.07, 28.0],
       [14.0, 0.13, 14.0],
@@ -322,45 +351,39 @@ class _PlanetArcPainter extends CustomPainter {
       [0.0,  0.55,  1.2],
     ];
 
+    final rimPaint = Paint()..style = PaintingStyle.stroke;
     for (final g in glowStops) {
-      final r = planetR + g[0];
-      canvas.drawCircle(
-        Offset(cx, cy),
-        r,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = g[2]
-          ..color = Color.fromRGBO(40, 160, 255, g[1])
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, g[2] * 0.6),
-      );
+      rimPaint
+        ..strokeWidth = g[2]
+        ..color = Color.fromRGBO(40, 160, 255, g[1])
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, g[2] * 0.6);
+      canvas.drawCircle(planetCenter, planetR + g[0], rimPaint);
     }
 
-    // ── Bright inner rim line ─────────────────────────────────
+    // Bright inner rim line (no maskFilter — cheap)
     canvas.drawCircle(
-      Offset(cx, cy),
+      planetCenter,
       planetR + 1,
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0
-        ..color = const Color(0xBB60C8FF),
+        ..color = const Color(0xBB60C8FF)
+        ..maskFilter = null,
     );
 
-    // ── Top-of-planet surface light (like sunlight hitting limb)
+    // Surface light
     canvas.drawCircle(
-      Offset(cx, cy),
+      planetCenter,
       planetR,
       Paint()
         ..shader = RadialGradient(
           center: const Alignment(0, -0.92),
           radius: 0.4,
-          colors: const [
-            Color(0x183060CC),
-            Colors.transparent,
-          ],
-        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: planetR)),
+          colors: const [Color(0x183060CC), Colors.transparent],
+        ).createShader(planetRect),
     );
 
-    // ── Horizon glow spill above arc (upward bloom) ───────────
+    // Horizon bloom
     final bloomRect = Rect.fromLTWH(0, H * 0.55, W, H * 0.45);
     canvas.drawRect(
       bloomRect,
@@ -379,12 +402,12 @@ class _PlanetArcPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_PlanetArcPainter _) => false;
+  bool shouldRepaint(_PlanetArcPainter _) => false; // static — never repaints
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYER 3 — Atmospheric Haze
-// Slow-pulsing blue/teal nebula haze that sits above the planet rim
+// Slow 8s cycle — pre-computed sin values, minimal allocations
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _AtmosphericHazeWidget extends StatefulWidget {
@@ -397,12 +420,14 @@ class _AtmosphericHazeWidget extends StatefulWidget {
 class _AtmosphericHazeWidgetState extends State<_AtmosphericHazeWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
+
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 8))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
   }
 
   @override
@@ -412,11 +437,13 @@ class _AtmosphericHazeWidgetState extends State<_AtmosphericHazeWidget>
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) =>
-            CustomPaint(painter: _AtmosphericHazePainter(t: _ctrl.value)),
-      );
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) =>
+          CustomPaint(painter: _AtmosphericHazePainter(t: _ctrl.value)),
+    );
+  }
 }
 
 class _AtmosphericHazePainter extends CustomPainter {
@@ -427,10 +454,12 @@ class _AtmosphericHazePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final W = size.width;
     final H = size.height;
-    final pulse = 0.6 + 0.4 * math.sin(t * 2 * math.pi * 0.3);
 
-    // Wide central blue haze centred around horizon area
-    final hazeY = H * 0.72 + math.sin(t * 2 * math.pi * 0.2) * H * 0.01;
+    // Pre-compute trig once
+    final tau = t * 2 * math.pi;
+    final pulse = 0.6 + 0.4 * math.sin(tau * 0.3);
+    final hazeY = H * 0.72 + math.sin(tau * 0.2) * H * 0.01;
+
     final hazeRect =
         Rect.fromCenter(center: Offset(W * 0.5, hazeY), width: W, height: 160);
 
@@ -438,8 +467,6 @@ class _AtmosphericHazePainter extends CustomPainter {
       hazeRect,
       Paint()
         ..shader = RadialGradient(
-          center: Alignment.center,
-          radius: 1.0,
           colors: [
             Color.fromRGBO(30, 100, 220, 0.14 * pulse),
             Color.fromRGBO(10, 50, 140, 0.06 * pulse),
@@ -449,7 +476,6 @@ class _AtmosphericHazePainter extends CustomPainter {
         ).createShader(hazeRect),
     );
 
-    // Subtle teal accent left of center
     final tealRect = Rect.fromCenter(
         center: Offset(W * 0.35, H * 0.70), width: W * 0.5, height: 120);
     canvas.drawRect(
@@ -470,7 +496,11 @@ class _AtmosphericHazePainter extends CustomPainter {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LAYER 4 — Moving Particles
-// Slow upward-drifting luminous specks — like light dust over the planet
+// Key optimizations:
+//   • Particle list allocated ONCE in initState, never in build/paint
+//   • paint() mutates particle positions in-place (no allocations)
+//   • LayoutBuilder only re-inits when size actually changes
+//   • Paint object reused across all particles
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _Particle {
@@ -503,11 +533,12 @@ class _ParticlesWidgetState extends State<_ParticlesWidget>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 14))
-      ..repeat();
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    )..repeat();
   }
 
-  void _init(Size size) {
+  void _initParticles(Size size) {
     if (size == _lastSize) return;
     _lastSize = size;
     final n = (size.width * size.height / 6000).clamp(50, 160).toInt();
@@ -533,12 +564,16 @@ class _ParticlesWidgetState extends State<_ParticlesWidget>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (ctx, box) {
-      _init(Size(box.maxWidth, box.maxHeight));
+    return LayoutBuilder(builder: (_, box) {
+      _initParticles(Size(box.maxWidth, box.maxHeight));
       return AnimatedBuilder(
         animation: _ctrl,
         builder: (_, __) => CustomPaint(
-          painter: _ParticlesPainter(particles: _particles, t: _ctrl.value),
+          painter: _ParticlesPainter(
+            particles: _particles,
+            t: _ctrl.value,
+            canvasHeight: _lastSize.height,
+          ),
         ),
       );
     });
@@ -548,32 +583,37 @@ class _ParticlesWidgetState extends State<_ParticlesWidget>
 class _ParticlesPainter extends CustomPainter {
   final List<_Particle> particles;
   final double t;
-  const _ParticlesPainter({required this.particles, required this.t});
+  final double canvasHeight;
+
+  const _ParticlesPainter({
+    required this.particles,
+    required this.t,
+    required this.canvasHeight,
+  });
+
+  // Single reused Paint object — no per-particle allocation
+  static final _paint = Paint()..style = PaintingStyle.fill;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
+    final tau = t * 2 * math.pi;
+    final swayBase = tau * 0.25;
+    final twBase = tau * 1.1;
+
     for (final p in particles) {
-      // Drift upward
       p.y -= p.speed;
       if (p.y < -4) p.y = size.height + 4;
 
-      // Sway side to side
-      final sx = p.x + math.sin(t * 2 * math.pi * 0.25 + p.phase) * p.sway;
-
-      // Twinkle
+      final sx = p.x + math.sin(swayBase + p.phase) * p.sway;
       final tw =
-          p.opacity * (0.3 + 0.7 * math.sin(t * 2 * math.pi * 1.1 + p.phase));
+          p.opacity * (0.3 + 0.7 * math.sin(twBase + p.phase));
 
-      // Particles near bottom (planet surface) get a slight blue tint
-      final yFrac = p.y / size.height;
-      if (yFrac > 0.65) {
-        paint.color = Color.fromRGBO(100, 180, 255, tw.clamp(0.0, 1.0));
-      } else {
-        paint.color = Color.fromRGBO(255, 255, 255, tw.clamp(0.0, 1.0));
-      }
+      final yFrac = p.y / canvasHeight;
+      _paint.color = yFrac > 0.65
+          ? Color.fromRGBO(100, 180, 255, tw.clamp(0.0, 1.0))
+          : Color.fromRGBO(255, 255, 255, tw.clamp(0.0, 1.0));
 
-      canvas.drawCircle(Offset(sx, p.y), p.radius, paint);
+      canvas.drawCircle(Offset(sx, p.y), p.radius, _paint);
     }
   }
 
@@ -582,7 +622,7 @@ class _ParticlesPainter extends CustomPainter {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LAYER 5 — Top & Edge Vignette (static)
+// LAYER 5 — Top Vignette (static — raster cached, never repaints)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _TopVignettePainter extends CustomPainter {
@@ -590,31 +630,28 @@ class _TopVignettePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Top fade to near-black
+    // Top fade
+    final topRect = Rect.fromLTWH(0, 0, size.width, size.height * 0.35);
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height * 0.35),
+      topRect,
       Paint()
-        ..shader = LinearGradient(
+        ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xCC060810),
-            Colors.transparent,
-          ],
-        ).createShader(
-            Rect.fromLTWH(0, 0, size.width, size.height * 0.35)),
+          colors: [Color(0xCC060810), Colors.transparent],
+        ).createShader(topRect),
     );
 
-    // Edge radial crush
+    // Edge vignette
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
+      Offset.zero & size,
       Paint()
         ..shader = RadialGradient(
           center: Alignment.center,
           radius: 0.9,
-          colors: [Colors.transparent, const Color(0x88060810)],
+          colors: const [Colors.transparent, Color(0x88060810)],
           stops: const [0.45, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+        ).createShader(Offset.zero & size),
     );
   }
 
