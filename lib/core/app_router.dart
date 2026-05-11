@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:servicesplatform/features/web/presentation/home/about_us_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/all_blog_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/all_product_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/blog_detail_screen.dart';
+/// BLOG
+import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
 /// SCREENS
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
-import 'package:servicesplatform/features/web/presentation/home/about_us_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
-import 'package:servicesplatform/features/web/presentation/home/request_demo_scree.dart';
-
+import 'package:servicesplatform/features/web/presentation/home/product_detail_screen.dart';
 /// ✅ ADD THIS
 
 /// PRODUCT
 import 'package:servicesplatform/features/web/presentation/home/product_screem.dart';
-import 'package:servicesplatform/features/web/presentation/home/product_detail_screen.dart';
-import 'package:servicesplatform/features/web/presentation/home/all_product_screen.dart';
+import 'package:servicesplatform/features/web/presentation/home/request_demo_scree.dart';
 
-/// BLOG
-import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
-import 'package:servicesplatform/features/web/presentation/home/blog_detail_screen.dart';
-import 'package:servicesplatform/features/web/presentation/home/all_blog_screen.dart';
+import '../models/service_model.dart';
 
 class AppRouter {
   AppRouter._();
@@ -51,7 +50,6 @@ class AppRouter {
     debugLogDiagnostics: true,
 
     routes: [
-
       /// ================= HOME =================
       GoRoute(
         path: home,
@@ -90,11 +88,12 @@ class AppRouter {
         name: 'productDetail',
         pageBuilder: (context, state) {
           final type = state.pathParameters['type'] ?? '';
-
+          final service = state.extra as ServiceModel?;
           return CustomTransitionPage(
             key: state.pageKey,
             child: ProductDetailScreen(
               isDeveloper: type == 'developer',
+              service: service!,
             ),
             transitionsBuilder: (context, animation, _, child) {
               return FadeTransition(opacity: animation, child: child);
@@ -106,7 +105,6 @@ class AppRouter {
       // ============================================================
       // ======================== BLOG ==============================
       // ============================================================
-
       GoRoute(
         path: blog,
         name: 'blog',
@@ -132,10 +130,7 @@ class AppRouter {
 
           return CustomTransitionPage(
             key: state.pageKey,
-            child: BlogDetailScreen(
-              title: title,
-              category: category,
-            ),
+            child: BlogDetailScreen(title: title, category: category),
             transitionsBuilder: (context, animation, _, child) {
               return FadeTransition(opacity: animation, child: child);
             },
@@ -146,7 +141,6 @@ class AppRouter {
       // ============================================================
       // ================= REQUEST DEMO =============================
       // ============================================================
-
       GoRoute(
         path: requestDemo,
         name: 'requestDemo',
@@ -164,7 +158,6 @@ class AppRouter {
       // ============================================================
       // ================= CONTACT =================
       // ============================================================
-
       GoRoute(
         path: contact,
         name: 'contact',

@@ -35,10 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-
-      /// 🔥 IMPORTANT FOR SEO
-      title: 'Sell Tech IND. Productions | Best Flutter Developer in India',
-
+      title: 'Sell Tech IND. Productions - Building Scalable Digital Experiences',
       theme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,

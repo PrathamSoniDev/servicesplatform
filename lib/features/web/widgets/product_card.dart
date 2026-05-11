@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
+import 'package:servicesplatform/models/service_model.dart';
 
 class ProductCard extends StatefulWidget {
-  final bool isDeveloper;
   final VoidCallback onTap;
+  final ServiceModel service;
 
-  const ProductCard({
-    super.key,
-    required this.isDeveloper,
-    required this.onTap,
-  });
+  const ProductCard({super.key, required this.onTap, required this.service});
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -22,45 +20,51 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
-    final isDark   = Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final cardColor   = isDark ? AppTheme.darkCard    : AppTheme.cardLight;
+    final cardColor = isDark ? AppTheme.darkCard : AppTheme.cardLight;
     final borderColor = isDark ? AppTheme.borderColor : AppTheme.borderLight;
-    final titleColor  = isDark ? AppTheme.textPrimary : AppTheme.textBlack;
-    final descColor   = isDark ? AppTheme.textSecondary : AppTheme.textGrey;
+    final titleColor = isDark ? AppTheme.textPrimary : AppTheme.textBlack;
+    final descColor = isDark ? AppTheme.textSecondary : AppTheme.textGrey;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Hero(
-        tag: widget.isDeveloper ? "dev_prod" : "biz_prod",
+        tag: DateTime.now().millisecondsSinceEpoch,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
-          onEnter: (_) { if (!isMobile) setState(() => _hovered = true); },
-          onExit:  (_) { if (!isMobile) setState(() => _hovered = false); },
+          onEnter: (_) {
+            if (!isMobile) setState(() => _hovered = true);
+          },
+          onExit: (_) {
+            if (!isMobile) setState(() => _hovered = false);
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             clipBehavior: Clip.antiAlias,
-            transform: Matrix4.identity()
-              ..translate(0.0, _hovered && !isMobile ? -4.0 : 0.0),
+            transform:
+                Matrix4.identity()
+                  ..translate(0.0, _hovered && !isMobile ? -4.0 : 0.0),
             transformAlignment: Alignment.center,
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: _hovered
-                    ? AppTheme.primaryGreen.withOpacity(0.50)
-                    : borderColor,
+                color:
+                    _hovered
+                        ? AppTheme.primaryGreen.withValues(alpha: .50)
+                        : borderColor,
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.35 : 0.09),
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.09),
                   blurRadius: 14,
                   offset: const Offset(0, 6),
                 ),
                 if (_hovered && !isMobile)
                   BoxShadow(
-                    color: AppTheme.primaryGreen.withOpacity(0.12),
+                    color: AppTheme.primaryGreen.withValues(alpha: .12),
                     blurRadius: 30,
                     spreadRadius: 2,
                     offset: const Offset(0, 8),
@@ -76,17 +80,14 @@ class _ProductCardState extends State<ProductCard> {
                 // ── TIER 1: MICRO – h<90 or w<110 ─────────────────────────
                 // Just the icon badge
                 if (h < 90 || w < 110) {
-                  return _MicroTile(
-                    isDev: widget.isDeveloper,
-                    isDark: isDark,
-                  );
+                  return _MicroTile(isDark: isDark);
                 }
 
                 // ── TIER 2: MINIMAL – h<150 or w<160 ──────────────────────
                 // Icon + Title
                 if (h < 150 || w < 160) {
                   return _MinimalTile(
-                    isDev: widget.isDeveloper,
+                    text: widget.service.name,
                     isDark: isDark,
                     titleColor: titleColor,
                     cardW: w,
@@ -98,7 +99,8 @@ class _ProductCardState extends State<ProductCard> {
                 // Icon + Badge + Title + CTA arrow
                 if (h < 240 || w < 220) {
                   return _CompactTile(
-                    isDev: widget.isDeveloper,
+                    title: widget.service.name,
+                    desc: widget.service.description,
                     isDark: isDark,
                     hovered: _hovered,
                     isMobile: isMobile,
@@ -112,7 +114,8 @@ class _ProductCardState extends State<ProductCard> {
                 // Icon + Badge + Title + Description + CTA
                 if (h < 360 || w < 280) {
                   return _StandardTile(
-                    isDev: widget.isDeveloper,
+                    title: widget.service.name,
+                    desc: widget.service.description,
                     isDark: isDark,
                     hovered: _hovered,
                     isMobile: isMobile,
@@ -125,14 +128,10 @@ class _ProductCardState extends State<ProductCard> {
 
                 // ── TIER 5: FULL – all elements ────────────────────────────
                 return _FullTile(
-                  isDev: widget.isDeveloper,
-                  isDark: isDark,
+                  service: widget.service,
+
                   hovered: _hovered,
                   isMobile: isMobile,
-                  titleColor: titleColor,
-                  descColor: descColor,
-                  cardW: w,
-                  cardH: h,
                 );
               },
             ),
@@ -147,9 +146,9 @@ class _ProductCardState extends State<ProductCard> {
 // TIER 1 – MICRO   h<90 or w<110
 // ─────────────────────────────────────────────────────────────────────────────
 class _MicroTile extends StatelessWidget {
-  final bool isDev;
   final bool isDark;
-  const _MicroTile({required this.isDev, required this.isDark});
+
+  const _MicroTile({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -157,11 +156,11 @@ class _MicroTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppTheme.primaryGreen.withOpacity(0.10),
+          color: AppTheme.primaryGreen.withValues(alpha: .10),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          isDev ? Icons.terminal_rounded : Icons.business_center_rounded,
+          Icons.business_center_rounded,
           color: AppTheme.primaryGreen,
           size: 20,
         ),
@@ -174,13 +173,14 @@ class _MicroTile extends StatelessWidget {
 // TIER 2 – MINIMAL   h<150 or w<160
 // ─────────────────────────────────────────────────────────────────────────────
 class _MinimalTile extends StatelessWidget {
-  final bool isDev;
+  final String text;
   final bool isDark;
   final Color titleColor;
   final double cardW;
   final double cardH;
+
   const _MinimalTile({
-    required this.isDev,
+    required this.text,
     required this.isDark,
     required this.titleColor,
     required this.cardW,
@@ -197,11 +197,11 @@ class _MinimalTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppTheme.primaryGreen.withOpacity(0.10),
+              color: AppTheme.primaryGreen.withValues(alpha: .10),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              isDev ? Icons.terminal_rounded : Icons.business_center_rounded,
+              Icons.business_center_rounded,
               color: AppTheme.primaryGreen,
               size: 16,
             ),
@@ -209,7 +209,7 @@ class _MinimalTile extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              isDev ? "Developer" : "Business",
+              text,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -230,21 +230,24 @@ class _MinimalTile extends StatelessWidget {
 // TIER 3 – COMPACT   h<240 or w<220
 // ─────────────────────────────────────────────────────────────────────────────
 class _CompactTile extends StatelessWidget {
-  final bool isDev;
   final bool isDark;
   final bool hovered;
   final bool isMobile;
   final Color titleColor;
   final double cardW;
   final double cardH;
+  final String title;
+  final String desc;
+
   const _CompactTile({
-    required this.isDev,
     required this.isDark,
     required this.hovered,
     required this.isMobile,
     required this.titleColor,
     required this.cardW,
     required this.cardH,
+    required this.title,
+    required this.desc,
   });
 
   @override
@@ -260,15 +263,27 @@ class _CompactTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _IconBox(isDev: isDev, size: 18, padding: 9),
-              _BadgePill(isDev: isDev, fontSize: 8),
+              _IconBox(size: 18, padding: 9),
+              _BadgePill(text: title, fontSize: 8),
             ],
           ),
           const SizedBox(height: 10),
           // Title
-          Text(
-            isDev ? "Developer Platform" : "Business Platform",
+          SeoText(
+            title,
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: titleColor,
+              fontSize: cardW < 180 ? 13 : 15,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SeoText(
+            desc,
+            maxLines: 4,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: titleColor,
@@ -291,7 +306,6 @@ class _CompactTile extends StatelessWidget {
 // TIER 4 – STANDARD   h<360 or w<280
 // ─────────────────────────────────────────────────────────────────────────────
 class _StandardTile extends StatelessWidget {
-  final bool isDev;
   final bool isDark;
   final bool hovered;
   final bool isMobile;
@@ -299,8 +313,10 @@ class _StandardTile extends StatelessWidget {
   final Color descColor;
   final double cardW;
   final double cardH;
+  final String title;
+  final String desc;
+
   const _StandardTile({
-    required this.isDev,
     required this.isDark,
     required this.hovered,
     required this.isMobile,
@@ -308,6 +324,8 @@ class _StandardTile extends StatelessWidget {
     required this.descColor,
     required this.cardW,
     required this.cardH,
+    required this.title,
+    required this.desc,
   });
 
   @override
@@ -322,13 +340,13 @@ class _StandardTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _IconBox(isDev: isDev, size: 20, padding: 10),
-              _BadgePill(isDev: isDev, fontSize: 9),
+              _IconBox(size: 20, padding: 10),
+              _BadgePill(text: '', fontSize: 9),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            isDev ? "Developer Platform" : "Business Platform",
+            title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -341,16 +359,10 @@ class _StandardTile extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           Text(
-            isDev
-                ? "Powerful tools to help engineers build, ship and scale smarter."
-                : "Everything your team needs to hire better and grow faster.",
+            desc,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: descColor,
-              height: 1.5,
-              fontSize: 12.5,
-            ),
+            style: TextStyle(color: descColor, height: 1.5, fontSize: 12.5),
           ),
           if (cardH > 260) ...[
             const SizedBox(height: 14),
@@ -366,119 +378,211 @@ class _StandardTile extends StatelessWidget {
 // TIER 5 – FULL   h≥360 and w≥280
 // ─────────────────────────────────────────────────────────────────────────────
 class _FullTile extends StatelessWidget {
-  final bool isDev;
-  final bool isDark;
+  final ServiceModel service;
   final bool hovered;
   final bool isMobile;
-  final Color titleColor;
-  final Color descColor;
-  final double cardW;
-  final double cardH;
+
   const _FullTile({
-    required this.isDev,
-    required this.isDark,
+    required this.service,
     required this.hovered,
     required this.isMobile,
-    required this.titleColor,
-    required this.descColor,
-    required this.cardW,
-    required this.cardH,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double pad       = isMobile ? 18 : 24;
-    final double iconSize  = isMobile ? 22 : 26;
-    final double iconPad   = isMobile ? 10 : 13;
-    final double titleSize = isMobile ? 18 : 21;
-    final double descSize  = isMobile ? 12.5 : 13.5;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      padding: EdgeInsets.all(isMobile ? 22 : 28),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(34),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF101827),
+            hovered
+                ? AppTheme.primaryGreen.withValues(alpha: .18)
+                : const Color(0xFF111827),
+          ],
+        ),
+        border: Border.all(
+          color:
+              hovered
+                  ? AppTheme.primaryGreen.withValues(alpha: .35)
+                  : Colors.white.withValues(alpha: .05),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                hovered
+                    ? AppTheme.primaryGreen.withValues(alpha: .15)
+                    : Colors.black.withValues(alpha: .15),
+            blurRadius: hovered ? 40 : 18,
+            spreadRadius: hovered ? 2 : 0,
+            offset: const Offset(0, 20),
+          ),
+        ],
+      ),
 
-    final tags = isDev
-        ? ["API Access", "CLI Tools", "SDKs"]
-        : ["Analytics", "Hiring", "Reports"];
-
-    return Padding(
-      padding: EdgeInsets.all(pad),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Icon + Badge ─────────────────────────────────────────────
+          /// TOP ROW
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: EdgeInsets.all(iconPad),
+                duration: const Duration(milliseconds: 350),
+                width: hovered ? 78 : 70,
+                height: hovered ? 78 : 70,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryGreen.withOpacity(hovered ? 0.15 : 0.09),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AppTheme.primaryGreen.withOpacity(hovered ? 0.40 : 0.18),
-                    width: 1,
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryGreen,
+                      AppTheme.primaryGreen.withValues(alpha: .55),
+                    ],
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryGreen.withValues(alpha: .25),
+                      blurRadius: 25,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  isDev ? Icons.terminal_rounded : Icons.business_center_rounded,
-                  color: AppTheme.primaryGreen,
-                  size: iconSize,
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Colors.black,
+                  size: 34,
                 ),
               ),
-              _BadgePill(isDev: isDev, fontSize: 9.5),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.white.withValues(alpha: .05),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: .08),
+                  ),
+                ),
+                child: SeoText(
+                  "PREMIUM",
+                  style: TextStyle(
+                    color: AppTheme.primaryGreen,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+              ),
             ],
           ),
 
-          SizedBox(height: isMobile ? 14 : 20),
+          const Spacer(),
 
-          // ── Title ───────────────────────────────────────────────────
-          Text(
-            isDev ? "Developer Platform" : "Business Platform",
+          /// TITLE
+          SeoText(
+            service.name,
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: titleColor,
-              fontSize: titleSize,
-              fontWeight: FontWeight.w800,
-              height: 1.2,
-              letterSpacing: -0.3,
+              color: Colors.white,
+              fontSize: isMobile ? 24 : 30,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
+              letterSpacing: -1,
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 18),
 
-          // ── Description ─────────────────────────────────────────────
-          Text(
-            isDev
-                ? "Powerful tools designed to help engineers build, ship and scale smarter."
-                : "Everything your team needs to hire better and grow faster.",
-            maxLines: isMobile ? 2 : 3,
+          /// DESCRIPTION
+          SeoText(
+            service.description,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: descColor,
-              height: 1.55,
-              fontSize: descSize,
+              color: Colors.white.withValues(alpha: .70),
+              fontSize: isMobile ? 13 : 15,
+              height: 1.8,
+              fontWeight: FontWeight.w400,
             ),
           ),
 
-          SizedBox(height: isMobile ? 14 : 20),
+          const SizedBox(height: 24),
 
-          // ── Feature tags (Wrap → never overflows) ───────────────────
+          /// TECH STACK
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: tags.map((t) => _TagChip(label: t, isDark: isDark)).toList(),
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildTech("Flutter"),
+              _buildTech("Firebase"),
+              _buildTech("API"),
+            ],
           ),
 
-          SizedBox(height: isMobile ? 14 : 18),
+          const SizedBox(height: 30),
 
-          // ── CTA ──────────────────────────────────────────────────────
-          _CtaArrow(
-            hovered: hovered,
-            titleColor: titleColor,
-            fontSize: isMobile ? 12 : 14,
+          /// CTA
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              color:
+                  hovered
+                      ? AppTheme.primaryGreen
+                      : Colors.white.withValues(alpha: .06),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SeoText(
+                    "Explore Solution",
+                    style: TextStyle(
+                      color: hovered ? Colors.black : Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+
+                AnimatedSlide(
+                  duration: const Duration(milliseconds: 250),
+                  offset: hovered ? const Offset(.2, 0) : Offset.zero,
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    color: hovered ? Colors.black : AppTheme.primaryGreen,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTech(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(40),
+        color: Colors.white.withValues(alpha: .05),
+        border: Border.all(color: Colors.white.withValues(alpha: .06)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -489,22 +593,25 @@ class _FullTile extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _IconBox extends StatelessWidget {
-  final bool isDev;
   final double size;
   final double padding;
-  const _IconBox({required this.isDev, required this.size, required this.padding});
+
+  const _IconBox({required this.size, required this.padding});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: AppTheme.primaryGreen.withOpacity(0.10),
+        color: AppTheme.primaryGreen.withValues(alpha: .10),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryGreen.withOpacity(0.22), width: 1),
+        border: Border.all(
+          color: AppTheme.primaryGreen.withValues(alpha: .22),
+          width: 1,
+        ),
       ),
       child: Icon(
-        isDev ? Icons.terminal_rounded : Icons.business_center_rounded,
+        Icons.business_center_rounded,
         color: AppTheme.primaryGreen,
         size: size,
       ),
@@ -513,21 +620,22 @@ class _IconBox extends StatelessWidget {
 }
 
 class _BadgePill extends StatelessWidget {
-  final bool isDev;
+  final String text;
   final double fontSize;
-  const _BadgePill({required this.isDev, required this.fontSize});
+
+  const _BadgePill({required this.text, required this.fontSize});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.primaryGreen.withOpacity(0.08),
+        color: AppTheme.primaryGreen.withValues(alpha: .08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primaryGreen.withOpacity(0.22)),
+        border: Border.all(color: AppTheme.primaryGreen.withValues(alpha: .22)),
       ),
       child: Text(
-        isDev ? "DEV" : "BIZ",
+        text,
         style: TextStyle(
           color: AppTheme.primaryGreen,
           fontSize: fontSize,
@@ -543,7 +651,12 @@ class _CtaArrow extends StatelessWidget {
   final bool hovered;
   final Color titleColor;
   final double fontSize;
-  const _CtaArrow({required this.hovered, required this.titleColor, required this.fontSize});
+
+  const _CtaArrow({
+    required this.hovered,
+    required this.titleColor,
+    required this.fontSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -576,6 +689,7 @@ class _CtaArrow extends StatelessWidget {
 class _TagChip extends StatelessWidget {
   final String label;
   final bool isDark;
+
   const _TagChip({required this.label, required this.isDark});
 
   @override
@@ -583,22 +697,25 @@ class _TagChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.black.withOpacity(0.04),
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: .05)
+                : Colors.black.withValues(alpha: .04),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.10)
-              : Colors.black.withOpacity(0.08),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: .10)
+                  : Colors.black.withValues(alpha: .08),
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isDark
-              ? Colors.white.withOpacity(0.55)
-              : Colors.black.withOpacity(0.45),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: .55)
+                  : Colors.black.withValues(alpha: .45),
           fontSize: 10.5,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.2,

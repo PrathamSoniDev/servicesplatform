@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/presentation/home/request_demo_scree.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
@@ -7,9 +8,10 @@ import 'package:servicesplatform/features/web/utils/app_theme.dart';
 // Breakpoints
 // ─────────────────────────────────────────────────────────────────────────────
 class _BP {
-  static const double mobile      = 600;   // < 600 → hamburger only
-  static const double tablet      = 900;   // 600–900 → logo + hamburger, no nav
-  static const double smallDesk   = 1100;  // 900–1100 → compact nav (no pricing/service)
+  static const double mobile = 600; // < 600 → hamburger only
+  static const double tablet = 900; // 600–900 → logo + hamburger, no nav
+  static const double smallDesk =
+      1100; // 900–1100 → compact nav (no pricing/service)
   // ≥ 1100 → full nav
 }
 
@@ -34,35 +36,37 @@ class CustomAppBar extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Menu',
-      barrierColor: Colors.black.withOpacity(0.2),
+      barrierColor: Colors.black.withValues(alpha: .2),
       transitionDuration: const Duration(milliseconds: 350),
-      pageBuilder: (ctx, a1, a2) => Align(
-        alignment: Alignment.centerRight,
-        child: _GlassMenuOverlay(
-          onHomeTap: onHomeTap,
-          onAboutTap: onAboutTap,
-          onProductTap: onProductTap,
-          onBlogTap: onBlogTap,
-          onContactTap: onContactTap,
-        ),
-      ),
-      transitionBuilder: (ctx, a1, a2, child) => SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(1, 0),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: a1, curve: Curves.easeOutCubic)),
-        child: child,
-      ),
+      pageBuilder:
+          (ctx, a1, a2) => Align(
+            alignment: Alignment.centerRight,
+            child: _GlassMenuOverlay(
+              onHomeTap: onHomeTap,
+              onAboutTap: onAboutTap,
+              onProductTap: onProductTap,
+              onBlogTap: onBlogTap,
+              onContactTap: onContactTap,
+            ),
+          ),
+      transitionBuilder:
+          (ctx, a1, a2, child) => SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: a1, curve: Curves.easeOutCubic)),
+            child: child,
+          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-    final isMobile    = w < _BP.mobile;
-    final isTablet    = w >= _BP.mobile    && w < _BP.tablet;
-    final isSmallDesk = w >= _BP.tablet    && w < _BP.smallDesk;
-    final isFullDesk  = w >= _BP.smallDesk;
+    final isMobile = w < _BP.mobile;
+    final isTablet = w >= _BP.mobile && w < _BP.tablet;
+    final isSmallDesk = w >= _BP.tablet && w < _BP.smallDesk;
+    final isFullDesk = w >= _BP.smallDesk;
 
     // Horizontal padding scales with width, clamped so it never overflows
     final double hPad = (w * 0.035).clamp(12.0, 60.0);
@@ -78,7 +82,7 @@ class CustomAppBar extends StatelessWidget {
             color: const Color(0x55060810),
             border: Border(
               bottom: BorderSide(
-                color: Colors.white.withOpacity(0.07),
+                color: Colors.white.withValues(alpha: .07),
                 width: 0.8,
               ),
             ),
@@ -139,24 +143,28 @@ class _Logo extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withValues(alpha: .55),
               width: 1.5,
             ),
           ),
           child: Center(
             child: Container(
-              width: small ? 8 : 10,
-              height: small ? 8 : 10,
+              width: small ? 23 : 27,
+              height: small ? 23 : 27,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                image: DecorationImage(
+                  image: AssetImage('assets/gif/Sell tech.gif'),
+                  fit: BoxFit.cover,
+                  repeat: ImageRepeat.repeat,
+                ),
               ),
             ),
           ),
         ),
         SizedBox(width: small ? 7 : 10),
         Text(
-          'YourCompany',
+          'SellTech IND. Productions',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -196,11 +204,15 @@ class _DesktopNav extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _NavItem(title: 'Product',  onTap: onProductTap, compact: compact),
+        _NavItem(title: 'Product', onTap: onProductTap, compact: compact),
         if (!compact)
-          
-        _NavItem(title: 'Company', onTap: onAboutTap, compact: compact, accent: true),
-        _NavItem(title: 'Blog',    onTap: onBlogTap,  compact: compact),
+          _NavItem(
+            title: 'Company',
+            onTap: onAboutTap,
+            compact: compact,
+            accent: true,
+          ),
+        _NavItem(title: 'Blog', onTap: onBlogTap, compact: compact),
         if (!compact)
           _NavItem(title: 'Service', onTap: onContactTap, compact: false),
       ],
@@ -214,6 +226,7 @@ class _DesktopNav extends StatelessWidget {
 
 class _DesktopActions extends StatelessWidget {
   final bool compact;
+
   const _DesktopActions({required this.compact});
 
   @override
@@ -229,7 +242,7 @@ class _DesktopActions extends StatelessWidget {
               child: Text(
                 'login',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.65),
+                  color: Colors.white.withValues(alpha: .65),
                   fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
@@ -237,17 +250,17 @@ class _DesktopActions extends StatelessWidget {
             ),
           ),
         _AstroCtaButton(
-  label: compact ? 'Demo' : 'Request demo',
-  onTap: () {
-    // This navigates to the screen I created for you
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RequestDemoScreen(),
-      ),
-    );
-  },
-),
+          label: compact ? 'Demo' : 'Request demo',
+          onTap: () {
+            // This navigates to the screen I created for you
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RequestDemoScreen(),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -259,12 +272,17 @@ class _DesktopActions extends StatelessWidget {
 
 class _HamburgerButton extends StatelessWidget {
   final VoidCallback onTap;
+
   const _HamburgerButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.menu, color: Colors.white.withOpacity(0.85), size: 24),
+      icon: Icon(
+        Icons.menu,
+        color: Colors.white.withValues(alpha: .85),
+        size: 24,
+      ),
       onPressed: onTap,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
@@ -298,9 +316,10 @@ class _NavItemState extends State<_NavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = widget.accent
-        ? AppTheme.primaryGreen
-        : (_hover ? Colors.white : Colors.white.withOpacity(0.65));
+    final Color color =
+        widget.accent
+            ? AppTheme.primaryGreen
+            : (_hover ? Colors.white : Colors.white.withValues(alpha: .65));
 
     final double hPad = widget.compact ? 10.0 : 16.0;
     final double fontSize = widget.compact ? 13.0 : 14.0;
@@ -317,8 +336,7 @@ class _NavItemState extends State<_NavItem> {
             duration: const Duration(milliseconds: 160),
             style: TextStyle(
               color: color,
-              fontWeight:
-                  widget.accent ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: widget.accent ? FontWeight.w600 : FontWeight.w400,
               fontSize: fontSize,
             ),
             child: Text(widget.title),
@@ -336,6 +354,7 @@ class _NavItemState extends State<_NavItem> {
 class _AstroCtaButton extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
+
   const _AstroCtaButton({required this.label, required this.onTap});
 
   @override
@@ -359,19 +378,21 @@ class _AstroCtaButtonState extends State<_AstroCtaButton> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _hover
-                  ? Colors.white.withOpacity(0.55)
-                  : Colors.white.withOpacity(0.25),
+              color:
+                  _hover
+                      ? Colors.white.withValues(alpha: .55)
+                      : Colors.white.withValues(alpha: .25),
               width: 0.8,
             ),
-            color: _hover
-                ? Colors.white.withOpacity(0.08)
-                : Colors.transparent,
+            color:
+                _hover
+                    ? Colors.white.withValues(alpha: .08)
+                    : Colors.transparent,
           ),
           child: Text(
             widget.label,
             style: TextStyle(
-              color: Colors.white.withOpacity(_hover ? 1.0 : 0.85),
+              color: Colors.white.withValues(alpha: _hover ? 1.0 : 0.85),
               fontWeight: FontWeight.w500,
               fontSize: 13,
             ),
@@ -437,15 +458,15 @@ class _GlassMenuOverlay extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.white.withOpacity(0.06),
-                          Colors.white.withOpacity(0.01),
+                          Colors.white.withValues(alpha: .06),
+                          Colors.white.withValues(alpha: .01),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       border: Border(
                         left: BorderSide(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: .10),
                           width: 0.8,
                         ),
                       ),
@@ -462,9 +483,11 @@ class _GlassMenuOverlay extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(10),
                             child: IconButton(
-                              icon: Icon(Icons.close,
-                                  color: Colors.white.withOpacity(0.8),
-                                  size: 22),
+                              icon: Icon(
+                                Icons.close,
+                                color: Colors.white.withValues(alpha: .8),
+                                size: 22,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -474,14 +497,46 @@ class _GlassMenuOverlay extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _MenuTile(title: 'HOME',     onTap: () { Navigator.pop(context); onHomeTap(); }),
-                              _MenuTile(title: 'ABOUT',    onTap: () { Navigator.pop(context); onAboutTap(); }),
-                              _MenuTile(title: 'PRODUCTS', onTap: () { Navigator.pop(context); onProductTap(); }),
-                              _MenuTile(title: 'BLOG',     onTap: () { Navigator.pop(context); onBlogTap(); }),
-                              _MenuTile(title: 'CONTACT',  onTap: () { Navigator.pop(context); onContactTap(); }),
+                              _MenuTile(
+                                title: 'HOME',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onHomeTap();
+                                },
+                              ),
+                              _MenuTile(
+                                title: 'ABOUT',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onAboutTap();
+                                },
+                              ),
+                              _MenuTile(
+                                title: 'PRODUCTS',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onProductTap();
+                                },
+                              ),
+                              _MenuTile(
+                                title: 'BLOG',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onBlogTap();
+                                },
+                              ),
+                              _MenuTile(
+                                title: 'CONTACT',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onContactTap();
+                                },
+                              ),
                               const SizedBox(height: 32),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
                                 child: _AstroCtaButton(
                                   label: 'Start free trial',
                                   onTap: () {},
@@ -510,6 +565,7 @@ class _GlassMenuOverlay extends StatelessWidget {
 class _MenuTile extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
+
   const _MenuTile({required this.title, required this.onTap});
 
   @override

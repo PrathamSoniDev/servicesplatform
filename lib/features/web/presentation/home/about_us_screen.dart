@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
@@ -18,19 +19,19 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
   final List<Map<String, String>> steps = [
     {
-      "title": "Product Discovery",
+      "title": "Our Mission",
       "desc":
-          "We collaborate with clients to understand goals and define the right digital solution."
+          "Our mission is to empower businesses with innovative, scalable, and reliable digital solutions that create long-term growth and competitive advantage.",
     },
     {
-      "title": "Design & Architecture",
+      "title": "Our Vision",
       "desc":
-          "Our team designs modern UI/UX and scalable architecture for long-term growth."
+          "To become a globally trusted technology partner delivering world-class software and digital experiences through innovation, quality, and customer-centric development.",
     },
     {
-      "title": "Development",
+      "title": "Our Core Values",
       "desc":
-          "We build high-performance web apps and mobile apps using modern technologies."
+          "Innovation-driven solutions with quality-focused development, transparent communication, scalable architecture, reliable performance, and long-term client partnerships.",
     },
   ];
 
@@ -88,9 +89,10 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 maxWidth: Responsive.maxContentWidth(context),
                 maxHeight: MediaQuery.of(context).size.height,
               ),
-              child: isMobile
-                  ? _buildMobileLayout(context)
-                  : _buildDesktopLayout(context),
+              child:
+                  isMobile
+                      ? _buildMobileLayout(context)
+                      : _buildDesktopLayout(context),
             ),
           ),
         ),
@@ -101,8 +103,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   /// DESKTOP
   Widget _buildDesktopLayout(BuildContext context) {
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: Responsive.pagePadding(context)),
+      padding: EdgeInsets.symmetric(
+        horizontal: Responsive.pagePadding(context),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -111,10 +114,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
             child: _buildHeroText(context, false), // ❌ removed FittedBox
           ),
           const SizedBox(width: 40),
-          Expanded(
-            flex: 6,
-            child: _buildTimelineDesktop(context),
-          ),
+          Expanded(flex: 6, child: _buildTimelineDesktop(context)),
         ],
       ),
     );
@@ -131,7 +131,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               flex: 8,
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.pagePadding(context)),
+                  horizontal: Responsive.pagePadding(context),
+                ),
                 child: _buildHeroText(context, true), // ❌ removed FittedBox
               ),
             ),
@@ -141,8 +142,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: steps.length,
-                onPageChanged: (index) =>
-                    setState(() => currentIndex = index),
+                onPageChanged: (index) => setState(() => currentIndex = index),
                 itemBuilder: (context, index) {
                   return AnimatedScale(
                     scale: currentIndex == index ? 1.0 : 0.9,
@@ -151,8 +151,11 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                       duration: const Duration(milliseconds: 400),
                       opacity: currentIndex == index ? 1.0 : 0.6,
                       child: Center(
-                        child: _buildCard(context, steps[index],
-                            isMobile: true),
+                        child: _buildCard(
+                          context,
+                          steps[index],
+                          isMobile: true,
+                        ),
                       ),
                     ),
                   );
@@ -169,9 +172,10 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   height: 6,
                   width: currentIndex == index ? 20 : 6,
                   decoration: BoxDecoration(
-                    color: currentIndex == index
-                        ? AppTheme.primaryGreen
-                        : AppTheme.textGrey.withOpacity(0.3),
+                    color:
+                        currentIndex == index
+                            ? AppTheme.primaryGreen
+                            : AppTheme.textGrey.withValues(alpha: .3),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 );
@@ -213,11 +217,11 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: AppTheme.primaryGreen.withOpacity(0.1),
+            color: AppTheme.primaryGreen.withValues(alpha: .1),
             borderRadius: BorderRadius.circular(30),
           ),
           child: const SeoText(
-            "About Our Company",
+            "About Sell Tech Ind. Productions",
             style: TextStyle(
               color: AppTheme.primaryGreen,
               fontWeight: FontWeight.bold,
@@ -230,7 +234,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
         /// 🔥 BIG HEADING
         SeoHeading(
-          "Building Digital Products That Drive Innovation",
+          "Building Future-Ready Digital Experiences",
           style: TextStyle(
             fontSize: headingSize,
             fontWeight: FontWeight.w900,
@@ -246,9 +250,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: SeoText(
-            "We build high-quality digital products including mobile apps, web platforms, and scalable enterprise solutions.",
-            align:
-                isMobile ? TextAlign.center : TextAlign.start,
+            "We design and develop scalable mobile apps, modern web platforms, and enterprise software solutions focused on innovation, performance, and long-term business growth.",
+            align: isMobile ? TextAlign.center : TextAlign.start,
             style: TextStyle(
               fontSize: descSize,
               height: 1.6,
@@ -273,8 +276,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               children: [
                 if (isLeft)
                   Expanded(
-                      child: _HoverCard(
-                          child: _buildCard(context, steps[index])))
+                    child: _HoverCard(child: _buildCard(context, steps[index])),
+                  )
                 else
                   const Spacer(),
                 Container(
@@ -288,8 +291,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 ),
                 if (!isLeft)
                   Expanded(
-                      child: _HoverCard(
-                          child: _buildCard(context, steps[index])))
+                    child: _HoverCard(child: _buildCard(context, steps[index])),
+                  )
                 else
                   const Spacer(),
               ],
@@ -300,8 +303,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
     );
   }
 
-  Widget _buildCard(BuildContext context, Map step,
-      {bool isMobile = false}) {
+  Widget _buildCard(BuildContext context, Map step, {bool isMobile = false}) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 300, maxHeight: 180),
       padding: const EdgeInsets.all(16),
@@ -310,10 +312,10 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: .04),
             blurRadius: 15,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -322,11 +324,14 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppTheme.primaryGreen.withOpacity(0.1),
+              color: AppTheme.primaryGreen.withValues(alpha: .1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.auto_awesome,
-                color: AppTheme.primaryGreen, size: 18),
+            child: const Icon(
+              Icons.auto_awesome,
+              color: AppTheme.primaryGreen,
+              size: 18,
+            ),
           ),
           const SizedBox(height: 10),
           SeoHeading(
@@ -356,6 +361,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
 class _HoverCard extends StatefulWidget {
   final Widget child;
+
   const _HoverCard({required this.child});
 
   @override

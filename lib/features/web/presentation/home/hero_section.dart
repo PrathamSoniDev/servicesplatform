@@ -1,8 +1,10 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/presentation/seo/seo_widget.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 import 'package:servicesplatform/features/web/utils/responsive.dart';
+import 'package:servicesplatform/features/web/widgets/button.dart';
 import 'package:servicesplatform/features/web/widgets/custom_app_bar.dart';
 
 class HeroSection extends StatelessWidget {
@@ -27,12 +29,18 @@ class HeroSection extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isSmallDesktop = size.width < 1100 && !isMobile;
 
-    final double titleSize = isMobile
-        ? 34
-        : isSmallDesktop
+    final double titleSize =
+        isMobile
+            ? 34
+            : isSmallDesktop
             ? 48
             : (size.width * 0.06).clamp(60, 88);
-
+    final double mediumTitleSize =
+        isMobile
+            ? 28
+            : isSmallDesktop
+            ? 36
+            : (size.width * 0.045).clamp(40, 60);
     final double subTitleSize = isMobile ? 14 : (isSmallDesktop ? 16 : 19);
 
     const double appBarHeight = 80;
@@ -40,9 +48,7 @@ class HeroSection extends StatelessWidget {
     return Stack(
       children: [
         // ── BASE ──────────────────────────────────────────────────
-        const Positioned.fill(
-          child: ColoredBox(color: Color(0xFF060810)),
-        ),
+        const Positioned.fill(child: ColoredBox(color: Color(0xFF060810))),
 
         // ── LAYER 1: STARFIELD ────────────────────────────────────
         // RepaintBoundary isolates repaints to this layer only
@@ -99,18 +105,17 @@ class HeroSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SeoHeading(
-                      "The future of development",
+                      "Custom Software Development That Scales Your Business",
                       align: TextAlign.center,
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium
-                          ?.copyWith(
-                            fontSize: titleSize,
-                            height: 1.0,
-                            color: Colors.white.withOpacity(.35),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -1.0,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.displayMedium?.copyWith(
+                        fontSize: titleSize,
+                        height: 1.0,
+                        color: Colors.white.withValues(alpha: .35),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -1.0,
+                      ),
                     ),
 
                     const SizedBox(height: 15),
@@ -122,23 +127,24 @@ class HeroSection extends StatelessWidget {
                         children: [
                           Text(
                             "is",
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayMedium
-                                ?.copyWith(
-                                  fontSize: titleSize,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displayMedium?.copyWith(
+                              fontSize: mediumTitleSize,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Icon(
                             Icons.fingerprint,
-                            size: isMobile ? 50 : (isSmallDesktop ? 70 : 110),
+                            size: mediumTitleSize,
                             color: AppTheme.neonGreen,
                             shadows: [
                               Shadow(
-                                color: AppTheme.neonGreen.withOpacity(.35),
+                                color: AppTheme.neonGreen.withValues(
+                                  alpha: .35,
+                                ),
                                 blurRadius: 25,
                               ),
                             ],
@@ -146,23 +152,22 @@ class HeroSection extends StatelessWidget {
                           const SizedBox(width: 10),
                           Text(
                             "human +",
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayMedium
-                                ?.copyWith(
-                                  fontSize: titleSize,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displayMedium?.copyWith(
+                              fontSize: mediumTitleSize,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Icon(
                             Icons.auto_awesome,
                             color: AppTheme.neonGreen,
-                            size: isMobile ? 40 : (isSmallDesktop ? 60 : 90),
+                            size: mediumTitleSize,
                             shadows: [
                               Shadow(
-                                color: AppTheme.neonGreen.withOpacity(.7),
+                                color: AppTheme.neonGreen.withValues(alpha: .7),
                                 blurRadius: 30,
                               ),
                             ],
@@ -170,14 +175,13 @@ class HeroSection extends StatelessWidget {
                           const SizedBox(width: 10),
                           Text(
                             "AI",
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayMedium
-                                ?.copyWith(
-                                  fontSize: titleSize,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displayMedium?.copyWith(
+                              fontSize: mediumTitleSize,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -187,21 +191,38 @@ class HeroSection extends StatelessWidget {
 
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth:
-                            isMobile ? 400 : (isSmallDesktop ? 500 : 650),
+                        maxWidth: isMobile ? 400 : (isSmallDesktop ? 500 : 650),
                       ),
                       child: SeoText(
-                        "We help you map the skills you need, track the skills you have, and close your gaps to thrive in a GenAI world.",
+                        "Sell Tech Ind. Productions delivers modern mobile applications, scalable software systems, high-converting websites, SaaS platforms, and enterprise-grade digital solutions designed to help startups, businesses, and brands grow faster in the digital world.",
                         align: TextAlign.center,
-                        style:
-                            Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontSize: subTitleSize,
-                                  color: Colors.white.withOpacity(.6),
-                                  height: 1.5,
-                                ),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontSize: subTitleSize,
+                          color: Colors.white.withValues(alpha: .6),
+                          height: 1.5,
+                        ),
                       ),
                     ),
-
+                    SizedBox(height: size.height * 0.01),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 40),
+                        AppButton(
+                          text: 'Get In Touch',
+                          onPressed: onContactTap,
+                          type: AppButtonType.outline,
+                          enableBlur: true,
+                        ),
+                        const SizedBox(width: 40),
+                        AppButton(
+                          text: 'View Portfolio',
+                          onPressed: () {},
+                          type: AppButtonType.solid,
+                          enableGlow: true,
+                        ),
+                      ],
+                    ),
                     SizedBox(height: size.height * 0.03),
                   ],
                 ),
@@ -232,6 +253,7 @@ class HeroSection extends StatelessWidget {
 
 class _StarfieldWidget extends StatefulWidget {
   const _StarfieldWidget();
+
   @override
   State<_StarfieldWidget> createState() => _StarfieldWidgetState();
 }
@@ -274,9 +296,10 @@ class _StarfieldWidgetState extends State<_StarfieldWidget>
     return AnimatedBuilder(
       animation: _ctrl,
       // child: null — painter is cheap, no sub-tree to preserve
-      builder: (_, __) => CustomPaint(
-        painter: _StarfieldPainter(t: _ctrl.value, stars: _stars),
-      ),
+      builder:
+          (_, __) => CustomPaint(
+            painter: _StarfieldPainter(t: _ctrl.value, stars: _stars),
+          ),
     );
   }
 }
@@ -346,9 +369,9 @@ class _PlanetArcPainter extends CustomPainter {
       [55.0, 0.03, 50.0],
       [28.0, 0.07, 28.0],
       [14.0, 0.13, 14.0],
-      [6.0,  0.20,  6.0],
-      [2.0,  0.35,  2.5],
-      [0.0,  0.55,  1.2],
+      [6.0, 0.20, 6.0],
+      [2.0, 0.35, 2.5],
+      [0.0, 0.55, 1.2],
     ];
 
     final rimPaint = Paint()..style = PaintingStyle.stroke;
@@ -412,9 +435,9 @@ class _PlanetArcPainter extends CustomPainter {
 
 class _AtmosphericHazeWidget extends StatefulWidget {
   const _AtmosphericHazeWidget();
+
   @override
-  State<_AtmosphericHazeWidget> createState() =>
-      _AtmosphericHazeWidgetState();
+  State<_AtmosphericHazeWidget> createState() => _AtmosphericHazeWidgetState();
 }
 
 class _AtmosphericHazeWidgetState extends State<_AtmosphericHazeWidget>
@@ -440,14 +463,16 @@ class _AtmosphericHazeWidgetState extends State<_AtmosphericHazeWidget>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _ctrl,
-      builder: (_, __) =>
-          CustomPaint(painter: _AtmosphericHazePainter(t: _ctrl.value)),
+      builder:
+          (_, __) =>
+              CustomPaint(painter: _AtmosphericHazePainter(t: _ctrl.value)),
     );
   }
 }
 
 class _AtmosphericHazePainter extends CustomPainter {
   final double t;
+
   const _AtmosphericHazePainter({required this.t});
 
   @override
@@ -460,8 +485,11 @@ class _AtmosphericHazePainter extends CustomPainter {
     final pulse = 0.6 + 0.4 * math.sin(tau * 0.3);
     final hazeY = H * 0.72 + math.sin(tau * 0.2) * H * 0.01;
 
-    final hazeRect =
-        Rect.fromCenter(center: Offset(W * 0.5, hazeY), width: W, height: 160);
+    final hazeRect = Rect.fromCenter(
+      center: Offset(W * 0.5, hazeY),
+      width: W,
+      height: 160,
+    );
 
     canvas.drawRect(
       hazeRect,
@@ -477,7 +505,10 @@ class _AtmosphericHazePainter extends CustomPainter {
     );
 
     final tealRect = Rect.fromCenter(
-        center: Offset(W * 0.35, H * 0.70), width: W * 0.5, height: 120);
+      center: Offset(W * 0.35, H * 0.70),
+      width: W * 0.5,
+      height: 120,
+    );
     canvas.drawRect(
       tealRect,
       Paint()
@@ -505,6 +536,7 @@ class _AtmosphericHazePainter extends CustomPainter {
 
 class _Particle {
   double x, y, radius, opacity, phase, speed, sway;
+
   _Particle({
     required this.x,
     required this.y,
@@ -518,6 +550,7 @@ class _Particle {
 
 class _ParticlesWidget extends StatefulWidget {
   const _ParticlesWidget();
+
   @override
   State<_ParticlesWidget> createState() => _ParticlesWidgetState();
 }
@@ -564,19 +597,22 @@ class _ParticlesWidgetState extends State<_ParticlesWidget>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (_, box) {
-      _initParticles(Size(box.maxWidth, box.maxHeight));
-      return AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) => CustomPaint(
-          painter: _ParticlesPainter(
-            particles: _particles,
-            t: _ctrl.value,
-            canvasHeight: _lastSize.height,
-          ),
-        ),
-      );
-    });
+    return LayoutBuilder(
+      builder: (_, box) {
+        _initParticles(Size(box.maxWidth, box.maxHeight));
+        return AnimatedBuilder(
+          animation: _ctrl,
+          builder:
+              (_, __) => CustomPaint(
+                painter: _ParticlesPainter(
+                  particles: _particles,
+                  t: _ctrl.value,
+                  canvasHeight: _lastSize.height,
+                ),
+              ),
+        );
+      },
+    );
   }
 }
 
@@ -605,13 +641,13 @@ class _ParticlesPainter extends CustomPainter {
       if (p.y < -4) p.y = size.height + 4;
 
       final sx = p.x + math.sin(swayBase + p.phase) * p.sway;
-      final tw =
-          p.opacity * (0.3 + 0.7 * math.sin(twBase + p.phase));
+      final tw = p.opacity * (0.3 + 0.7 * math.sin(twBase + p.phase));
 
       final yFrac = p.y / canvasHeight;
-      _paint.color = yFrac > 0.65
-          ? Color.fromRGBO(100, 180, 255, tw.clamp(0.0, 1.0))
-          : Color.fromRGBO(255, 255, 255, tw.clamp(0.0, 1.0));
+      _paint.color =
+          yFrac > 0.65
+              ? Color.fromRGBO(100, 180, 255, tw.clamp(0.0, 1.0))
+              : Color.fromRGBO(255, 255, 255, tw.clamp(0.0, 1.0));
 
       canvas.drawCircle(Offset(sx, p.y), p.radius, _paint);
     }

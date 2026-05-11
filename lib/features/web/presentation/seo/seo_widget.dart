@@ -11,9 +11,7 @@ class SeoWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RobotDetector(
-      child: child,
-    );
+    return RobotDetector(child: child);
   }
 }
 
@@ -27,11 +25,7 @@ class SeoHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      header: true,
-      child: child,
-    );
+    return Semantics(container: true, header: true, child: child);
   }
 }
 
@@ -45,10 +39,7 @@ class SeoFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      child: child,
-    );
+    return Semantics(container: true, child: child);
   }
 }
 
@@ -62,10 +53,7 @@ class SeoBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      child: child,
-    );
+    return Semantics(container: true, child: child);
   }
 }
 
@@ -77,12 +65,7 @@ class SeoHeading extends StatelessWidget {
   final TextStyle? style;
   final TextAlign? align;
 
-  const SeoHeading(
-    this.text, {
-    super.key,
-    this.style,
-    this.align,
-  });
+  const SeoHeading(this.text, {super.key, this.style, this.align});
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +85,7 @@ class SeoHeading extends StatelessWidget {
 /// ===============================
 class SeoText extends StatelessWidget {
   final String text;
+  final TextOverflow? overflow;
   final TextStyle? style;
   final TextAlign? align;
   final int? maxLines;
@@ -110,6 +94,7 @@ class SeoText extends StatelessWidget {
     this.text, {
     super.key,
     this.style,
+    this.overflow,
     this.align,
     this.maxLines,
   });
@@ -120,7 +105,10 @@ class SeoText extends StatelessWidget {
       text: text,
       child: Text(
         text,
-        textAlign: align ?? TextAlign.start, // ✅ default added
+        overflow: overflow,
+        softWrap: true,
+        textAlign: align ?? TextAlign.start,
+        // ✅ default added
         style: style,
         maxLines: maxLines,
       ),
@@ -180,11 +168,7 @@ class SeoLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LinkRenderer(
-      href: url,
-      text: text,
-      child: child,
-    );
+    return LinkRenderer(href: url, text: text, child: child);
   }
 }
 
@@ -208,10 +192,7 @@ class SeoButtonLink extends StatelessWidget {
     return LinkRenderer(
       href: url,
       text: text,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        child: Text(text),
-      ),
+      child: ElevatedButton(onPressed: onPressed, child: Text(text)),
     );
   }
 }
