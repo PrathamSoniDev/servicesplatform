@@ -8,6 +8,7 @@ import 'package:servicesplatform/features/web/presentation/home/blog_detail_scre
 import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
 /// SCREENS
 import 'package:servicesplatform/features/web/presentation/home/homescreen.dart';
+import 'package:servicesplatform/features/web/presentation/home/industries_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/product_detail_screen.dart';
 /// ✅ ADD THIS
@@ -28,6 +29,7 @@ class AppRouter {
 
   static const String home = '/';
   static const String about = '/about';
+  static const String industries = '/industries';
 
   /// PRODUCT
   static const String product = '/product';
@@ -100,6 +102,11 @@ class AppRouter {
             },
           );
         },
+      ),
+      GoRoute(
+        path: industries,
+        name: 'industries',
+        builder: (context, state) => const IndustriesSection(),
       ),
 
       // ============================================================

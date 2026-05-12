@@ -19,6 +19,7 @@ class CustomAppBar extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onAboutTap;
   final VoidCallback onProductTap;
+  final VoidCallback onIndustriesTap;
   final VoidCallback onBlogTap;
   final VoidCallback onContactTap;
 
@@ -27,6 +28,7 @@ class CustomAppBar extends StatelessWidget {
     required this.onHomeTap,
     required this.onAboutTap,
     required this.onProductTap,
+    required this.onIndustriesTap,
     required this.onBlogTap,
     required this.onContactTap,
   });
@@ -45,6 +47,7 @@ class CustomAppBar extends StatelessWidget {
               onHomeTap: onHomeTap,
               onAboutTap: onAboutTap,
               onProductTap: onProductTap,
+              onIndustriesTap: onIndustriesTap,
               onBlogTap: onBlogTap,
               onContactTap: onContactTap,
             ),
@@ -101,6 +104,7 @@ class CustomAppBar extends StatelessWidget {
                   onHomeTap: onHomeTap,
                   onAboutTap: onAboutTap,
                   onProductTap: onProductTap,
+                  onIndustriesTap: onIndustriesTap,
                   onBlogTap: onBlogTap,
                   onContactTap: onContactTap,
                 ),
@@ -186,6 +190,7 @@ class _DesktopNav extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onAboutTap;
   final VoidCallback onProductTap;
+  final VoidCallback onIndustriesTap;
   final VoidCallback onBlogTap;
   final VoidCallback onContactTap;
 
@@ -194,6 +199,7 @@ class _DesktopNav extends StatelessWidget {
     required this.onHomeTap,
     required this.onAboutTap,
     required this.onProductTap,
+    required this.onIndustriesTap,
     required this.onBlogTap,
     required this.onContactTap,
   });
@@ -212,6 +218,7 @@ class _DesktopNav extends StatelessWidget {
             compact: compact,
             accent: true,
           ),
+        _NavItem(title: 'Industries', onTap: onIndustriesTap, compact: compact),
         _NavItem(title: 'Blog', onTap: onBlogTap, compact: compact),
         if (!compact)
           _NavItem(title: 'Service', onTap: onContactTap, compact: false),
@@ -411,6 +418,7 @@ class _GlassMenuOverlay extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onAboutTap;
   final VoidCallback onProductTap;
+  final VoidCallback onIndustriesTap;
   final VoidCallback onBlogTap;
   final VoidCallback onContactTap;
 
@@ -418,6 +426,7 @@ class _GlassMenuOverlay extends StatelessWidget {
     required this.onHomeTap,
     required this.onAboutTap,
     required this.onProductTap,
+    required this.onIndustriesTap,
     required this.onBlogTap,
     required this.onContactTap,
   });
@@ -516,6 +525,13 @@ class _GlassMenuOverlay extends StatelessWidget {
                                 onTap: () {
                                   Navigator.pop(context);
                                   onProductTap();
+                                },
+                              ),
+                              _MenuTile(
+                                title: 'INDUSTRIES',
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onIndustriesTap();
                                 },
                               ),
                               _MenuTile(

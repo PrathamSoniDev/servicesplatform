@@ -11,6 +11,7 @@ class HeroSection extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onAboutTap;
   final VoidCallback onProductTap;
+  final VoidCallback onIndustriesTap;
   final VoidCallback onBlogTap;
   final VoidCallback onContactTap;
 
@@ -19,6 +20,7 @@ class HeroSection extends StatelessWidget {
     required this.onHomeTap,
     required this.onAboutTap,
     required this.onProductTap,
+    required this.onIndustriesTap,
     required this.onBlogTap,
     required this.onContactTap,
   });
@@ -237,6 +239,7 @@ class HeroSection extends StatelessWidget {
             onHomeTap: onHomeTap,
             onAboutTap: onAboutTap,
             onProductTap: onProductTap,
+            onIndustriesTap: onIndustriesTap,
             onBlogTap: onBlogTap,
             onContactTap: onContactTap,
           ),
