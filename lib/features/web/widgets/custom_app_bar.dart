@@ -157,7 +157,7 @@ class _Logo extends StatelessWidget {
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/gif/Sell tech.gif'),
+                  image: AssetImage('assets/gif/Sell-tech.gif'),
                   fit: BoxFit.cover,
                   repeat: ImageRepeat.repeat,
                 ),

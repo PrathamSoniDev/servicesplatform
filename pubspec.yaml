@@ -53,10 +53,17 @@ dependencies:
   share_plus: ^12.0.1
   lottie: ^3.3.1
   seo_renderer: ^0.6.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+flutter_launcher_icons:
+  web:
+    generate: true
+    image_path: "assets/gif/Sell-tech.gif" # Path to your source image
+    background_color: "#ffffff" # Optional hex code
+    theme_color: "#ffffff"      # Optional hex code
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
