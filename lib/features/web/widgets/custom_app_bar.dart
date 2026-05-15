@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:servicesplatform/features/web/presentation/home/request_demo_scree.dart';
 import 'package:servicesplatform/features/web/utils/app_theme.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -115,10 +114,10 @@ class CustomAppBar extends StatelessWidget {
               // ── RIGHT ACTIONS ─────────────────────────────────
               if (isMobile || isTablet)
                 // Hamburger only
-                _HamburgerButton(onTap: () => _showGlassMenu(context))
-              else
-                // login + CTA — scaled for screen size
-                _DesktopActions(compact: isSmallDesk),
+                _HamburgerButton(onTap: () => _showGlassMenu(context)),
+              //    else
+              // login + CTA — scaled for screen size
+              //  _DesktopActions(compact: isSmallDesk),
             ],
           ),
         ),
@@ -210,18 +209,18 @@ class _DesktopNav extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _NavItem(title: 'Product', onTap: onProductTap, compact: compact),
+        _NavItem(title: 'Our Services', onTap: onProductTap, compact: compact),
         if (!compact)
           _NavItem(
-            title: 'Company',
+            title: 'About US',
             onTap: onAboutTap,
             compact: compact,
             accent: true,
           ),
         _NavItem(title: 'Industries', onTap: onIndustriesTap, compact: compact),
-        _NavItem(title: 'Blog', onTap: onBlogTap, compact: compact),
+        //_NavItem(title: 'Blog', onTap: onBlogTap, compact: compact),
         if (!compact)
-          _NavItem(title: 'Service', onTap: onContactTap, compact: false),
+          _NavItem(title: 'Contact US', onTap: onContactTap, compact: false),
       ],
     );
   }
@@ -231,47 +230,47 @@ class _DesktopNav extends StatelessWidget {
 // Desktop Actions (login + CTA)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _DesktopActions extends StatelessWidget {
-  final bool compact;
-
-  const _DesktopActions({required this.compact});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (!compact)
-          GestureDetector(
-            onTap: () {},
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Text(
-                'login',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: .65),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        _AstroCtaButton(
-          label: compact ? 'Demo' : 'Request demo',
-          onTap: () {
-            // This navigates to the screen I created for you
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const RequestDemoScreen(),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
+// class _DesktopActions extends StatelessWidget {
+//   final bool compact;
+//
+//   const _DesktopActions({required this.compact});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       mainAxisSize: MainAxisSize.min,
+//       children: [
+//         if (!compact)
+//           GestureDetector(
+//             onTap: () {},
+//             child: Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 14),
+//               child: Text(
+//                 'login',
+//                 style: TextStyle(
+//                   color: Colors.white.withValues(alpha: .65),
+//                   fontWeight: FontWeight.w400,
+//                   fontSize: 14,
+//                 ),
+//               ),
+//             ),
+//           ),
+//         _AstroCtaButton(
+//           label: compact ? 'Demo' : 'Request demo',
+//           onTap: () {
+//             // This navigates to the screen I created for you
+//             Navigator.push(
+//               context,
+//               MaterialPageRoute(
+//                 builder: (context) => const RequestDemoScreen(),
+//               ),
+//             );
+//           },
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hamburger Button
@@ -514,14 +513,14 @@ class _GlassMenuOverlay extends StatelessWidget {
                                 },
                               ),
                               _MenuTile(
-                                title: 'ABOUT',
+                                title: 'ABOUT US',
                                 onTap: () {
                                   Navigator.pop(context);
                                   onAboutTap();
                                 },
                               ),
                               _MenuTile(
-                                title: 'PRODUCTS',
+                                title: 'OUR SERVICES',
                                 onTap: () {
                                   Navigator.pop(context);
                                   onProductTap();
@@ -534,30 +533,30 @@ class _GlassMenuOverlay extends StatelessWidget {
                                   onIndustriesTap();
                                 },
                               ),
+                              // _MenuTile(
+                              //   title: 'BLOG',
+                              //   onTap: () {
+                              //     Navigator.pop(context);
+                              //     onBlogTap();
+                              //   },
+                              // ),
                               _MenuTile(
-                                title: 'BLOG',
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  onBlogTap();
-                                },
-                              ),
-                              _MenuTile(
-                                title: 'CONTACT',
+                                title: 'CONTACT US',
                                 onTap: () {
                                   Navigator.pop(context);
                                   onContactTap();
                                 },
                               ),
-                              const SizedBox(height: 32),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                ),
-                                child: _AstroCtaButton(
-                                  label: 'Start free trial',
-                                  onTap: () {},
-                                ),
-                              ),
+                              // const SizedBox(height: 32),
+                              // Padding(
+                              //   padding: const EdgeInsets.symmetric(
+                              //     horizontal: 24,
+                              //   ),
+                              //   child: _AstroCtaButton(
+                              //     label: 'Start free trial',
+                              //     onTap: () {},
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),

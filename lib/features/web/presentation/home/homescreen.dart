@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:servicesplatform/features/web/presentation/home/about_us_screen.dart';
-import 'package:servicesplatform/features/web/presentation/home/blog_screen.dart';
 import 'package:servicesplatform/features/web/presentation/home/hero_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/industries_section.dart';
 import 'package:servicesplatform/features/web/presentation/home/new_contact_screen.dart';
@@ -53,24 +52,37 @@ class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> sections = [
-      /// ✅ HERO → HEADER (VERY IMPORTANT FOR SEO)
+      /// HERO
       SeoHeader(
         child: HeroSection(
           key: const ValueKey('hero'),
-          onHomeTap: () => _safeScroll(0, 6),
-          onAboutTap: () => _safeScroll(1, 6),
-          onProductTap: () => _safeScroll(2, 6),
-          onIndustriesTap: () => _safeScroll(3, 6),
-          onBlogTap: () => _safeScroll(4, 6),
-          onContactTap: () => _safeScroll(5, 6),
+          onHomeTap: () => _safeScroll(0, 5),
+          onAboutTap: () => _safeScroll(1, 5),
+          onProductTap: () => _safeScroll(2, 5),
+          onIndustriesTap: () => _safeScroll(3, 5),
+
+          /// BLOG DISABLED
+          onBlogTap: () {},
+
+          onContactTap: () => _safeScroll(4, 5),
         ),
       ),
 
-      /// ✅ बाकी sections → normal (already SEO inside them if needed)
+      /// ABOUT
       const AboutUsScreen(key: ValueKey('about')),
+
+      /// PRODUCTS
       const ProductScreen(key: ValueKey('product')),
+
+      /// INDUSTRIES
       const IndustriesSection(key: ValueKey('industries')),
-      const BlogScreen(key: ValueKey('blog')),
+
+      /// BLOG TEMPORARILY DISABLED
+      // const BlogScreen(
+      //   key: ValueKey('blog'),
+      // ),
+
+      /// CONTACT
       const ContactScreen(key: ValueKey('contact')),
     ];
 
